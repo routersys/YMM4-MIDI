@@ -6,6 +6,8 @@
 
 YMM4（YukkuriMovieMaker v4）で、MIDIファイル（`.mid`, `.midi`）を音声アイテムとして読み込めるようにするファイルソースプラグインです。
 
+![image](https://github.com/routersys/YMM4-MIDI/blob/main/MIDI.png)
+
 ---
 
 ### 概要
