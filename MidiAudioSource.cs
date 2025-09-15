@@ -3,195 +3,347 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using YukkuriMovieMaker.Plugin.FileSource;
 using MeltySynth;
 using NAudio.Midi;
+using System.Threading;
 
 namespace MIDI
 {
     public class MidiAudioSource : IAudioFileSource
     {
-        public TimeSpan Duration { get; }
-        public int Hz => 44100;
+        private static readonly ConcurrentDictionary<string, (float[] audioBuffer, TimeSpan duration, int sampleRate)> audioCache = new();
 
+        public static void ClearCache() => audioCache.Clear();
+
+        public TimeSpan Duration { get; private set; }
+        public int Hz => sampleRate;
+
+        private readonly int sampleRate;
         private long position = 0;
-        private readonly float[] audioBuffer;
+        private float[]? audioBuffer;
+        private readonly Task loadingTask;
+        private Dictionary<int, InstrumentSettings>? instrumentSettings;
+        private readonly MidiConfiguration config;
+        private readonly SynthesisEngine synthesisEngine;
+        private readonly AudioRenderer audioRenderer;
+        private readonly EffectsProcessor effectsProcessor;
+        private readonly SfzProcessor sfzProcessor;
 
-        public MidiAudioSource(string filePath)
+        public MidiAudioSource(string filePath, MidiConfiguration? configuration = null)
         {
-            var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (assemblyLocation == null)
+            config = configuration ?? MidiConfiguration.Default;
+            sampleRate = config.Audio.SampleRate;
+            synthesisEngine = new SynthesisEngine(config, sampleRate);
+            audioRenderer = new AudioRenderer(config, sampleRate);
+            effectsProcessor = new EffectsProcessor(config, sampleRate);
+            sfzProcessor = new SfzProcessor(config, sampleRate);
+
+            instrumentSettings = synthesisEngine.InitializeInstrumentSettings();
+
+            if (audioCache.TryGetValue(filePath, out var cachedData) && cachedData.sampleRate == this.sampleRate)
             {
-                throw new DirectoryNotFoundException("プラグインのインストール先フォルダが見つかりません。");
+                this.audioBuffer = cachedData.audioBuffer;
+                this.Duration = cachedData.duration;
+                this.loadingTask = Task.CompletedTask;
+                return;
             }
 
-            var sf2Path = Directory.GetFiles(assemblyLocation, "*.sf2").FirstOrDefault();
-
-            if (sf2Path != null && File.Exists(sf2Path))
+            try
             {
                 var midiFile = new MeltySynth.MidiFile(filePath);
-                Duration = midiFile.Length;
+                this.Duration = midiFile.Length.Add(TimeSpan.FromSeconds(2.0));
+            }
+            catch (Exception ex)
+            {
+                LogError($"MIDIのDuration読み込み中にエラーが発生しました: {ex.Message}", ex);
+                this.Duration = TimeSpan.Zero;
+                this.loadingTask = Task.FromException(ex);
+                return;
+            }
 
-                var synthesizer = new Synthesizer(sf2Path, Hz);
-                var sequencer = new MidiFileSequencer(synthesizer);
-                sequencer.Play(midiFile, false);
+            var totalSamples = (long)(this.Duration.TotalSeconds * sampleRate) * 2;
+            if (totalSamples <= 0)
+            {
+                this.audioBuffer = Array.Empty<float>();
+                this.loadingTask = Task.CompletedTask;
+                return;
+            }
+            this.audioBuffer = new float[totalSamples];
 
-                var totalSamplesToRender = (long)(Duration.TotalSeconds * Hz) * 2;
-                var audioDataList = new List<float>((int)totalSamplesToRender);
+            try
+            {
+                RenderInitialChunk(filePath);
+            }
+            catch (Exception ex)
+            {
+                LogError($"MIDIの初期チャンク描画中にエラーが発生しました: {ex.Message}", ex);
+            }
 
-                var leftBuffer = new float[1024];
-                var rightBuffer = new float[1024];
+            this.loadingTask = Task.Run(() => LoadFullAudioAsync(filePath));
+        }
 
-                while (audioDataList.Count < totalSamplesToRender)
+        private void RenderInitialChunk(string filePath)
+        {
+            var initialDuration = TimeSpan.FromSeconds(config.Performance.InitialSyncDurationSeconds);
+            var chunkBuffer = RenderAudio(filePath, initialDuration);
+            if (this.audioBuffer != null)
+            {
+                Array.Copy(chunkBuffer, this.audioBuffer, Math.Min(chunkBuffer.Length, this.audioBuffer.Length));
+            }
+        }
+
+        private void LoadFullAudioAsync(string filePath)
+        {
+            try
+            {
+                var fullBuffer = RenderAudio(filePath, null);
+                Volatile.Write(ref this.audioBuffer, fullBuffer);
+
+                if (this.audioBuffer != null)
                 {
-                    sequencer.Render(leftBuffer, rightBuffer);
-                    for (int i = 0; i < leftBuffer.Length; i++)
-                    {
-                        audioDataList.Add(leftBuffer[i]);
-                        audioDataList.Add(rightBuffer[i]);
-                    }
+                    var newItem = (this.audioBuffer, this.Duration, this.sampleRate);
+                    audioCache.AddOrUpdate(filePath, newItem, (key, existingVal) => newItem);
                 }
+            }
+            catch (Exception ex)
+            {
+                LogError($"MIDIデータの非同期ロード中にエラーが発生しました: {ex.Message}", ex);
+                throw;
+            }
+        }
 
-                audioBuffer = audioDataList.Take((int)totalSamplesToRender).ToArray();
+        private float[] RenderAudio(string filePath, TimeSpan? durationLimit)
+        {
+            var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
+                                 throw new DirectoryNotFoundException();
+
+            if (config.SFZ.EnableSfz && config.SFZ.ProgramMaps.Any())
+            {
+                try
+                {
+                    return sfzProcessor.ProcessWithSfz(filePath, durationLimit);
+                }
+                catch (Exception ex)
+                {
+                    LogError($"SFZのレンダリングに失敗しました。: {ex.Message}", ex);
+                }
+            }
+
+            if (config.SoundFont.EnableSoundFont)
+            {
+                var sf2Path = FindSoundFont(filePath, assemblyLocation);
+                if (sf2Path != null && File.Exists(sf2Path))
+                {
+                    return ProcessWithSoundFont(filePath, sf2Path, durationLimit);
+                }
+            }
+
+            return ProcessWithSynthesis(filePath, durationLimit);
+        }
+
+        private string? FindSoundFont(string midiFilePath, string assemblyLocation)
+        {
+            var defaultSf2Path = Path.Combine(assemblyLocation, "GeneralUser-GS.sf2");
+            var userSf2Directory = Path.Combine(assemblyLocation, config.SoundFont.DefaultSoundFontDirectory);
+
+            if (!Directory.Exists(userSf2Directory))
+            {
+                Directory.CreateDirectory(userSf2Directory);
+            }
+            var allUserSf2Files = Directory.GetFiles(userSf2Directory, "*.sf2", SearchOption.AllDirectories);
+
+            var meltyMidiFile = new MeltySynth.MidiFile(midiFilePath);
+            var durationSeconds = meltyMidiFile.Length.TotalSeconds;
+
+            var naudioMidiFile = new NAudio.Midi.MidiFile(midiFilePath, false);
+            var trackCount = naudioMidiFile.Events.Tracks;
+            var usedPrograms = naudioMidiFile.Events
+                .SelectMany(track => track)
+                .OfType<PatchChangeEvent>()
+                .Select(p => p.Patch)
+                .Distinct()
+                .ToHashSet();
+
+            foreach (var rule in config.SoundFont.Rules)
+            {
+                bool durationMatch =
+                    (!rule.MinDurationSeconds.HasValue || durationSeconds >= rule.MinDurationSeconds.Value) &&
+                    (!rule.MaxDurationSeconds.HasValue || durationSeconds <= rule.MaxDurationSeconds.Value);
+
+                bool trackCountMatch =
+                    (!rule.MinTrackCount.HasValue || trackCount >= rule.MinTrackCount.Value) &&
+                    (!rule.MaxTrackCount.HasValue || trackCount <= rule.MaxTrackCount.Value);
+
+                bool programsMatch = !rule.RequiredPrograms.Any() || rule.RequiredPrograms.All(usedPrograms.Contains);
+
+                if (durationMatch && trackCountMatch && programsMatch)
+                {
+                    var matchedFontPath = allUserSf2Files.FirstOrDefault(f =>
+                        Path.GetFileName(f).Equals(rule.SoundFontFile, StringComparison.OrdinalIgnoreCase));
+                    if (matchedFontPath != null) return matchedFontPath;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(config.SoundFont.PreferredSoundFont))
+            {
+                var preferred = allUserSf2Files.FirstOrDefault(f =>
+                    Path.GetFileName(f).Equals(config.SoundFont.PreferredSoundFont, StringComparison.OrdinalIgnoreCase));
+                if (preferred != null) return preferred;
+            }
+
+            if (config.SoundFont.UseDefaultSoundFont && File.Exists(defaultSf2Path))
+            {
+                return defaultSf2Path;
+            }
+
+            if (allUserSf2Files.Any())
+            {
+                return allUserSf2Files.OrderByDescending(f => new FileInfo(f).Length).FirstOrDefault();
+            }
+
+            return null;
+        }
+
+        private float[] ProcessWithSoundFont(string filePath, string sf2Path, TimeSpan? durationLimit)
+        {
+            var midiFile = new MeltySynth.MidiFile(filePath);
+            var synthesizer = new Synthesizer(sf2Path, sampleRate);
+            var sequencer = new MidiFileSequencer(synthesizer);
+            sequencer.Play(midiFile, false);
+
+            var renderDuration = durationLimit ?? midiFile.Length.Add(TimeSpan.FromSeconds(2.0));
+            var totalSamplesToRender = (long)(renderDuration.TotalSeconds * sampleRate) * 2;
+            var audioDataList = new List<float>((int)Math.Min(totalSamplesToRender, int.MaxValue));
+
+            var bufferSize = config.Performance.BufferSize;
+            var leftBuffer = new float[bufferSize];
+            var rightBuffer = new float[bufferSize];
+
+            long renderedSamples = 0;
+            while (renderedSamples < totalSamplesToRender && !sequencer.EndOfSequence)
+            {
+                sequencer.Render(leftBuffer, rightBuffer);
+
+                for (int i = 0; i < leftBuffer.Length; i++)
+                {
+                    if (renderedSamples + (i * 2) >= totalSamplesToRender) break;
+                    audioDataList.Add(leftBuffer[i] * config.Audio.MasterVolume);
+                    audioDataList.Add(rightBuffer[i] * config.Audio.MasterVolume);
+                }
+                renderedSamples += bufferSize * 2;
+            }
+
+            var buffer = audioDataList.ToArray();
+
+            if (config.Effects.EnableEffects)
+            {
+                effectsProcessor.ApplyAudioEnhancements(buffer);
+            }
+            return buffer;
+        }
+
+        private float[] ProcessWithSynthesis(string filePath, TimeSpan? durationLimit)
+        {
+            var midiFile = new NAudio.Midi.MidiFile(filePath, false);
+            var ticksPerQuarterNote = midiFile.DeltaTicksPerQuarterNote;
+
+            var tempoMap = MidiProcessor.ExtractTempoMap(midiFile, config);
+            var noteEvents = MidiProcessor.ExtractNoteEvents(midiFile, ticksPerQuarterNote, tempoMap, config);
+            var controlEvents = MidiProcessor.ExtractControlEvents(midiFile, ticksPerQuarterNote, tempoMap, config);
+
+            long totalTicks = 0;
+            if (noteEvents.Any()) totalTicks = Math.Max(totalTicks, noteEvents.Max(e => e.EndTicks));
+            if (controlEvents.Any()) totalTicks = Math.Max(totalTicks, controlEvents.Max(e => e.Ticks));
+
+            var internalDuration = totalTicks > 0 ? MidiProcessor.TicksToTimeSpan(totalTicks, ticksPerQuarterNote, tempoMap) : TimeSpan.FromSeconds(1);
+            var renderDuration = durationLimit ?? internalDuration.Add(TimeSpan.FromSeconds(2.0));
+            var totalSamples = (long)(renderDuration.TotalSeconds * sampleRate);
+            var buffer = new float[totalSamples * 2];
+
+            var channelStates = new Dictionary<int, ChannelState>();
+            for (int i = 0; i < 16; i++)
+            {
+                channelStates[i] = new ChannelState();
+            }
+            MidiProcessor.ApplyControlEvents(controlEvents, channelStates, config);
+
+            var currentInstrumentSettings = instrumentSettings ?? synthesisEngine.InitializeInstrumentSettings();
+
+            if (config.Performance.EnableParallelProcessing)
+            {
+                audioRenderer.RenderAudioHighQuality(noteEvents, buffer, channelStates, currentInstrumentSettings);
             }
             else
             {
-                var midiFile = new NAudio.Midi.MidiFile(filePath, false);
-                var ticksPerQuarterNote = midiFile.DeltaTicksPerQuarterNote;
-                var tempoMap = midiFile.Events.SelectMany(track => track)
-                                              .OfType<TempoEvent>()
-                                              .OrderBy(e => e.AbsoluteTime)
-                                              .ToList();
-                if (!tempoMap.Any() || tempoMap.First().AbsoluteTime > 0)
-                {
-                    tempoMap.Insert(0, new TempoEvent(500000, 0));
-                }
-
-                var noteEvents = new List<NoteEvent>();
-                for (int i = 0; i < midiFile.Events.Tracks; i++)
-                {
-                    foreach (var midiEvent in midiFile.Events[i])
-                    {
-                        if (midiEvent is NoteOnEvent noteOn && noteOn.OffEvent != null)
-                        {
-                            noteEvents.Add(new NoteEvent(noteOn, ticksPerQuarterNote, tempoMap));
-                        }
-                    }
-                }
-
-                long totalTicks = noteEvents.Any() ? noteEvents.Max(e => e.EndTicks) : 0;
-                Duration = TicksToTimeSpan(totalTicks, ticksPerQuarterNote, tempoMap);
-
-                var totalSamples = (long)(Duration.TotalSeconds * Hz);
-                audioBuffer = new float[totalSamples * 2];
-
-                RenderAudioWithSineWaves(noteEvents);
-                NormalizeAudio();
+                audioRenderer.RenderAudioStandard(noteEvents, buffer, channelStates);
             }
+
+            if (config.Audio.EnableNormalization)
+            {
+                effectsProcessor.NormalizeAudio(buffer);
+            }
+            return buffer;
         }
 
-        private void RenderAudioWithSineWaves(List<NoteEvent> notes)
+        private void LogError(string message, Exception? ex = null)
         {
-            foreach (var note in notes)
-            {
-                var frequency = 440.0 * Math.Pow(2.0, (note.NoteNumber - 69.0) / 12.0);
-                var amplitude = note.Velocity / 127.0f;
-                var startSample = (long)(note.StartTime.TotalSeconds * Hz);
-                var endSample = (long)(note.EndTime.TotalSeconds * Hz);
-                var attackTime = 0.005;
-                var releaseTime = 0.01;
-                var attackSamples = (long)(attackTime * Hz);
-                var releaseSamples = (long)(releaseTime * Hz);
+            if (!config.Debug.EnableLogging) return;
 
-                for (long i = startSample; i < endSample; i++)
-                {
-                    var time = (i - startSample) / (double)Hz;
-                    double envelope = 1.0;
-                    if (i - startSample < attackSamples) envelope = (double)(i - startSample) / attackSamples;
-                    else if (endSample - i < releaseSamples) envelope = (double)(endSample - i) / releaseSamples;
-                    var sampleValue = amplitude * envelope * Math.Sin(2 * Math.PI * frequency * time);
-                    if (i * 2 < audioBuffer.Length)
-                    {
-                        audioBuffer[i * 2] += (float)sampleValue;
-                        audioBuffer[i * 2 + 1] += (float)sampleValue;
-                    }
-                }
-            }
-        }
+            try
+            {
+                var logPath = Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "",
+                    config.Debug.LogFilePath
+                );
 
-        private void NormalizeAudio()
-        {
-            float maxAbs = 0;
-            for (int i = 0; i < audioBuffer.Length; i++)
-            {
-                var absVal = Math.Abs(audioBuffer[i]);
-                if (absVal > maxAbs) maxAbs = absVal;
+                var logEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
+                if (ex != null) logEntry += $"\n{ex}";
+                logEntry += "\n\n";
+
+                File.AppendAllText(logPath, logEntry);
             }
-            if (maxAbs > 1.0f)
+            catch
             {
-                var scale = 0.99f / maxAbs;
-                for (int i = 0; i < audioBuffer.Length; i++) audioBuffer[i] *= scale;
             }
         }
 
         public int Read(float[] destBuffer, int offset, int count)
         {
-            var maxCount = (int)Math.Max(0, audioBuffer.Length - position);
+            var currentBuffer = Volatile.Read(ref audioBuffer);
+
+            if (currentBuffer == null)
+            {
+                Array.Clear(destBuffer, offset, count);
+                return count;
+            }
+
+            var currentPosition = Interlocked.Read(ref position);
+            var maxCount = (int)Math.Max(0, currentBuffer.Length - currentPosition);
             count = Math.Min(count, maxCount);
+
             if (count > 0)
             {
-                Array.Copy(audioBuffer, position, destBuffer, offset, count);
+                Array.Copy(currentBuffer, currentPosition, destBuffer, offset, count);
             }
-            position += count;
+
+            Interlocked.Add(ref position, count);
             return count;
         }
 
         public void Seek(TimeSpan time)
         {
-            position = Math.Min((long)(Hz * time.TotalSeconds) * 2, audioBuffer.Length);
+            var currentBuffer = Volatile.Read(ref audioBuffer);
+            var bufferLength = currentBuffer?.Length ?? 0;
+            var newPosition = Math.Min((long)(sampleRate * time.TotalSeconds) * 2, bufferLength);
+            Interlocked.Exchange(ref position, newPosition);
         }
 
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-        }
-
-        private static TimeSpan TicksToTimeSpan(long ticks, int ticksPerQuarterNote, List<TempoEvent> tempoMap)
-        {
-            double seconds = 0;
-            long lastTicks = 0;
-            double currentTempo = 500000.0;
-            foreach (var tempoEvent in tempoMap)
-            {
-                if (ticks < tempoEvent.AbsoluteTime) break;
-                long deltaTicks = tempoEvent.AbsoluteTime - lastTicks;
-                seconds += (deltaTicks / (double)ticksPerQuarterNote) * (currentTempo / 1000000.0);
-                currentTempo = tempoEvent.MicrosecondsPerQuarterNote;
-                lastTicks = tempoEvent.AbsoluteTime;
-            }
-            long remainingTicks = ticks - lastTicks;
-            seconds += (remainingTicks / (double)ticksPerQuarterNote) * (currentTempo / 1000000.0);
-            return TimeSpan.FromSeconds(seconds);
-        }
-
-        private class NoteEvent
-        {
-            public int NoteNumber { get; }
-            public int Velocity { get; }
-            public long StartTicks { get; }
-            public long EndTicks { get; }
-            public TimeSpan StartTime { get; }
-            public TimeSpan EndTime { get; }
-
-            public NoteEvent(NoteOnEvent noteOn, int ticksPerQuarterNote, List<TempoEvent> tempoMap)
-            {
-                NoteNumber = noteOn.NoteNumber;
-                Velocity = noteOn.Velocity;
-                StartTicks = noteOn.AbsoluteTime;
-                EndTicks = noteOn.OffEvent.AbsoluteTime;
-                StartTime = TicksToTimeSpan(StartTicks, ticksPerQuarterNote, tempoMap);
-                EndTime = TicksToTimeSpan(EndTicks, ticksPerQuarterNote, tempoMap);
-            }
         }
     }
 }
