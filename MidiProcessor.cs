@@ -41,7 +41,7 @@ namespace MIDI
             return tempoMap;
         }
 
-        public static List<EnhancedNoteEvent> ExtractNoteEvents(NAudio.Midi.MidiFile midiFile, int ticksPerQuarterNote, List<TempoEvent> tempoMap, MidiConfiguration config)
+        public static List<EnhancedNoteEvent> ExtractNoteEvents(NAudio.Midi.MidiFile midiFile, int ticksPerQuarterNote, List<TempoEvent> tempoMap, MidiConfiguration config, int sampleRate)
         {
             var noteEvents = new List<EnhancedNoteEvent>();
 
@@ -56,7 +56,7 @@ namespace MIDI
                         if (config.MIDI.ExcludedChannels.Contains(noteOn.Channel)) continue;
                         if (noteOn.Velocity < config.MIDI.MinVelocity) continue;
 
-                        noteEvents.Add(new EnhancedNoteEvent(noteOn, ticksPerQuarterNote, tempoMap, trackIndex));
+                        noteEvents.Add(new EnhancedNoteEvent(noteOn, ticksPerQuarterNote, tempoMap, trackIndex, sampleRate));
                     }
                 }
             }

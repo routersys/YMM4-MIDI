@@ -302,6 +302,12 @@ namespace MIDI
         private float _normalizationLevel = 0.95f;
         public float NormalizationLevel { get => _normalizationLevel; set => SetField(ref _normalizationLevel, value); }
 
+        private bool _enableGlobalFadeOut;
+        public bool EnableGlobalFadeOut { get => _enableGlobalFadeOut; set => SetField(ref _enableGlobalFadeOut, value); }
+
+        private double _globalFadeOutSeconds = 0.05;
+        public double GlobalFadeOutSeconds { get => _globalFadeOutSeconds; set => SetField(ref _globalFadeOutSeconds, value); }
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
         {
@@ -504,6 +510,33 @@ namespace MIDI
         private double _defaultRelease = 0.01;
         public double DefaultRelease { get => _defaultRelease; set => SetField(ref _defaultRelease, value); }
 
+        private double _fmModulatorFrequency = 5.0;
+        public double FmModulatorFrequency { get => _fmModulatorFrequency; set => SetField(ref _fmModulatorFrequency, value); }
+
+        private double _fmModulationIndex = 1.0;
+        public double FmModulationIndex { get => _fmModulationIndex; set => SetField(ref _fmModulationIndex, value); }
+
+        private bool _enableEnvelopeSmoothing = true;
+        public bool EnableEnvelopeSmoothing { get => _enableEnvelopeSmoothing; set => SetField(ref _enableEnvelopeSmoothing, value); }
+
+        private double _smoothingAttackSeconds = 0.005;
+        public double SmoothingAttackSeconds { get => _smoothingAttackSeconds; set => SetField(ref _smoothingAttackSeconds, value); }
+
+        private double _smoothingReleaseSeconds = 0.01;
+        public double SmoothingReleaseSeconds { get => _smoothingReleaseSeconds; set => SetField(ref _smoothingReleaseSeconds, value); }
+
+        private bool _enableAntiPop;
+        public bool EnableAntiPop { get => _enableAntiPop; set => SetField(ref _enableAntiPop, value); }
+
+        private double _antiPopAttackSeconds = 0.001;
+        public double AntiPopAttackSeconds { get => _antiPopAttackSeconds; set => SetField(ref _antiPopAttackSeconds, value); }
+
+        private double _antiPopReleaseSeconds = 0.005;
+        public double AntiPopReleaseSeconds { get => _antiPopReleaseSeconds; set => SetField(ref _antiPopReleaseSeconds, value); }
+
+        private bool _enableBandlimitedSynthesis = true;
+        public bool EnableBandlimitedSynthesis { get => _enableBandlimitedSynthesis; set => SetField(ref _enableBandlimitedSynthesis, value); }
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
         {
@@ -566,6 +599,42 @@ namespace MIDI
 
         private EqualizerSettings _eq = new();
         public EqualizerSettings EQ { get => _eq; set => SetField(ref _eq, value); }
+
+        private bool _enableConvolutionReverb;
+        public bool EnableConvolutionReverb { get => _enableConvolutionReverb; set => SetField(ref _enableConvolutionReverb, value); }
+
+        private bool _enablePhaser;
+        public bool EnablePhaser { get => _enablePhaser; set => SetField(ref _enablePhaser, value); }
+
+        private float _phaserRate = 0.5f;
+        public float PhaserRate { get => _phaserRate; set => SetField(ref _phaserRate, value); }
+
+        private int _phaserStages = 4;
+        public int PhaserStages { get => _phaserStages; set => SetField(ref _phaserStages, value); }
+
+        private float _phaserFeedback = 0.5f;
+        public float PhaserFeedback { get => _phaserFeedback; set => SetField(ref _phaserFeedback, value); }
+
+        private bool _enableFlanger;
+        public bool EnableFlanger { get => _enableFlanger; set => SetField(ref _enableFlanger, value); }
+
+        private float _flangerDelay = 0.005f;
+        public float FlangerDelay { get => _flangerDelay; set => SetField(ref _flangerDelay, value); }
+
+        private float _flangerRate = 0.1f;
+        public float FlangerRate { get => _flangerRate; set => SetField(ref _flangerRate, value); }
+
+        private float _flangerDepth = 0.7f;
+        public float FlangerDepth { get => _flangerDepth; set => SetField(ref _flangerDepth, value); }
+
+        private bool _enableLimiter;
+        public bool EnableLimiter { get => _enableLimiter; set => SetField(ref _enableLimiter, value); }
+
+        private float _limiterThreshold = 0.95f;
+        public float LimiterThreshold { get => _limiterThreshold; set => SetField(ref _limiterThreshold, value); }
+
+        private bool _enableDCOffsetRemoval = true;
+        public bool EnableDCOffsetRemoval { get => _enableDCOffsetRemoval; set => SetField(ref _enableDCOffsetRemoval, value); }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

@@ -131,7 +131,7 @@ namespace MIDI
             {
                 ProcessSfzBlocks(allEvents, totalSamples, outputBuffer, channelToSynth,
                                programToSynth, allSynths, currentEventIndex, samplesPerBlock,
-                               mixLeftBlock, mixRightBlock, pointersPtr);
+                               mixLeftBlock, mixRightBlock, pointersPtr, leftBlock, rightBlock);
             }
             finally
             {
@@ -152,7 +152,8 @@ namespace MIDI
         private void ProcessSfzBlocks(List<UniversalMidiEvent> allEvents, long totalSamples, float[] outputBuffer,
                                     IntPtr[] channelToSynth, Dictionary<int, IntPtr> programToSynth,
                                     List<IntPtr> allSynths, int currentEventIndex, int samplesPerBlock,
-                                    float[] mixLeftBlock, float[] mixRightBlock, IntPtr pointersPtr)
+                                    float[] mixLeftBlock, float[] mixRightBlock, IntPtr pointersPtr,
+                                    float[] leftBlock, float[] rightBlock)
         {
             for (long framePos = 0; framePos < totalSamples; framePos += samplesPerBlock)
             {
@@ -162,7 +163,7 @@ namespace MIDI
                 Array.Clear(mixLeftBlock, 0, samplesPerBlock);
                 Array.Clear(mixRightBlock, 0, samplesPerBlock);
 
-                RenderSynthsForBlock(allSynths, samplesPerBlock, pointersPtr, mixLeftBlock, mixRightBlock);
+                RenderSynthsForBlock(allSynths, samplesPerBlock, pointersPtr, mixLeftBlock, mixRightBlock, leftBlock, rightBlock);
 
                 CopyBlockToOutput(outputBuffer, framePos, totalSamples, samplesPerBlock, mixLeftBlock, mixRightBlock);
             }
@@ -208,11 +209,9 @@ namespace MIDI
         }
 
         private void RenderSynthsForBlock(List<IntPtr> allSynths, int samplesPerBlock, IntPtr pointersPtr,
-                                        float[] mixLeftBlock, float[] mixRightBlock)
+                                        float[] mixLeftBlock, float[] mixRightBlock,
+                                        float[] leftBlock, float[] rightBlock)
         {
-            var leftBlock = new float[samplesPerBlock];
-            var rightBlock = new float[samplesPerBlock];
-
             foreach (var synth in allSynths)
             {
                 SfizzPInvoke.sfizz_render_block(synth, pointersPtr, 2, samplesPerBlock);

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace MIDI
@@ -37,23 +39,40 @@ namespace MIDI
             {
                 var channel = kvp.Key;
                 var notes = kvp.Value;
-                var channelBuffer = new float[buffer.Length];
-                var channelState = channelStates[channel];
-
-                foreach (var note in notes)
+                float[] channelBuffer = ArrayPool<float>.Shared.Rent(buffer.Length);
+                try
                 {
-                    RenderNoteWithEffects(note, channelBuffer, channelState, instrumentSettings);
-                }
+                    Array.Clear(channelBuffer, 0, buffer.Length);
+                    var channelState = channelStates[channel];
 
-                lock (buffer)
-                {
-                    for (int i = 0; i < channelBuffer.Length; i++)
+                    foreach (var note in notes)
                     {
-                        buffer[i] += channelBuffer[i];
+                        RenderNoteWithEffects(note, channelBuffer, channelState, instrumentSettings);
                     }
+
+                    lock (buffer)
+                    {
+                        int vectorSize = Vector<float>.Count;
+                        int i = 0;
+                        for (; i <= buffer.Length - vectorSize; i += vectorSize)
+                        {
+                            var bufferVec = new Vector<float>(buffer, i);
+                            var channelVec = new Vector<float>(channelBuffer, i);
+                            (bufferVec + channelVec).CopyTo(buffer, i);
+                        }
+                        for (; i < buffer.Length; i++)
+                        {
+                            buffer[i] += channelBuffer[i];
+                        }
+                    }
+                }
+                finally
+                {
+                    ArrayPool<float>.Shared.Return(channelBuffer);
                 }
             });
         }
+
 
         public void RenderAudioStandard(List<EnhancedNoteEvent> noteEvents, float[] buffer,
                                       Dictionary<int, ChannelState> channelStates)
@@ -121,7 +140,7 @@ namespace MIDI
                     envelopeValue = (float)Math.Max(envelopeValue, instrument.Sustain);
                 }
 
-                var waveValue = synthesisEngine.GenerateWaveform(instrument.WaveType, frequency, time, amplitude, envelopeValue);
+                var waveValue = synthesisEngine.GenerateWaveform(instrument.WaveType, frequency, time, amplitude, envelopeValue, note.NoteNumber);
                 waveValue = filterProcessor.ApplyFilters(waveValue, instrument, time, channelState);
                 waveValue = effectsProcessor.ApplyChannelEffects(waveValue, channelState, time);
 

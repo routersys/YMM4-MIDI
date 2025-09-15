@@ -11,7 +11,10 @@ namespace MIDI
         Sawtooth,
         Triangle,
         Organ,
-        Noise
+        Noise,
+        Wavetable,
+        Fm,
+        KarplusStrong
     }
 
     public enum FilterType
@@ -48,8 +51,11 @@ namespace MIDI
         public long EndTicks { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
+        public long StartSample { get; set; }
+        public long EndSample { get; set; }
 
-        public EnhancedNoteEvent(NoteOnEvent noteOn, int ticksPerQuarterNote, List<TempoEvent> tempoMap, int trackIndex)
+
+        public EnhancedNoteEvent(NoteOnEvent noteOn, int ticksPerQuarterNote, List<TempoEvent> tempoMap, int trackIndex, int sampleRate)
         {
             NoteNumber = noteOn.NoteNumber;
             Velocity = noteOn.Velocity;
@@ -59,6 +65,8 @@ namespace MIDI
             EndTicks = noteOn.OffEvent.AbsoluteTime;
             StartTime = TicksToTimeSpan(StartTicks, ticksPerQuarterNote, tempoMap);
             EndTime = TicksToTimeSpan(EndTicks, ticksPerQuarterNote, tempoMap);
+            StartSample = (long)(StartTime.TotalSeconds * sampleRate);
+            EndSample = (long)(EndTime.TotalSeconds * sampleRate);
         }
 
         private static TimeSpan TicksToTimeSpan(long ticks, int ticksPerQuarterNote, List<TempoEvent> tempoMap)

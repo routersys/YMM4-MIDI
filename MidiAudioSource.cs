@@ -251,7 +251,7 @@ namespace MIDI
             var ticksPerQuarterNote = midiFile.DeltaTicksPerQuarterNote;
 
             var tempoMap = MidiProcessor.ExtractTempoMap(midiFile, config);
-            var noteEvents = MidiProcessor.ExtractNoteEvents(midiFile, ticksPerQuarterNote, tempoMap, config);
+            var noteEvents = MidiProcessor.ExtractNoteEvents(midiFile, ticksPerQuarterNote, tempoMap, config, sampleRate);
             var controlEvents = MidiProcessor.ExtractControlEvents(midiFile, ticksPerQuarterNote, tempoMap, config);
 
             long totalTicks = 0;
@@ -279,6 +279,84 @@ namespace MIDI
             else
             {
                 audioRenderer.RenderAudioStandard(noteEvents, buffer, channelStates);
+            }
+
+            if (config.Synthesis.EnableEnvelopeSmoothing)
+            {
+                var attackSamples = (int)(config.Synthesis.SmoothingAttackSeconds * sampleRate) * 2;
+                var releaseSamples = (int)(config.Synthesis.SmoothingReleaseSeconds * sampleRate) * 2;
+
+                foreach (var note in noteEvents)
+                {
+                    var startSample = note.StartSample * 2;
+                    var endSample = note.EndSample * 2;
+
+                    for (long i = 0; i < attackSamples; i++)
+                    {
+                        if (startSample + i >= buffer.Length) break;
+                        var fade = (float)i / attackSamples;
+                        buffer[startSample + i] *= fade;
+                    }
+
+                    for (long i = 0; i < releaseSamples; i++)
+                    {
+                        var index = endSample - releaseSamples + i;
+                        if (index < 0) continue;
+                        if (index >= buffer.Length) break;
+                        var fade = 1.0f - (float)i / releaseSamples;
+                        buffer[index] *= fade;
+                    }
+                }
+            }
+
+            if (config.Synthesis.EnableAntiPop)
+            {
+                var attackSamples = (int)(config.Synthesis.AntiPopAttackSeconds * sampleRate);
+                var releaseSamples = (int)(config.Synthesis.AntiPopReleaseSeconds * sampleRate);
+
+                foreach (var note in noteEvents)
+                {
+                    var startSample = note.StartSample * 2;
+                    var endSample = note.EndSample * 2;
+                    var noteSamples = endSample - startSample;
+
+                    var actualAttackSamples = Math.Min(attackSamples * 2, noteSamples);
+                    for (long i = 0; i < actualAttackSamples; i += 2)
+                    {
+                        var index = startSample + i;
+                        if (index + 1 >= buffer.Length) break;
+                        var fade = (float)i / actualAttackSamples;
+                        buffer[index] *= fade;
+                        buffer[index + 1] *= fade;
+                    }
+
+                    var actualReleaseSamples = Math.Min(releaseSamples * 2, noteSamples);
+                    for (long i = 0; i < actualReleaseSamples; i += 2)
+                    {
+                        var index = endSample - actualReleaseSamples + i;
+                        if (index < 0 || index + 1 >= buffer.Length) continue;
+                        var fade = 1.0f - ((float)i / actualReleaseSamples);
+                        buffer[index] *= fade;
+                        buffer[index + 1] *= fade;
+                    }
+                }
+            }
+
+            if (config.Effects.EnableEffects)
+            {
+                effectsProcessor.ApplyAudioEnhancements(buffer);
+            }
+
+            if (config.Audio.EnableGlobalFadeOut)
+            {
+                var fadeSamples = (int)(config.Audio.GlobalFadeOutSeconds * sampleRate) * 2;
+                fadeSamples = Math.Min(fadeSamples, buffer.Length);
+                for (int i = 0; i < fadeSamples; i++)
+                {
+                    var index = buffer.Length - fadeSamples + i;
+                    var fade = 1.0f - (float)i / fadeSamples;
+                    buffer[index] *= fade;
+                }
             }
 
             if (config.Audio.EnableNormalization)
