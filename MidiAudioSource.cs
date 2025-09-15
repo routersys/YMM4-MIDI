@@ -9,12 +9,14 @@ using YukkuriMovieMaker.Plugin.FileSource;
 using MeltySynth;
 using NAudio.Midi;
 using System.Threading;
+using System.Buffers;
 
 namespace MIDI
 {
     public class MidiAudioSource : IAudioFileSource
     {
         private static readonly ConcurrentDictionary<string, (float[] audioBuffer, TimeSpan duration, int sampleRate)> audioCache = new();
+        private static bool hasNotifiedGpuError = false;
 
         public static void ClearCache() => audioCache.Clear();
 
@@ -37,8 +39,8 @@ namespace MIDI
             config = configuration ?? MidiConfiguration.Default;
             sampleRate = config.Audio.SampleRate;
             synthesisEngine = new SynthesisEngine(config, sampleRate);
-            audioRenderer = new AudioRenderer(config, sampleRate);
             effectsProcessor = new EffectsProcessor(config, sampleRate);
+            audioRenderer = new AudioRenderer(config, sampleRate);
             sfzProcessor = new SfzProcessor(config, sampleRate);
 
             instrumentSettings = synthesisEngine.InitializeInstrumentSettings();
@@ -91,7 +93,9 @@ namespace MIDI
             var chunkBuffer = RenderAudio(filePath, initialDuration);
             if (this.audioBuffer != null)
             {
-                Array.Copy(chunkBuffer, this.audioBuffer, Math.Min(chunkBuffer.Length, this.audioBuffer.Length));
+                var sourceSpan = chunkBuffer.AsSpan();
+                var destSpan = this.audioBuffer.AsSpan();
+                sourceSpan.Slice(0, Math.Min(sourceSpan.Length, destSpan.Length)).CopyTo(destSpan);
             }
         }
 
@@ -216,33 +220,45 @@ namespace MIDI
 
             var renderDuration = durationLimit ?? midiFile.Length.Add(TimeSpan.FromSeconds(2.0));
             var totalSamplesToRender = (long)(renderDuration.TotalSeconds * sampleRate) * 2;
-            var audioDataList = new List<float>((int)Math.Min(totalSamplesToRender, int.MaxValue));
 
             var bufferSize = config.Performance.BufferSize;
-            var leftBuffer = new float[bufferSize];
-            var rightBuffer = new float[bufferSize];
+            var leftBuffer = ArrayPool<float>.Shared.Rent(bufferSize);
+            var rightBuffer = ArrayPool<float>.Shared.Rent(bufferSize);
 
+            var audioData = new float[totalSamplesToRender];
+            var audioDataSpan = audioData.AsSpan();
             long renderedSamples = 0;
-            while (renderedSamples < totalSamplesToRender && !sequencer.EndOfSequence)
-            {
-                sequencer.Render(leftBuffer, rightBuffer);
 
-                for (int i = 0; i < leftBuffer.Length; i++)
+            try
+            {
+                while (renderedSamples < totalSamplesToRender && !sequencer.EndOfSequence)
                 {
-                    if (renderedSamples + (i * 2) >= totalSamplesToRender) break;
-                    audioDataList.Add(leftBuffer[i] * config.Audio.MasterVolume);
-                    audioDataList.Add(rightBuffer[i] * config.Audio.MasterVolume);
+                    sequencer.Render(leftBuffer, rightBuffer);
+                    var samplesToCopy = (int)Math.Min(bufferSize * 2, totalSamplesToRender - renderedSamples);
+
+                    for (int i = 0; i < samplesToCopy / 2; i++)
+                    {
+                        audioDataSpan[(int)renderedSamples + i * 2] = leftBuffer[i] * config.Audio.MasterVolume;
+                        audioDataSpan[(int)renderedSamples + i * 2 + 1] = rightBuffer[i] * config.Audio.MasterVolume;
+                    }
+                    renderedSamples += samplesToCopy;
                 }
-                renderedSamples += bufferSize * 2;
+
+                if (config.Effects.EnableEffects)
+                {
+                    if (!effectsProcessor.ApplyAudioEnhancements(audioDataSpan))
+                    {
+                        NotifyGpuFallbackToCpu();
+                    }
+                }
             }
-
-            var buffer = audioDataList.ToArray();
-
-            if (config.Effects.EnableEffects)
+            finally
             {
-                effectsProcessor.ApplyAudioEnhancements(buffer);
+                ArrayPool<float>.Shared.Return(leftBuffer);
+                ArrayPool<float>.Shared.Return(rightBuffer);
             }
-            return buffer;
+
+            return audioData;
         }
 
         private float[] ProcessWithSynthesis(string filePath, TimeSpan? durationLimit)
@@ -262,6 +278,7 @@ namespace MIDI
             var renderDuration = durationLimit ?? internalDuration.Add(TimeSpan.FromSeconds(2.0));
             var totalSamples = (long)(renderDuration.TotalSeconds * sampleRate);
             var buffer = new float[totalSamples * 2];
+            var bufferSpan = buffer.AsSpan();
 
             var channelStates = new Dictionary<int, ChannelState>();
             for (int i = 0; i < 16; i++)
@@ -272,13 +289,22 @@ namespace MIDI
 
             var currentInstrumentSettings = instrumentSettings ?? synthesisEngine.InitializeInstrumentSettings();
 
-            if (config.Performance.EnableParallelProcessing)
+            bool gpuSucceeded = true;
+            if (config.Performance.GPU.EnableGpuSynthesis && ComputeSharp.GraphicsDevice.GetDefault() != null)
             {
-                audioRenderer.RenderAudioHighQuality(noteEvents, buffer, channelStates, currentInstrumentSettings);
+                if (!audioRenderer.RenderAudioGpu(bufferSpan, noteEvents, channelStates, currentInstrumentSettings))
+                {
+                    gpuSucceeded = false;
+                    audioRenderer.RenderAudioHighQuality(buffer, noteEvents, channelStates, currentInstrumentSettings);
+                }
+            }
+            else if (config.Performance.EnableParallelProcessing)
+            {
+                audioRenderer.RenderAudioHighQuality(buffer, noteEvents, channelStates, currentInstrumentSettings);
             }
             else
             {
-                audioRenderer.RenderAudioStandard(noteEvents, buffer, channelStates);
+                audioRenderer.RenderAudioStandard(bufferSpan, noteEvents, channelStates);
             }
 
             if (config.Synthesis.EnableEnvelopeSmoothing)
@@ -288,17 +314,17 @@ namespace MIDI
 
                 foreach (var note in noteEvents)
                 {
-                    var startSample = note.StartSample * 2;
-                    var endSample = note.EndSample * 2;
+                    var startSample = (int)note.StartSample * 2;
+                    var endSample = (int)note.EndSample * 2;
 
-                    for (long i = 0; i < attackSamples; i++)
+                    for (int i = 0; i < attackSamples; i++)
                     {
                         if (startSample + i >= buffer.Length) break;
                         var fade = (float)i / attackSamples;
                         buffer[startSample + i] *= fade;
                     }
 
-                    for (long i = 0; i < releaseSamples; i++)
+                    for (int i = 0; i < releaseSamples; i++)
                     {
                         var index = endSample - releaseSamples + i;
                         if (index < 0) continue;
@@ -344,7 +370,15 @@ namespace MIDI
 
             if (config.Effects.EnableEffects)
             {
-                effectsProcessor.ApplyAudioEnhancements(buffer);
+                if (!effectsProcessor.ApplyAudioEnhancements(bufferSpan))
+                {
+                    gpuSucceeded = false;
+                }
+            }
+
+            if (!gpuSucceeded)
+            {
+                NotifyGpuFallbackToCpu();
             }
 
             if (config.Audio.EnableGlobalFadeOut)
@@ -361,9 +395,20 @@ namespace MIDI
 
             if (config.Audio.EnableNormalization)
             {
-                effectsProcessor.NormalizeAudio(buffer);
+                effectsProcessor.NormalizeAudio(bufferSpan);
             }
             return buffer;
+        }
+
+        private void NotifyGpuFallbackToCpu()
+        {
+            if (hasNotifiedGpuError) return;
+            hasNotifiedGpuError = true;
+            string message = "GPUでの音声処理中にエラーが発生しました。処理は自動的にCPUに切り替えられました。\n" +
+                             "パフォーマンスが低下する可能性があります。\n\n" +
+                             "このメッセージはアプリケーションの実行ごとに一度だけ表示されます。\n" +
+                             "エラーが続く場合は、設定 > パフォーマンス > GPUアクセラレーションを無効にすることをお勧めします。";
+            LogError(message);
         }
 
         private void LogError(string message, Exception? ex = null)
@@ -404,7 +449,9 @@ namespace MIDI
 
             if (count > 0)
             {
-                Array.Copy(currentBuffer, currentPosition, destBuffer, offset, count);
+                var sourceSpan = new ReadOnlySpan<float>(currentBuffer, (int)currentPosition, count);
+                var destSpan = new Span<float>(destBuffer, offset, count);
+                sourceSpan.CopyTo(destSpan);
             }
 
             Interlocked.Add(ref position, count);
@@ -421,6 +468,7 @@ namespace MIDI
 
         public void Dispose()
         {
+            effectsProcessor?.Dispose();
             GC.SuppressFinalize(this);
         }
     }

@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Buffers;
 using System.Numerics;
 using ComputeSharp;
 
 namespace MIDI
 {
-    public partial class EffectsProcessor
+    public partial class EffectsProcessor : IDisposable
     {
         private readonly MidiConfiguration config;
         private readonly int sampleRate;
-        private float[] impulseResponse = null!;
+        private float[]? impulseResponse;
+        private bool disposedValue;
+        private const int GpuChunkSize = 1 << 18;
 
         public EffectsProcessor(MidiConfiguration config, int sampleRate)
         {
@@ -19,9 +22,10 @@ namespace MIDI
 
         private void LoadImpulseResponse()
         {
-            impulseResponse = new float[sampleRate];
+            if (!config.Effects.EnableConvolutionReverb) return;
+            impulseResponse = ArrayPool<float>.Shared.Rent(sampleRate);
             var random = new Random();
-            for (int i = 0; i < impulseResponse.Length; i++)
+            for (int i = 0; i < sampleRate; i++)
             {
                 impulseResponse[i] = (float)((random.NextDouble() * 2 - 1) * Math.Exp(-i / (sampleRate * 0.2)));
             }
@@ -55,12 +59,64 @@ namespace MIDI
             return output;
         }
 
-        public void ApplyAudioEnhancements(float[] buffer)
+        public bool ApplyAudioEnhancements(Span<float> buffer)
         {
-            if (config.Effects.EnableConvolutionReverb && GraphicsDevice.GetDefault() != null)
+            if (!config.Effects.EnableEffects) return true;
+
+            var device = GraphicsDevice.GetDefault();
+            bool gpuUsed = false;
+            bool gpuSucceeded = true;
+
+            if (device == null || (!config.Performance.GPU.EnableGpuEffectsChain && !config.Performance.GPU.EnableGpuEqualizer && !config.Performance.GPU.EnableGpuConvolutionReverb))
             {
-                ApplyConvolutionReverbGpu(buffer);
+                ApplyCpuAudioEnhancements(buffer);
+                return true;
             }
+
+            if (config.Performance.GPU.EnableGpuEffectsChain)
+            {
+                gpuUsed = true;
+                if (!ApplyGpuEffectsChain(buffer, device))
+                {
+                    gpuSucceeded = false;
+                    ApplyDCOffsetRemoval(buffer);
+                    ApplyCompression(buffer);
+                    ApplyGlobalReverb(buffer);
+                    ApplyLimiter(buffer);
+                }
+            }
+            else
+            {
+                if (config.Performance.GPU.EnableGpuConvolutionReverb)
+                {
+                    gpuUsed = true;
+                    if (!ApplyConvolutionReverbGpu(buffer, device)) gpuSucceeded = false;
+                }
+                if (config.Effects.EnableDCOffsetRemoval) ApplyDCOffsetRemoval(buffer);
+                if (config.Effects.EnableCompression) ApplyCompression(buffer);
+                if (config.Effects.EnableReverb) ApplyGlobalReverb(buffer);
+                if (config.Effects.EnableLimiter) ApplyLimiter(buffer);
+            }
+
+            if (config.Performance.GPU.EnableGpuEqualizer)
+            {
+                gpuUsed = true;
+                if (!ApplyEqualizerGpu(buffer, device))
+                {
+                    gpuSucceeded = false;
+                    if (config.Effects.EnableEqualizer) ApplyEqualizer(buffer);
+                }
+            }
+            else if (config.Effects.EnableEqualizer)
+            {
+                ApplyEqualizer(buffer);
+            }
+
+            return !gpuUsed || gpuSucceeded;
+        }
+
+        private void ApplyCpuAudioEnhancements(Span<float> buffer)
+        {
             if (config.Effects.EnableDCOffsetRemoval) ApplyDCOffsetRemoval(buffer);
             if (config.Effects.EnableCompression) ApplyCompression(buffer);
             if (config.Effects.EnableReverb) ApplyGlobalReverb(buffer);
@@ -68,49 +124,62 @@ namespace MIDI
             if (config.Effects.EnableLimiter) ApplyLimiter(buffer);
         }
 
-        public void ApplyConvolutionReverbGpu(float[] buffer)
+        public bool ApplyConvolutionReverbGpu(Span<float> buffer, GraphicsDevice device)
         {
-            using var device = GraphicsDevice.GetDefault();
-            using var gpuBuffer = device.AllocateReadWriteBuffer<float>(buffer);
-            using var gpuImpulseResponse = device.AllocateReadOnlyBuffer<float>(impulseResponse);
+            if (impulseResponse == null) return true;
+            try
+            {
+                using var gpuBuffer = device.AllocateReadWriteBuffer<float>(buffer);
+                using var gpuImpulseResponse = device.AllocateReadOnlyBuffer<float>(impulseResponse.AsSpan(0, sampleRate));
 
-            device.For(gpuBuffer.Length, new ConvolutionShader(gpuBuffer, gpuImpulseResponse, gpuImpulseResponse.Length));
+                device.For(gpuBuffer.Length, new ConvolutionShader(gpuBuffer, gpuImpulseResponse, gpuImpulseResponse.Length));
 
-            gpuBuffer.CopyTo(buffer);
+                gpuBuffer.CopyTo(buffer);
+                return true;
+            }
+            catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is NotSupportedException)
+            {
+                return false;
+            }
         }
 
-        [ThreadGroupSize(DefaultThreadGroupSizes.X)]
-        [GeneratedComputeShaderDescriptor]
-        public readonly partial struct ConvolutionShader : IComputeShader
+        public bool ApplyGpuEffectsChain(Span<float> buffer, GraphicsDevice device)
         {
-            private readonly ReadWriteBuffer<float> audioBuffer;
-            private readonly ReadOnlyBuffer<float> impulseResponse;
-            private readonly int irLength;
-
-            public ConvolutionShader(ReadWriteBuffer<float> audioBuffer, ReadOnlyBuffer<float> impulseResponse, int irLength)
+            try
             {
-                this.audioBuffer = audioBuffer;
-                this.impulseResponse = impulseResponse;
-                this.irLength = irLength;
-            }
+                using var gpuBuffer = device.AllocateReadWriteBuffer<float>(buffer);
 
-            public void Execute()
-            {
-                int i = ThreadIds.X;
-                float result = 0;
-                for (int j = 0; j < irLength; j++)
+                for (int offset = 0; offset < buffer.Length; offset += GpuChunkSize)
                 {
-                    int sampleIndex = i - j;
-                    if (sampleIndex >= 0)
-                    {
-                        result += audioBuffer[sampleIndex] * impulseResponse[j];
-                    }
+                    int count = Math.Min(GpuChunkSize, buffer.Length - offset);
+                    var shader = new EffectsChainShader(
+                        gpuBuffer,
+                        gpuBuffer.Length,
+                        sampleRate,
+                        offset,
+                        config.Effects.EnableReverb,
+                        config.Effects.ReverbDelay,
+                        config.Effects.ReverbDecay,
+                        config.Effects.EnableCompression,
+                        config.Effects.CompressionThreshold,
+                        config.Effects.CompressionRatio,
+                        config.Effects.EnableLimiter,
+                        config.Effects.LimiterThreshold,
+                        config.Effects.EnableDCOffsetRemoval
+                    );
+                    device.For(count, shader);
                 }
-                audioBuffer[i] = Hlsl.Clamp(result, -1.0f, 1.0f);
+
+                gpuBuffer.CopyTo(buffer);
+                return true;
+            }
+            catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is NotSupportedException)
+            {
+                return false;
             }
         }
 
-        public void ApplyDCOffsetRemoval(float[] buffer)
+        public void ApplyDCOffsetRemoval(Span<float> buffer)
         {
             float lastIn = 0;
             float lastOut = 0;
@@ -126,30 +195,29 @@ namespace MIDI
             }
         }
 
-        public void ApplyCompression(float[] buffer)
+        public void ApplyCompression(Span<float> buffer)
         {
             var threshold = config.Effects.CompressionThreshold;
             var ratio = config.Effects.CompressionRatio;
-            var attack = config.Effects.CompressionAttack;
-            var release = config.Effects.CompressionRelease;
-
-            var attackCoeff = (float)Math.Exp(-1.0 / (attack * sampleRate));
-            var releaseCoeff = (float)Math.Exp(-1.0 / (release * sampleRate));
 
             int vectorSize = Vector<float>.Count;
             var thresholdVec = new Vector<float>(threshold);
+            var ratioVec = new Vector<float>(ratio);
 
             for (int i = 0; i <= buffer.Length - vectorSize; i += vectorSize)
             {
-                var inputVec = new Vector<float>(buffer, i);
+                var inputVec = new Vector<float>(buffer.Slice(i, vectorSize));
                 var absInputVec = Vector.Abs(inputVec);
 
-                if (Vector.GreaterThanAll(absInputVec, thresholdVec))
+                var condition = Vector.GreaterThan(absInputVec, thresholdVec);
+                if (condition != Vector<int>.Zero)
                 {
                     var excessVec = absInputVec - thresholdVec;
-                    var compressedExcessVec = excessVec / ratio;
+                    var compressedExcessVec = excessVec / ratioVec;
                     var gainVec = (thresholdVec + compressedExcessVec) / absInputVec;
-                    (inputVec * gainVec).CopyTo(buffer, i);
+
+                    var resultVec = Vector.ConditionalSelect(condition, inputVec * gainVec, inputVec);
+                    resultVec.CopyTo(buffer.Slice(i, vectorSize));
                 }
             }
         }
@@ -171,16 +239,26 @@ namespace MIDI
             return input + input * delay * config.Effects.FlangerDepth;
         }
 
-        public void ApplyLimiter(float[] buffer)
+        public void ApplyLimiter(Span<float> buffer)
         {
             float threshold = config.Effects.LimiterThreshold;
-            for (int i = 0; i < buffer.Length; i++)
+            int vectorSize = Vector<float>.Count;
+            var minVec = new Vector<float>(-threshold);
+            var maxVec = new Vector<float>(threshold);
+
+            for (int i = 0; i <= buffer.Length - vectorSize; i += vectorSize)
+            {
+                var vec = new Vector<float>(buffer.Slice(i, vectorSize));
+                vec = Vector.Max(minVec, Vector.Min(maxVec, vec));
+                vec.CopyTo(buffer.Slice(i, vectorSize));
+            }
+            for (int i = buffer.Length - (buffer.Length % vectorSize); i < buffer.Length; i++)
             {
                 buffer[i] = Math.Max(-threshold, Math.Min(threshold, buffer[i]));
             }
         }
 
-        public void ApplyGlobalReverb(float[] buffer)
+        public void ApplyGlobalReverb(Span<float> buffer)
         {
             var delayMs = config.Effects.ReverbDelay;
             var delaySamples = (int)(delayMs * sampleRate / 1000);
@@ -193,9 +271,9 @@ namespace MIDI
 
                 for (int i = delaySamples; i <= buffer.Length - vectorSize; i += vectorSize)
                 {
-                    var currentVec = new Vector<float>(buffer, i);
-                    var delayedVec = new Vector<float>(buffer, i - delaySamples);
-                    (currentVec + delayedVec * decayVec).CopyTo(buffer, i);
+                    var currentVec = new Vector<float>(buffer.Slice(i, vectorSize));
+                    var delayedVec = new Vector<float>(buffer.Slice(i - delaySamples, vectorSize));
+                    (currentVec + delayedVec * decayVec).CopyTo(buffer.Slice(i, vectorSize));
                 }
                 for (int i = buffer.Length - (buffer.Length % vectorSize); i < buffer.Length; i++)
                 {
@@ -204,7 +282,7 @@ namespace MIDI
             }
         }
 
-        public void ApplyEqualizer(float[] buffer)
+        public void ApplyEqualizer(Span<float> buffer)
         {
             var bassGain = config.Effects.EQ.BassGain;
             var midGain = config.Effects.EQ.MidGain;
@@ -217,13 +295,71 @@ namespace MIDI
             {
                 if (i % 2 == 0)
                 {
-                    var sampleVec = new Vector<float>(buffer, i);
-                    (sampleVec * bassGainVec).CopyTo(buffer, i);
+                    var sampleVec = new Vector<float>(buffer.Slice(i, vectorSize));
+                    (sampleVec * bassGainVec).CopyTo(buffer.Slice(i, vectorSize));
                 }
             }
         }
 
-        public void NormalizeAudio(float[] buffer)
+        private bool ApplyEqualizerGpu(Span<float> buffer, GraphicsDevice device)
+        {
+            float[]? paddedBuffer = null;
+            try
+            {
+                int N = 1;
+                while (N < buffer.Length) N <<= 1;
+
+                paddedBuffer = ArrayPool<float>.Shared.Rent(N);
+                buffer.CopyTo(paddedBuffer);
+                if (buffer.Length < N)
+                {
+                    Array.Clear(paddedBuffer, buffer.Length, N - buffer.Length);
+                }
+
+                using var complexBuffer = device.AllocateReadWriteBuffer<Float2>(N);
+                using var sourceBuffer = device.AllocateReadOnlyBuffer(paddedBuffer);
+
+                device.For(N, new ToComplexShader(sourceBuffer, complexBuffer));
+
+                ExecuteFft(device, complexBuffer, N, false);
+
+                device.For(N, new ApplyEqShader(complexBuffer, sampleRate, config.Effects.EQ.BassGain, config.Effects.EQ.MidGain, config.Effects.EQ.TrebleGain));
+
+                ExecuteFft(device, complexBuffer, N, true);
+
+                using var realBuffer = device.AllocateReadWriteBuffer<float>(N);
+                device.For(N, new ToRealShader(complexBuffer, realBuffer, N));
+
+                realBuffer.CopyTo(paddedBuffer, 0, 0, buffer.Length);
+
+                paddedBuffer.AsSpan(0, buffer.Length).CopyTo(buffer);
+
+                return true;
+            }
+            catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is NotSupportedException || ex is OutOfMemoryException)
+            {
+                return false;
+            }
+            finally
+            {
+                if (paddedBuffer != null)
+                {
+                    ArrayPool<float>.Shared.Return(paddedBuffer);
+                }
+            }
+        }
+
+        private static void ExecuteFft(GraphicsDevice device, ReadWriteBuffer<Float2> buffer, int n, bool inverse)
+        {
+            device.For(n, new BitReverseShader(buffer, n));
+
+            for (int size = 2; size <= n; size <<= 1)
+            {
+                device.For(n, new FftShader(buffer, n, size, inverse));
+            }
+        }
+
+        public void NormalizeAudio(Span<float> buffer)
         {
             float maxAbs = 0;
             foreach (float sample in buffer)
@@ -238,14 +374,42 @@ namespace MIDI
                 var scaleVec = new Vector<float>(scale);
                 for (int i = 0; i <= buffer.Length - vectorSize; i += vectorSize)
                 {
-                    var vec = new Vector<float>(buffer, i);
-                    (vec * scaleVec).CopyTo(buffer, i);
+                    var vec = new Vector<float>(buffer.Slice(i, vectorSize));
+                    (vec * scaleVec).CopyTo(buffer.Slice(i, vectorSize));
                 }
                 for (int i = buffer.Length - (buffer.Length % vectorSize); i < buffer.Length; i++)
                 {
                     buffer[i] *= scale;
                 }
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                }
+
+                if (impulseResponse != null)
+                {
+                    ArrayPool<float>.Shared.Return(impulseResponse);
+                    impulseResponse = null;
+                }
+                disposedValue = true;
+            }
+        }
+
+        ~EffectsProcessor()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

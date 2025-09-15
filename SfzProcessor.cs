@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -106,7 +107,9 @@ namespace MIDI
                                             .Add(TimeSpan.FromSeconds(2.0));
 
             var totalSamples = (long)(renderDuration.TotalSeconds * sampleRate);
-            var outputBuffer = new float[totalSamples * 2];
+            var outputBuffer = ArrayPool<float>.Shared.Rent((int)(totalSamples * 2));
+            var outputSpan = outputBuffer.AsSpan(0, (int)(totalSamples * 2));
+            outputSpan.Clear();
 
             var channelToSynth = new IntPtr[16];
             var defaultSynth = programToSynth.TryGetValue(0, out var s) ? s : allSynths.First();
@@ -116,10 +119,10 @@ namespace MIDI
             int currentEventIndex = 0;
             var samplesPerBlock = config.Performance.BufferSize;
 
-            var leftBlock = new float[samplesPerBlock];
-            var rightBlock = new float[samplesPerBlock];
-            var mixLeftBlock = new float[samplesPerBlock];
-            var mixRightBlock = new float[samplesPerBlock];
+            var leftBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
+            var rightBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
+            var mixLeftBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
+            var mixRightBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
 
             var leftHandle = GCHandle.Alloc(leftBlock, GCHandleType.Pinned);
             var rightHandle = GCHandle.Alloc(rightBlock, GCHandleType.Pinned);
@@ -129,43 +132,51 @@ namespace MIDI
 
             try
             {
-                ProcessSfzBlocks(allEvents, totalSamples, outputBuffer, channelToSynth,
+                ProcessSfzBlocks(allEvents, totalSamples, outputSpan, channelToSynth,
                                programToSynth, allSynths, currentEventIndex, samplesPerBlock,
                                mixLeftBlock, mixRightBlock, pointersPtr, leftBlock, rightBlock);
+
+                if (config.Audio.EnableNormalization)
+                {
+                    var effectsProcessor = new EffectsProcessor(config, sampleRate);
+                    effectsProcessor.NormalizeAudio(outputSpan);
+                }
+
+                return outputSpan.ToArray();
             }
             finally
             {
+                ArrayPool<float>.Shared.Return(outputBuffer);
+                ArrayPool<float>.Shared.Return(leftBlock);
+                ArrayPool<float>.Shared.Return(rightBlock);
+                ArrayPool<float>.Shared.Return(mixLeftBlock);
+                ArrayPool<float>.Shared.Return(mixRightBlock);
                 leftHandle.Free();
                 rightHandle.Free();
                 pointersHandle.Free();
             }
-
-            if (config.Audio.EnableNormalization)
-            {
-                var effectsProcessor = new EffectsProcessor(config, sampleRate);
-                effectsProcessor.NormalizeAudio(outputBuffer);
-            }
-
-            return outputBuffer;
         }
 
-        private void ProcessSfzBlocks(List<UniversalMidiEvent> allEvents, long totalSamples, float[] outputBuffer,
+        private void ProcessSfzBlocks(List<UniversalMidiEvent> allEvents, long totalSamples, Span<float> outputBuffer,
                                     IntPtr[] channelToSynth, Dictionary<int, IntPtr> programToSynth,
                                     List<IntPtr> allSynths, int currentEventIndex, int samplesPerBlock,
                                     float[] mixLeftBlock, float[] mixRightBlock, IntPtr pointersPtr,
                                     float[] leftBlock, float[] rightBlock)
         {
+            var mixLeftSpan = mixLeftBlock.AsSpan(0, samplesPerBlock);
+            var mixRightSpan = mixRightBlock.AsSpan(0, samplesPerBlock);
+
             for (long framePos = 0; framePos < totalSamples; framePos += samplesPerBlock)
             {
                 currentEventIndex = ProcessEventsForBlock(allEvents, framePos, samplesPerBlock,
                                                         currentEventIndex, channelToSynth, programToSynth);
 
-                Array.Clear(mixLeftBlock, 0, samplesPerBlock);
-                Array.Clear(mixRightBlock, 0, samplesPerBlock);
+                mixLeftSpan.Clear();
+                mixRightSpan.Clear();
 
                 RenderSynthsForBlock(allSynths, samplesPerBlock, pointersPtr, mixLeftBlock, mixRightBlock, leftBlock, rightBlock);
 
-                CopyBlockToOutput(outputBuffer, framePos, totalSamples, samplesPerBlock, mixLeftBlock, mixRightBlock);
+                CopyBlockToOutput(outputBuffer, framePos, totalSamples, samplesPerBlock, mixLeftSpan, mixRightSpan);
             }
         }
 
@@ -209,8 +220,8 @@ namespace MIDI
         }
 
         private void RenderSynthsForBlock(List<IntPtr> allSynths, int samplesPerBlock, IntPtr pointersPtr,
-                                        float[] mixLeftBlock, float[] mixRightBlock,
-                                        float[] leftBlock, float[] rightBlock)
+                                        Span<float> mixLeftBlock, Span<float> mixRightBlock,
+                                        ReadOnlySpan<float> leftBlock, ReadOnlySpan<float> rightBlock)
         {
             foreach (var synth in allSynths)
             {
@@ -223,14 +234,18 @@ namespace MIDI
             }
         }
 
-        private void CopyBlockToOutput(float[] outputBuffer, long framePos, long totalSamples,
-                                     int samplesPerBlock, float[] mixLeftBlock, float[] mixRightBlock)
+        private void CopyBlockToOutput(Span<float> outputBuffer, long framePos, long totalSamples,
+                                     int samplesPerBlock, ReadOnlySpan<float> mixLeftBlock, ReadOnlySpan<float> mixRightBlock)
         {
-            var samplesToCopy = Math.Min(samplesPerBlock, totalSamples - framePos);
+            var samplesToCopy = (int)Math.Min(samplesPerBlock, totalSamples - framePos);
             for (int i = 0; i < samplesToCopy; i++)
             {
-                outputBuffer[(framePos + i) * 2] = mixLeftBlock[i] * config.Audio.MasterVolume;
-                outputBuffer[(framePos + i) * 2 + 1] = mixRightBlock[i] * config.Audio.MasterVolume;
+                var outIndex = (int)(framePos + i) * 2;
+                if (outIndex + 1 < outputBuffer.Length)
+                {
+                    outputBuffer[outIndex] = mixLeftBlock[i] * config.Audio.MasterVolume;
+                    outputBuffer[outIndex + 1] = mixRightBlock[i] * config.Audio.MasterVolume;
+                }
             }
         }
 

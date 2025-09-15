@@ -1,9 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ComputeSharp;
 
 namespace MIDI
 {
+    public struct GpuNoteData
+    {
+        public int NoteNumber;
+        public float Velocity;
+        public int Channel;
+        public int StartSample;
+        public int EndSample;
+        public float Frequency;
+        public float BaseAmplitude;
+        public int WaveType;
+        public float Attack;
+        public float Decay;
+        public float Sustain;
+        public float Release;
+        public int FilterType;
+        public float FilterCutoff;
+        public float FilterResonance;
+        public float PanLeft;
+        public float PanRight;
+    }
+
     public class SynthesisEngine
     {
         private readonly MidiConfiguration config;
@@ -103,7 +125,6 @@ namespace MIDI
             double value = phase < 0.5 ? 1.0 : -1.0;
             value += PolyBlep(phase, phaseIncrement);
             value -= PolyBlep((phase + 0.5) % 1.0, phaseIncrement);
-            // Leaky integrator
             return value * phaseIncrement + (1.0 - phaseIncrement) * value;
         }
 

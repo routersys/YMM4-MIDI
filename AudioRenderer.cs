@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using ComputeSharp;
 
 namespace MIDI
 {
@@ -14,6 +15,8 @@ namespace MIDI
         private readonly SynthesisEngine synthesisEngine;
         private readonly FilterProcessor filterProcessor;
         private readonly EffectsProcessor effectsProcessor;
+        private readonly object bufferLock = new object();
+        private const int GpuChunkSize = 1 << 18;
 
         public AudioRenderer(MidiConfiguration config, int sampleRate)
         {
@@ -24,7 +27,7 @@ namespace MIDI
             this.effectsProcessor = new EffectsProcessor(config, sampleRate);
         }
 
-        public void RenderAudioHighQuality(List<EnhancedNoteEvent> noteEvents, float[] buffer,
+        public void RenderAudioHighQuality(float[] buffer, List<EnhancedNoteEvent> noteEvents,
                                          Dictionary<int, ChannelState> channelStates,
                                          Dictionary<int, InstrumentSettings> instrumentSettings)
         {
@@ -40,25 +43,28 @@ namespace MIDI
                 var channel = kvp.Key;
                 var notes = kvp.Value;
                 float[] channelBuffer = ArrayPool<float>.Shared.Rent(buffer.Length);
+                var channelSpan = channelBuffer.AsSpan(0, buffer.Length);
+
                 try
                 {
-                    Array.Clear(channelBuffer, 0, buffer.Length);
+                    channelSpan.Clear();
                     var channelState = channelStates[channel];
 
                     foreach (var note in notes)
                     {
-                        RenderNoteWithEffects(note, channelBuffer, channelState, instrumentSettings);
+                        RenderNoteWithEffects(note, channelSpan, channelState, instrumentSettings);
                     }
 
-                    lock (buffer)
+                    lock (bufferLock)
                     {
+                        var bufferSpan = buffer.AsSpan();
                         int vectorSize = Vector<float>.Count;
                         int i = 0;
                         for (; i <= buffer.Length - vectorSize; i += vectorSize)
                         {
-                            var bufferVec = new Vector<float>(buffer, i);
-                            var channelVec = new Vector<float>(channelBuffer, i);
-                            (bufferVec + channelVec).CopyTo(buffer, i);
+                            var bufferVec = new Vector<float>(bufferSpan.Slice(i, vectorSize));
+                            var channelVec = new Vector<float>(channelSpan.Slice(i, vectorSize));
+                            (bufferVec + channelVec).CopyTo(bufferSpan.Slice(i, vectorSize));
                         }
                         for (; i < buffer.Length; i++)
                         {
@@ -73,8 +79,72 @@ namespace MIDI
             });
         }
 
+        public bool RenderAudioGpu(Span<float> buffer, List<EnhancedNoteEvent> noteEvents, Dictionary<int, ChannelState> channelStates, Dictionary<int, InstrumentSettings> instrumentSettings)
+        {
+            try
+            {
+                var noteDataList = new List<GpuNoteData>();
+                foreach (var note in noteEvents)
+                {
+                    var channelState = channelStates[note.Channel];
+                    var instrument = synthesisEngine.GetInstrumentSettings(note.Channel, channelState.Program, instrumentSettings);
+                    var frequency = (float)synthesisEngine.GetFrequency(note.NoteNumber, channelState.PitchBend);
+                    var baseAmplitude = (note.Velocity / 127.0f) * channelState.Volume * channelState.Expression * instrument.VolumeMultiplier * config.Audio.MasterVolume;
+                    var panAngle = (channelState.Pan + 1) * Math.PI / 4;
 
-        public void RenderAudioStandard(List<EnhancedNoteEvent> noteEvents, float[] buffer,
+                    noteDataList.Add(new GpuNoteData
+                    {
+                        NoteNumber = note.NoteNumber,
+                        Velocity = note.Velocity,
+                        Channel = note.Channel,
+                        StartSample = (int)note.StartSample,
+                        EndSample = (int)note.EndSample,
+                        Frequency = frequency,
+                        BaseAmplitude = baseAmplitude,
+                        WaveType = (int)instrument.WaveType,
+                        Attack = (float)(instrument.Attack * config.Synthesis.EnvelopeScale * channelState.AttackMultiplier),
+                        Decay = (float)(instrument.Decay * config.Synthesis.EnvelopeScale * channelState.DecayMultiplier),
+                        Sustain = (float)instrument.Sustain,
+                        Release = (float)(instrument.Release * config.Synthesis.EnvelopeScale * channelState.ReleaseMultiplier),
+                        FilterType = (int)instrument.FilterType,
+                        FilterCutoff = (float)instrument.FilterCutoff,
+                        FilterResonance = (float)instrument.FilterResonance,
+                        PanLeft = (float)Math.Cos(panAngle),
+                        PanRight = (float)Math.Sin(panAngle)
+                    });
+                }
+
+                using var device = GraphicsDevice.GetDefault();
+                using var gpuBuffer = device.AllocateReadWriteBuffer<float>(buffer);
+                using var noteBuffer = device.AllocateReadOnlyBuffer(noteDataList.ToArray());
+
+                int numSamples = buffer.Length / 2;
+                for (int offset = 0; offset < numSamples; offset += GpuChunkSize)
+                {
+                    int count = Math.Min(GpuChunkSize, numSamples - offset);
+                    var shader = new WaveformGenerationShader(
+                        gpuBuffer,
+                        noteBuffer,
+                        noteBuffer.Length,
+                        sampleRate,
+                        offset,
+                        (float)config.Synthesis.FmModulatorFrequency,
+                        (float)config.Synthesis.FmModulationIndex,
+                        config.Synthesis.EnableBandlimitedSynthesis
+                    );
+                    device.For(count, shader);
+                }
+
+                gpuBuffer.CopyTo(buffer);
+                return true;
+            }
+            catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is NotSupportedException || ex is OutOfMemoryException)
+            {
+                return false;
+            }
+        }
+
+        public void RenderAudioStandard(Span<float> buffer, List<EnhancedNoteEvent> noteEvents,
                                       Dictionary<int, ChannelState> channelStates)
         {
             foreach (var note in noteEvents)
@@ -102,13 +172,13 @@ namespace MIDI
 
                     var waveType = config.Synthesis.DefaultWaveform;
                     var sampleValue = amplitude * envelope * synthesisEngine.GenerateBasicWaveform(waveType, frequency, time);
-                    buffer[i * 2] += (float)sampleValue;
-                    buffer[i * 2 + 1] += (float)sampleValue;
+                    buffer[(int)(i * 2)] += (float)sampleValue;
+                    buffer[(int)(i * 2 + 1)] += (float)sampleValue;
                 }
             }
         }
 
-        private void RenderNoteWithEffects(EnhancedNoteEvent note, float[] buffer, ChannelState channelState,
+        private void RenderNoteWithEffects(EnhancedNoteEvent note, Span<float> buffer, ChannelState channelState,
                                          Dictionary<int, InstrumentSettings> instrumentSettings)
         {
             var instrument = synthesisEngine.GetInstrumentSettings(note.Channel, channelState.Program, instrumentSettings);
@@ -116,8 +186,8 @@ namespace MIDI
             var baseAmplitude = (note.Velocity / 127.0f) * channelState.Volume * channelState.Expression *
                                instrument.VolumeMultiplier * config.Audio.MasterVolume;
 
-            var startSample = (long)(note.StartTime.TotalSeconds * sampleRate);
-            var endSample = (long)(note.EndTime.TotalSeconds * sampleRate);
+            var startSample = note.StartSample;
+            var endSample = note.EndSample;
             var noteDuration = endSample - startSample;
 
             var envelope = new ADSREnvelope(
@@ -144,8 +214,8 @@ namespace MIDI
                 waveValue = filterProcessor.ApplyFilters(waveValue, instrument, time, channelState);
                 waveValue = effectsProcessor.ApplyChannelEffects(waveValue, channelState, time);
 
-                var leftIndex = i * 2;
-                var rightIndex = i * 2 + 1;
+                var leftIndex = (int)(i * 2);
+                var rightIndex = (int)(i * 2 + 1);
 
                 if (rightIndex < buffer.Length)
                 {

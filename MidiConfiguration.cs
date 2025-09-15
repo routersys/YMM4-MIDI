@@ -318,6 +318,30 @@ namespace MIDI
         }
     }
 
+    public class GpuSettings : INotifyPropertyChanged
+    {
+        private bool _enableGpuSynthesis;
+        public bool EnableGpuSynthesis { get => _enableGpuSynthesis; set => SetField(ref _enableGpuSynthesis, value); }
+
+        private bool _enableGpuEqualizer;
+        public bool EnableGpuEqualizer { get => _enableGpuEqualizer; set => SetField(ref _enableGpuEqualizer, value); }
+
+        private bool _enableGpuEffectsChain;
+        public bool EnableGpuEffectsChain { get => _enableGpuEffectsChain; set => SetField(ref _enableGpuEffectsChain, value); }
+
+        private bool _enableGpuConvolutionReverb;
+        public bool EnableGpuConvolutionReverb { get => _enableGpuConvolutionReverb; set => SetField(ref _enableGpuConvolutionReverb, value); }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
+        }
+    }
+
     public class PerformanceSettings : INotifyPropertyChanged
     {
         private int _bufferSize = 1024;
@@ -334,6 +358,28 @@ namespace MIDI
 
         private double _initialSyncDurationSeconds = 15.0;
         public double InitialSyncDurationSeconds { get => _initialSyncDurationSeconds; set => SetField(ref _initialSyncDurationSeconds, value); }
+
+        private GpuSettings _gpu = new();
+        public GpuSettings GPU
+        {
+            get => _gpu;
+            set
+            {
+                if (_gpu != null) _gpu.PropertyChanged -= OnNestedPropertyChanged;
+                SetField(ref _gpu!, value ?? new GpuSettings());
+                if (_gpu != null) _gpu.PropertyChanged += OnNestedPropertyChanged;
+            }
+        }
+
+        public PerformanceSettings()
+        {
+            if (_gpu != null) _gpu.PropertyChanged += OnNestedPropertyChanged;
+        }
+
+        private void OnNestedPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GPU)));
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -598,7 +644,16 @@ namespace MIDI
         public bool EnableEqualizer { get => _enableEqualizer; set => SetField(ref _enableEqualizer, value); }
 
         private EqualizerSettings _eq = new();
-        public EqualizerSettings EQ { get => _eq; set => SetField(ref _eq, value); }
+        public EqualizerSettings EQ
+        {
+            get => _eq;
+            set
+            {
+                if (_eq != null) _eq.PropertyChanged -= OnNestedPropertyChanged;
+                SetField(ref _eq!, value ?? new EqualizerSettings());
+                if (_eq != null) _eq.PropertyChanged += OnNestedPropertyChanged;
+            }
+        }
 
         private bool _enableConvolutionReverb;
         public bool EnableConvolutionReverb { get => _enableConvolutionReverb; set => SetField(ref _enableConvolutionReverb, value); }
@@ -635,6 +690,16 @@ namespace MIDI
 
         private bool _enableDCOffsetRemoval = true;
         public bool EnableDCOffsetRemoval { get => _enableDCOffsetRemoval; set => SetField(ref _enableDCOffsetRemoval, value); }
+
+        public EffectsSettings()
+        {
+            if (_eq != null) _eq.PropertyChanged += OnNestedPropertyChanged;
+        }
+
+        private void OnNestedPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EQ)));
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -696,7 +761,26 @@ namespace MIDI
         public float Volume { get => _volume; set => SetField(ref _volume, value); }
 
         private FilterSettings _filter = new();
-        public FilterSettings Filter { get => _filter; set => SetField(ref _filter, value); }
+        public FilterSettings Filter
+        {
+            get => _filter;
+            set
+            {
+                if (_filter != null) _filter.PropertyChanged -= OnNestedPropertyChanged;
+                SetField(ref _filter!, value ?? new FilterSettings());
+                if (_filter != null) _filter.PropertyChanged += OnNestedPropertyChanged;
+            }
+        }
+
+        public InstrumentPreset()
+        {
+            if (_filter != null) _filter.PropertyChanged += OnNestedPropertyChanged;
+        }
+
+        private void OnNestedPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Filter)));
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -732,7 +816,26 @@ namespace MIDI
         public float Volume { get => _volume; set => SetField(ref _volume, value); }
 
         private FilterSettings _filter = new();
-        public FilterSettings Filter { get => _filter; set => SetField(ref _filter, value); }
+        public FilterSettings Filter
+        {
+            get => _filter;
+            set
+            {
+                if (_filter != null) _filter.PropertyChanged -= OnNestedPropertyChanged;
+                SetField(ref _filter!, value ?? new FilterSettings());
+                if (_filter != null) _filter.PropertyChanged += OnNestedPropertyChanged;
+            }
+        }
+
+        public CustomInstrument()
+        {
+            if (_filter != null) _filter.PropertyChanged += OnNestedPropertyChanged;
+        }
+
+        private void OnNestedPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Filter)));
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
