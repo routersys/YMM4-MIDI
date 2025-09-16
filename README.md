@@ -76,6 +76,8 @@ YMM4（YukkuriMovieMaker v4）で、MIDIファイル（`.mid`, `.midi`）を音�
 - **sfizz**: BSD 2-Clause License
   - The SFZ rendering engine.
 - **ComputeSharp** MIT License
+- **マテリアル シンボル**
+  - Apache License バージョン 2.0
 
 ---
 
