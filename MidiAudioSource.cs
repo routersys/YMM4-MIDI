@@ -47,7 +47,7 @@ namespace MIDI
         private MidiFileSequencer? _soundFontSequencer;
         private readonly MeltySynth.MidiFile? _soundFontMidiFile;
 
-        private readonly GraphicsDevice? realtimeGpuDevice;
+        private readonly GraphicsDevice? gpuDevice;
 
 
         public MidiAudioSource(string filePath, MidiConfiguration? configuration = null)
@@ -83,22 +83,22 @@ namespace MIDI
 
             _renderMethod = DetermineRenderMethod();
 
+            if (config.Performance.RenderingMode == RenderingMode.HighQualityGPU || config.Performance.RenderingMode == RenderingMode.RealtimeGPU)
+            {
+                try
+                {
+                    gpuDevice = GraphicsDevice.GetDefault();
+                }
+                catch (Exception ex)
+                {
+                    LogError($"GPUデバイスの取得に失敗しました: {ex.Message}", ex);
+                }
+            }
+
             bool isRealtime = config.Performance.RenderingMode == RenderingMode.RealtimeCPU || config.Performance.RenderingMode == RenderingMode.RealtimeGPU;
 
             if (isRealtime)
             {
-                if (config.Performance.RenderingMode == RenderingMode.RealtimeGPU && _renderMethod == RenderMethod.Synthesis)
-                {
-                    try
-                    {
-                        realtimeGpuDevice = GraphicsDevice.GetDefault();
-                    }
-                    catch (Exception ex)
-                    {
-                        LogError($"GPUデバイスの取得に失敗しました: {ex.Message}", ex);
-                    }
-                }
-
                 PrepareRealtimeRendering(out _sfzState, out _soundFontSynthesizer, out _soundFontMidiFile, out _soundFontSequencer);
                 this.loadingTask = Task.CompletedTask;
                 return;
@@ -344,7 +344,7 @@ namespace MIDI
 
                 if (config.Effects.EnableEffects)
                 {
-                    if (!effectsProcessor.ApplyAudioEnhancements(audioDataSpan))
+                    if (!effectsProcessor.ApplyAudioEnhancements(audioDataSpan, gpuDevice))
                     {
                         NotifyGpuFallbackToCpu();
                     }
@@ -388,9 +388,9 @@ namespace MIDI
             var currentInstrumentSettings = synthesisEngine.InitializeInstrumentSettings();
 
             bool gpuSucceeded = true;
-            if (config.Performance.RenderingMode == RenderingMode.HighQualityGPU && GraphicsDevice.GetDefault() != null)
+            if (config.Performance.RenderingMode == RenderingMode.HighQualityGPU && gpuDevice != null)
             {
-                if (!audioRenderer.RenderAudioGpu(bufferSpan, noteEvents, channelStates, currentInstrumentSettings))
+                if (!audioRenderer.RenderAudioGpu(gpuDevice, bufferSpan, noteEvents, channelStates, currentInstrumentSettings))
                 {
                     gpuSucceeded = false;
                     audioRenderer.RenderAudioHighQuality(buffer, noteEvents, channelStates, currentInstrumentSettings);
@@ -412,7 +412,7 @@ namespace MIDI
 
             if (config.Effects.EnableEffects)
             {
-                if (!effectsProcessor.ApplyAudioEnhancements(bufferSpan))
+                if (!effectsProcessor.ApplyAudioEnhancements(bufferSpan, gpuDevice))
                 {
                     NotifyGpuFallbackToCpu();
                 }
@@ -514,9 +514,9 @@ namespace MIDI
                     var channelStates = GetChannelStatesAtSample(startSample);
                     var notesInChunk = allNoteEvents.Where(n => n.StartSample < endSample && n.EndSample > startSample).ToList();
 
-                    if (config.Performance.RenderingMode == RenderingMode.RealtimeGPU && realtimeGpuDevice != null)
+                    if (config.Performance.RenderingMode == RenderingMode.RealtimeGPU && gpuDevice != null)
                     {
-                        if (!audioRenderer.RenderAudioGpuRealtime(realtimeGpuDevice, destBuffer, notesInChunk, channelStates, synthesisEngine.InitializeInstrumentSettings(), startSample))
+                        if (!audioRenderer.RenderAudioGpuRealtime(gpuDevice, destBuffer, notesInChunk, channelStates, synthesisEngine.InitializeInstrumentSettings(), startSample))
                         {
                             NotifyGpuFallbackToCpu();
                             audioRenderer.RenderAudioStandard(destBuffer, notesInChunk, channelStates, startSample);
@@ -531,7 +531,7 @@ namespace MIDI
 
             if (config.Effects.EnableEffects)
             {
-                if (!effectsProcessor.ApplyAudioEnhancements(destBuffer))
+                if (!effectsProcessor.ApplyAudioEnhancements(destBuffer, gpuDevice))
                 {
                     NotifyGpuFallbackToCpu();
                 }
@@ -638,7 +638,7 @@ namespace MIDI
 
         public void Dispose()
         {
-            (realtimeGpuDevice as IDisposable)?.Dispose();
+            (gpuDevice as IDisposable)?.Dispose();
             _sfzState?.Dispose();
             effectsProcessor?.Dispose();
             GC.SuppressFinalize(this);

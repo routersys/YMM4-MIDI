@@ -81,7 +81,7 @@ namespace MIDI
             });
         }
 
-        public bool RenderAudioGpu(Span<float> buffer, List<EnhancedNoteEvent> noteEvents, Dictionary<int, ChannelState> channelStates, Dictionary<int, InstrumentSettings> instrumentSettings)
+        public bool RenderAudioGpu(GraphicsDevice device, Span<float> buffer, List<EnhancedNoteEvent> noteEvents, Dictionary<int, ChannelState> channelStates, Dictionary<int, InstrumentSettings> instrumentSettings)
         {
             try
             {
@@ -117,7 +117,6 @@ namespace MIDI
                     });
                 }
 
-                using var device = GraphicsDevice.GetDefault();
                 using var gpuBuffer = device.AllocateReadWriteBuffer<float>(buffer);
                 using var noteBuffer = device.AllocateReadOnlyBuffer(noteDataList.ToArray());
 
@@ -141,7 +140,7 @@ namespace MIDI
                 gpuBuffer.CopyTo(buffer);
                 return true;
             }
-            catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is NotSupportedException || ex is OutOfMemoryException)
+            catch (Exception ex) when (ex is ObjectDisposedException || ex is ArgumentOutOfRangeException || ex is NotSupportedException || ex is OutOfMemoryException)
             {
                 return false;
             }

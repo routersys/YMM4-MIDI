@@ -60,11 +60,10 @@ namespace MIDI
             return output;
         }
 
-        public bool ApplyAudioEnhancements(Span<float> buffer)
+        public bool ApplyAudioEnhancements(Span<float> buffer, GraphicsDevice? device)
         {
             if (!config.Effects.EnableEffects) return true;
 
-            using var device = GraphicsDevice.GetDefault();
             bool gpuUsed = false;
             bool gpuSucceeded = true;
 
