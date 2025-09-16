@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace MIDI
 {
@@ -20,6 +21,27 @@ namespace MIDI
             {
                 ".mid", ".midi", ".kar", ".rmi"
             };
+
+            InitializeDirectories();
+        }
+
+        private void InitializeDirectories()
+        {
+            try
+            {
+                var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                if (string.IsNullOrEmpty(assemblyLocation)) return;
+
+                var sfzPath = Path.Combine(assemblyLocation, configuration.SFZ.SfzSearchPath);
+                if (!Directory.Exists(sfzPath))
+                {
+                    Directory.CreateDirectory(sfzPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"ディレクトリの初期化中にエラーが発生しました: {ex.Message}");
+            }
         }
 
         public IAudioFileSource? CreateAudioFileSource(string filePath, int audioTrackIndex)

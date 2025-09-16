@@ -121,27 +121,37 @@ namespace MIDI
 
         private float[] RenderAudio(string filePath, TimeSpan? durationLimit)
         {
-            var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
-                                 throw new DirectoryNotFoundException();
-
-            if (config.SFZ.EnableSfz && config.SFZ.ProgramMaps.Any())
+            if (config.SFZ.EnableSfz)
             {
                 try
                 {
-                    return sfzProcessor.ProcessWithSfz(filePath, durationLimit);
+                    var sfzAudio = sfzProcessor.ProcessWithSfz(filePath, durationLimit);
+                    if (sfzAudio.Length > 0)
+                    {
+                        return sfzAudio;
+                    }
+                    LogError("SFZレンダリングが空のバッファを返しました。フォールバックします。");
                 }
                 catch (Exception ex)
                 {
-                    LogError($"SFZのレンダリングに失敗しました。: {ex.Message}", ex);
+                    LogError($"SFZのレンダリングに失敗しました。SoundFontまたは内蔵シンセにフォールバックします。: {ex.Message}", ex);
                 }
             }
 
             if (config.SoundFont.EnableSoundFont)
             {
+                var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new DirectoryNotFoundException();
                 var sf2Path = FindSoundFont(filePath, assemblyLocation);
                 if (sf2Path != null && File.Exists(sf2Path))
                 {
-                    return ProcessWithSoundFont(filePath, sf2Path, durationLimit);
+                    try
+                    {
+                        return ProcessWithSoundFont(filePath, sf2Path, durationLimit);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError($"SoundFontの処理中にエラーが発生しました。内蔵シンセにフォールバックします。: {ex.Message}", ex);
+                    }
                 }
             }
 

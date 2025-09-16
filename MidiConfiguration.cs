@@ -23,7 +23,8 @@ namespace MIDI
         public override object? SettingView => new MidiSettingsView();
 
         private static readonly string ConfigFileName = "MidiPluginConfig.json";
-        private static string ConfigPath => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", ConfigFileName);
+        private static string BaseDir => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+        private static string ConfigPath => Path.Combine(BaseDir, ConfigFileName);
 
         private AudioSettings _audio = new();
         public AudioSettings Audio
@@ -154,7 +155,6 @@ namespace MIDI
             try
             {
                 var jsonString = File.ReadAllText(ConfigPath);
-
                 var options = new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -164,51 +164,71 @@ namespace MIDI
                     PropertyNameCaseInsensitive = true
                 };
 
-                try
+                jsonString = UpgradeSettings(jsonString, options);
+
+                var loadedConfig = JsonSerializer.Deserialize<MidiConfiguration>(jsonString, options);
+                if (loadedConfig != null)
                 {
-                    var loadedConfig = JsonSerializer.Deserialize<MidiConfiguration>(jsonString, options);
-                    if (loadedConfig != null)
-                    {
-                        CopyFrom(loadedConfig);
-                    }
+                    CopyFrom(loadedConfig);
                 }
-                catch (JsonException)
+                else
                 {
-                    JsonNode? root = JsonNode.Parse(jsonString);
-                    if (root?["instrumentPresets"] is JsonObject presetsObject)
-                    {
-                        var presetsArray = new JsonArray();
-                        foreach (var prop in presetsObject)
-                        {
-                            if (prop.Value is JsonObject presetObj)
-                            {
-                                presetObj["name"] = prop.Key;
-                                presetsArray.Add(presetObj.DeepClone());
-                            }
-                        }
-                        root["instrumentPresets"] = presetsArray;
-                        jsonString = root.ToJsonString(new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
-                        var loadedConfig = JsonSerializer.Deserialize<MidiConfiguration>(jsonString, options);
-                        if (loadedConfig != null)
-                        {
-                            CopyFrom(loadedConfig);
-                        }
-                        Save();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw new JsonException("設定のデシリアライズに失敗しました。");
                 }
             }
             catch (Exception ex)
             {
-                LogError($"設定ファイル読み込みエラー: {ex.Message}");
-                var defaultConfig = new MidiConfiguration();
-                CopyFrom(defaultConfig);
+                LogError($"設定ファイルの読み込み中にエラーが発生しました: {ex.Message}");
+                BackupAndLoadDefault();
             }
         }
 
+        private string UpgradeSettings(string jsonString, JsonSerializerOptions options)
+        {
+            var root = JsonNode.Parse(jsonString);
+            if (root?["instrumentPresets"] is JsonObject presetsObject)
+            {
+                var presetsArray = new JsonArray();
+                foreach (var prop in presetsObject)
+                {
+                    if (prop.Value is JsonObject presetObj)
+                    {
+                        presetObj["name"] = prop.Key;
+                        presetsArray.Add(presetObj.DeepClone());
+                    }
+                }
+                root["instrumentPresets"] = presetsArray;
+                return root.ToJsonString(options);
+            }
+            return jsonString;
+        }
+
+        private void BackupAndLoadDefault()
+        {
+            try
+            {
+                if (File.Exists(ConfigPath))
+                {
+                    var backupDir = Path.Combine(BaseDir, "backup");
+                    Directory.CreateDirectory(backupDir);
+                    var timestamp = DateTime.Now.ToString("yyyy-MM-dd-HH.mm.ss");
+                    var backupFileName = $"{timestamp}.bak";
+                    var backupPath = Path.Combine(backupDir, backupFileName);
+
+                    File.Move(ConfigPath, backupPath);
+                    LogError($"破損した可能性のある設定ファイルを {backupPath} にバックアップしました。");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"設定ファイルのバックアップに失敗しました: {ex.Message}");
+            }
+
+            LogError("デフォルト設定をロードします。");
+            var defaultConfig = new MidiConfiguration();
+            CopyFrom(defaultConfig);
+            Save();
+        }
 
         private void CopyFrom(MidiConfiguration source)
         {

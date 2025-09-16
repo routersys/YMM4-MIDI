@@ -12,6 +12,7 @@ namespace MIDI
         private float[]? impulseResponse;
         private bool disposedValue;
         private const int GpuChunkSize = 1 << 18;
+        private const float DcOffsetAlpha = 0.995f;
 
         public EffectsProcessor(MidiConfiguration config, int sampleRate)
         {
@@ -63,7 +64,7 @@ namespace MIDI
         {
             if (!config.Effects.EnableEffects) return true;
 
-            var device = GraphicsDevice.GetDefault();
+            using var device = GraphicsDevice.GetDefault();
             bool gpuUsed = false;
             bool gpuSucceeded = true;
 
@@ -183,12 +184,11 @@ namespace MIDI
         {
             float lastIn = 0;
             float lastOut = 0;
-            const float alpha = 0.995f;
 
             for (int i = 0; i < buffer.Length; i++)
             {
                 float currentIn = buffer[i];
-                float currentOut = currentIn - lastIn + alpha * lastOut;
+                float currentOut = currentIn - lastIn + DcOffsetAlpha * lastOut;
                 buffer[i] = currentOut;
                 lastIn = currentIn;
                 lastOut = currentOut;

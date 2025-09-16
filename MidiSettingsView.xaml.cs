@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 
 namespace MIDI
 {
@@ -14,6 +16,17 @@ namespace MIDI
         {
             InitializeComponent();
             DataContext = new MidiSettingsViewModel();
+        }
+
+        private void DataGridRow_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is DataGridRow row && row.DataContext is SoundFontFileViewModel vm)
+            {
+                if (DataContext is MidiSettingsViewModel viewModel && viewModel.EditSoundFontRuleCommand.CanExecute(vm))
+                {
+                    viewModel.EditSoundFontRuleCommand.Execute(vm);
+                }
+            }
         }
     }
 
@@ -49,6 +62,19 @@ namespace MIDI
                 return new ObservableCollection<int>();
             }
             return new List<int>();
+        }
+    }
+
+    public class InverseBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return !(bool)value;
         }
     }
 }

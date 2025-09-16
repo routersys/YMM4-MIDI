@@ -63,30 +63,10 @@ namespace MIDI
             TrackIndex = trackIndex;
             StartTicks = noteOn.AbsoluteTime;
             EndTicks = noteOn.OffEvent.AbsoluteTime;
-            StartTime = TicksToTimeSpan(StartTicks, ticksPerQuarterNote, tempoMap);
-            EndTime = TicksToTimeSpan(EndTicks, ticksPerQuarterNote, tempoMap);
+            StartTime = MidiProcessor.TicksToTimeSpan(StartTicks, ticksPerQuarterNote, tempoMap);
+            EndTime = MidiProcessor.TicksToTimeSpan(EndTicks, ticksPerQuarterNote, tempoMap);
             StartSample = (long)(StartTime.TotalSeconds * sampleRate);
             EndSample = (long)(EndTime.TotalSeconds * sampleRate);
-        }
-
-        private static TimeSpan TicksToTimeSpan(long ticks, int ticksPerQuarterNote, List<TempoEvent> tempoMap)
-        {
-            double seconds = 0;
-            long lastTicks = 0;
-            double currentTempo = 500000.0;
-
-            foreach (var tempoEvent in tempoMap)
-            {
-                if (ticks < tempoEvent.AbsoluteTime) break;
-                long deltaTicks = tempoEvent.AbsoluteTime - lastTicks;
-                seconds += (deltaTicks / (double)ticksPerQuarterNote) * (currentTempo / 1000000.0);
-                currentTempo = tempoEvent.MicrosecondsPerQuarterNote;
-                lastTicks = tempoEvent.AbsoluteTime;
-            }
-
-            long remainingTicks = ticks - lastTicks;
-            seconds += (remainingTicks / (double)ticksPerQuarterNote) * (currentTempo / 1000000.0);
-            return TimeSpan.FromSeconds(seconds);
         }
     }
 
@@ -103,7 +83,7 @@ namespace MIDI
         public ControlEvent(ControlChangeEvent cc, int ticksPerQuarterNote, List<TempoEvent> tempoMap, int trackIndex)
         {
             Ticks = cc.AbsoluteTime;
-            Time = TicksToTimeSpan(Ticks, ticksPerQuarterNote, tempoMap);
+            Time = MidiProcessor.TicksToTimeSpan(Ticks, ticksPerQuarterNote, tempoMap);
             Channel = cc.Channel;
             TrackIndex = trackIndex;
             Type = ControlEventType.ControlChange;
@@ -114,7 +94,7 @@ namespace MIDI
         public ControlEvent(PitchWheelChangeEvent pw, int ticksPerQuarterNote, List<TempoEvent> tempoMap, int trackIndex)
         {
             Ticks = pw.AbsoluteTime;
-            Time = TicksToTimeSpan(Ticks, ticksPerQuarterNote, tempoMap);
+            Time = MidiProcessor.TicksToTimeSpan(Ticks, ticksPerQuarterNote, tempoMap);
             Channel = pw.Channel;
             TrackIndex = trackIndex;
             Type = ControlEventType.PitchWheel;
@@ -125,32 +105,12 @@ namespace MIDI
         public ControlEvent(PatchChangeEvent pc, int ticksPerQuarterNote, List<TempoEvent> tempoMap, int trackIndex)
         {
             Ticks = pc.AbsoluteTime;
-            Time = TicksToTimeSpan(Ticks, ticksPerQuarterNote, tempoMap);
+            Time = MidiProcessor.TicksToTimeSpan(Ticks, ticksPerQuarterNote, tempoMap);
             Channel = pc.Channel;
             TrackIndex = trackIndex;
             Type = ControlEventType.ProgramChange;
             Controller = -1;
             Value = pc.Patch;
-        }
-
-        private static TimeSpan TicksToTimeSpan(long ticks, int ticksPerQuarterNote, List<TempoEvent> tempoMap)
-        {
-            double seconds = 0;
-            long lastTicks = 0;
-            double currentTempo = 500000.0;
-
-            foreach (var tempoEvent in tempoMap)
-            {
-                if (ticks < tempoEvent.AbsoluteTime) break;
-                long deltaTicks = tempoEvent.AbsoluteTime - lastTicks;
-                seconds += (deltaTicks / (double)ticksPerQuarterNote) * (currentTempo / 1000000.0);
-                currentTempo = tempoEvent.MicrosecondsPerQuarterNote;
-                lastTicks = tempoEvent.AbsoluteTime;
-            }
-
-            long remainingTicks = ticks - lastTicks;
-            seconds += (remainingTicks / (double)ticksPerQuarterNote) * (currentTempo / 1000000.0);
-            return TimeSpan.FromSeconds(seconds);
         }
     }
 
