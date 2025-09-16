@@ -362,6 +362,18 @@ namespace MIDI
         }
     }
 
+    public enum RenderingMode
+    {
+        [Description("CPU (高品質)")]
+        HighQualityCPU,
+        [Description("GPU (高品質)")]
+        HighQualityGPU,
+        [Description("CPU (リアルタイム)")]
+        RealtimeCPU,
+        [Description("GPU (リアルタイム)")]
+        RealtimeGPU
+    }
+
     public class PerformanceSettings : INotifyPropertyChanged
     {
         private int _bufferSize = 1024;
@@ -378,6 +390,9 @@ namespace MIDI
 
         private double _initialSyncDurationSeconds = 15.0;
         public double InitialSyncDurationSeconds { get => _initialSyncDurationSeconds; set => SetField(ref _initialSyncDurationSeconds, value); }
+
+        private RenderingMode _renderingMode = RenderingMode.HighQualityCPU;
+        public RenderingMode RenderingMode { get => _renderingMode; set => SetField(ref _renderingMode, value); }
 
         private GpuSettings _gpu = new();
         public GpuSettings GPU

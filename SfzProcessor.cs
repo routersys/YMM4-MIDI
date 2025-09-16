@@ -9,6 +9,36 @@ using NAudio.Midi;
 
 namespace MIDI
 {
+    public class SfzRealtimeState : IDisposable
+    {
+        public List<IntPtr> AllSynths { get; } = new();
+        public Dictionary<int, IntPtr> ProgramToSynth { get; } = new();
+        public IntPtr[] ChannelToSynth { get; } = new IntPtr[16];
+        public List<UniversalMidiEvent> AllEvents { get; set; } = new();
+        public int CurrentEventIndex { get; set; } = 0;
+        private bool disposedValue;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                foreach (var synth in AllSynths)
+                {
+                    SfizzPInvoke.sfizz_free(synth);
+                }
+                AllSynths.Clear();
+                ProgramToSynth.Clear();
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+    }
+
     public class SfzProcessor
     {
         private readonly MidiConfiguration config;
@@ -25,6 +55,35 @@ namespace MIDI
             var midiFile = new NAudio.Midi.MidiFile(midiFilePath, false);
             var tempoMap = MidiProcessor.ExtractTempoMap(midiFile, config);
             var allEvents = MidiProcessor.ExtractAllMidiEvents(midiFile, midiFile.DeltaTicksPerQuarterNote, tempoMap, sampleRate);
+
+            using var state = Initialize(allEvents);
+            if (!state.AllSynths.Any())
+            {
+                throw new InvalidOperationException("有効なSFZファイルが一つも見つかりませんでした。");
+            }
+
+            var renderDuration = durationLimit ??
+                                MidiProcessor.TicksToTimeSpan(allEvents.LastOrDefault()?.Ticks ?? 0,
+                                                            midiFile.DeltaTicksPerQuarterNote, tempoMap)
+                                            .Add(TimeSpan.FromSeconds(2.0));
+
+            var totalSamples = (long)(renderDuration.TotalSeconds * sampleRate);
+            var outputBuffer = new float[totalSamples * 2];
+
+            RenderRealtimeChunk(state, outputBuffer, 0);
+
+            if (config.Audio.EnableNormalization)
+            {
+                var effectsProcessor = new EffectsProcessor(config, sampleRate);
+                effectsProcessor.NormalizeAudio(outputBuffer);
+            }
+
+            return outputBuffer;
+        }
+
+        public SfzRealtimeState Initialize(List<UniversalMidiEvent> allEvents)
+        {
+            var state = new SfzRealtimeState { AllEvents = allEvents };
             var usedPrograms = allEvents.Where(e => e.Type == UniversalMidiEventType.PatchChange)
                                       .Select(e => e.Data1)
                                       .Distinct()
@@ -35,29 +94,128 @@ namespace MIDI
                                  throw new DirectoryNotFoundException();
             var sfzSearchDir = Path.Combine(assemblyLocation, config.SFZ.SfzSearchPath);
 
-            var programToSynth = new Dictionary<int, IntPtr>();
             var sfzPathToSynth = new Dictionary<string, IntPtr>();
-            var allSynths = new List<IntPtr>();
+
+            LoadSfzSynths(usedPrograms, sfzSearchDir, state.ProgramToSynth, sfzPathToSynth, state.AllSynths);
+
+            var defaultSynth = state.ProgramToSynth.TryGetValue(0, out var s) ? s : state.AllSynths.FirstOrDefault();
+            for (int i = 0; i < 16; i++)
+            {
+                state.ChannelToSynth[i] = defaultSynth;
+            }
+
+            return state;
+        }
+
+        public void Seek(SfzRealtimeState state, long targetSample)
+        {
+            foreach (var synth in state.AllSynths)
+            {
+                SfizzPInvoke.sfizz_all_sounds_off(synth);
+            }
+
+            var defaultSynth = state.ProgramToSynth.TryGetValue(0, out var s) ? s : state.AllSynths.FirstOrDefault();
+            for (int i = 0; i < 16; i++)
+            {
+                state.ChannelToSynth[i] = defaultSynth;
+            }
+
+            state.CurrentEventIndex = 0;
+
+            ProcessEventsForBlock(state, 0, (int)targetSample, true);
+        }
+
+        public void RenderRealtimeChunk(SfzRealtimeState state, Span<float> outputBuffer, long startSample)
+        {
+            outputBuffer.Clear();
+            if (!state.AllSynths.Any()) return;
+
+            var numSamples = outputBuffer.Length / 2;
+            var samplesPerBlock = config.Performance.BufferSize;
+            var leftBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
+            var rightBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
+            var mixLeftBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
+            var mixRightBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
+
+            var leftHandle = GCHandle.Alloc(leftBlock, GCHandleType.Pinned);
+            var rightHandle = GCHandle.Alloc(rightBlock, GCHandleType.Pinned);
+            var pointers = new IntPtr[] { leftHandle.AddrOfPinnedObject(), rightHandle.AddrOfPinnedObject() };
+            var pointersHandle = GCHandle.Alloc(pointers, GCHandleType.Pinned);
+            var pointersPtr = pointersHandle.AddrOfPinnedObject();
 
             try
             {
-                LoadSfzSynths(usedPrograms, sfzSearchDir, programToSynth, sfzPathToSynth, allSynths);
-
-                if (!allSynths.Any())
+                for (long framePos = 0; framePos < numSamples; framePos += samplesPerBlock)
                 {
-                    throw new InvalidOperationException("有効なSFZファイルが一つも見つかりませんでした。");
-                }
+                    long currentAbsoluteSample = startSample + framePos;
+                    var currentBlockSize = (int)Math.Min(samplesPerBlock, numSamples - framePos);
 
-                return RenderSfzAudio(allEvents, allSynths, programToSynth, durationLimit, midiFile, tempoMap);
+                    ProcessEventsForBlock(state, currentAbsoluteSample, currentBlockSize, false);
+
+                    mixLeftBlock.AsSpan(0, currentBlockSize).Clear();
+                    mixRightBlock.AsSpan(0, currentBlockSize).Clear();
+
+                    RenderSynthsForBlock(state.AllSynths, currentBlockSize, pointersPtr, mixLeftBlock, mixRightBlock, leftBlock, rightBlock);
+
+                    CopyBlockToOutput(outputBuffer, framePos, numSamples, currentBlockSize, mixLeftBlock, mixRightBlock);
+                }
             }
             finally
             {
-                foreach (var synth in allSynths)
-                {
-                    SfizzPInvoke.sfizz_free(synth);
-                }
+                ArrayPool<float>.Shared.Return(leftBlock);
+                ArrayPool<float>.Shared.Return(rightBlock);
+                ArrayPool<float>.Shared.Return(mixLeftBlock);
+                ArrayPool<float>.Shared.Return(mixRightBlock);
+                leftHandle.Free();
+                rightHandle.Free();
+                pointersHandle.Free();
             }
         }
+
+        private void ProcessEventsForBlock(SfzRealtimeState state, long startSample, int numSamples, bool isSeeking)
+        {
+            long endSample = startSample + numSamples;
+
+            while (state.CurrentEventIndex < state.AllEvents.Count &&
+                   state.AllEvents[state.CurrentEventIndex].SampleTime < endSample)
+            {
+                var evt = state.AllEvents[state.CurrentEventIndex];
+                if (evt.Channel < 1 || evt.Channel > 16)
+                {
+                    state.CurrentEventIndex++;
+                    continue;
+                }
+
+                int frameDelay = (int)(evt.SampleTime - startSample);
+                frameDelay = Math.Max(0, Math.Min(frameDelay, numSamples - 1));
+
+                var targetSynth = state.ChannelToSynth[evt.Channel - 1];
+
+                switch (evt.Type)
+                {
+                    case UniversalMidiEventType.NoteOn:
+                        if (!isSeeking) SfizzPInvoke.sfizz_note_on(targetSynth, frameDelay, evt.Data1, evt.Data2);
+                        break;
+                    case UniversalMidiEventType.NoteOff:
+                        if (!isSeeking) SfizzPInvoke.sfizz_note_off(targetSynth, frameDelay, evt.Data1, evt.Data2);
+                        break;
+                    case UniversalMidiEventType.ControlChange:
+                        SfizzPInvoke.sfizz_cc(targetSynth, frameDelay, evt.Data1, evt.Data2);
+                        break;
+                    case UniversalMidiEventType.PitchWheel:
+                        SfizzPInvoke.sfizz_pitch_wheel(targetSynth, frameDelay, evt.Data1 | (evt.Data2 << 7));
+                        break;
+                    case UniversalMidiEventType.PatchChange:
+                        if (state.ProgramToSynth.TryGetValue(evt.Data1, out var newSynth))
+                        {
+                            state.ChannelToSynth[evt.Channel - 1] = newSynth;
+                        }
+                        break;
+                }
+                state.CurrentEventIndex++;
+            }
+        }
+
 
         private void LoadSfzSynths(HashSet<int> usedPrograms, string sfzSearchDir,
                                  Dictionary<int, IntPtr> programToSynth,
@@ -95,128 +253,6 @@ namespace MIDI
                     }
                 }
             }
-        }
-
-        private float[] RenderSfzAudio(List<UniversalMidiEvent> allEvents, List<IntPtr> allSynths,
-                                     Dictionary<int, IntPtr> programToSynth, TimeSpan? durationLimit,
-                                     NAudio.Midi.MidiFile midiFile, List<TempoEvent> tempoMap)
-        {
-            var renderDuration = durationLimit ??
-                                MidiProcessor.TicksToTimeSpan(allEvents.LastOrDefault()?.Ticks ?? 0,
-                                                            midiFile.DeltaTicksPerQuarterNote, tempoMap)
-                                            .Add(TimeSpan.FromSeconds(2.0));
-
-            var totalSamples = (long)(renderDuration.TotalSeconds * sampleRate);
-            var outputBuffer = ArrayPool<float>.Shared.Rent((int)(totalSamples * 2));
-            var outputSpan = outputBuffer.AsSpan(0, (int)(totalSamples * 2));
-            outputSpan.Clear();
-
-            var channelToSynth = new IntPtr[16];
-            var defaultSynth = programToSynth.TryGetValue(0, out var s) ? s : allSynths.First();
-            for (int i = 0; i < 16; i++)
-                channelToSynth[i] = defaultSynth;
-
-            int currentEventIndex = 0;
-            var samplesPerBlock = config.Performance.BufferSize;
-
-            var leftBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
-            var rightBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
-            var mixLeftBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
-            var mixRightBlock = ArrayPool<float>.Shared.Rent(samplesPerBlock);
-
-            var leftHandle = GCHandle.Alloc(leftBlock, GCHandleType.Pinned);
-            var rightHandle = GCHandle.Alloc(rightBlock, GCHandleType.Pinned);
-            var pointers = new IntPtr[] { leftHandle.AddrOfPinnedObject(), rightHandle.AddrOfPinnedObject() };
-            var pointersHandle = GCHandle.Alloc(pointers, GCHandleType.Pinned);
-            var pointersPtr = pointersHandle.AddrOfPinnedObject();
-
-            try
-            {
-                ProcessSfzBlocks(allEvents, totalSamples, outputSpan, channelToSynth,
-                               programToSynth, allSynths, currentEventIndex, samplesPerBlock,
-                               mixLeftBlock, mixRightBlock, pointersPtr, leftBlock, rightBlock);
-
-                if (config.Audio.EnableNormalization)
-                {
-                    var effectsProcessor = new EffectsProcessor(config, sampleRate);
-                    effectsProcessor.NormalizeAudio(outputSpan);
-                }
-
-                return outputSpan.ToArray();
-            }
-            finally
-            {
-                ArrayPool<float>.Shared.Return(outputBuffer);
-                ArrayPool<float>.Shared.Return(leftBlock);
-                ArrayPool<float>.Shared.Return(rightBlock);
-                ArrayPool<float>.Shared.Return(mixLeftBlock);
-                ArrayPool<float>.Shared.Return(mixRightBlock);
-                leftHandle.Free();
-                rightHandle.Free();
-                pointersHandle.Free();
-            }
-        }
-
-        private void ProcessSfzBlocks(List<UniversalMidiEvent> allEvents, long totalSamples, Span<float> outputBuffer,
-                                    IntPtr[] channelToSynth, Dictionary<int, IntPtr> programToSynth,
-                                    List<IntPtr> allSynths, int currentEventIndex, int samplesPerBlock,
-                                    float[] mixLeftBlock, float[] mixRightBlock, IntPtr pointersPtr,
-                                    float[] leftBlock, float[] rightBlock)
-        {
-            var mixLeftSpan = mixLeftBlock.AsSpan(0, samplesPerBlock);
-            var mixRightSpan = mixRightBlock.AsSpan(0, samplesPerBlock);
-
-            for (long framePos = 0; framePos < totalSamples; framePos += samplesPerBlock)
-            {
-                currentEventIndex = ProcessEventsForBlock(allEvents, framePos, samplesPerBlock,
-                                                        currentEventIndex, channelToSynth, programToSynth);
-
-                mixLeftSpan.Clear();
-                mixRightSpan.Clear();
-
-                RenderSynthsForBlock(allSynths, samplesPerBlock, pointersPtr, mixLeftBlock, mixRightBlock, leftBlock, rightBlock);
-
-                CopyBlockToOutput(outputBuffer, framePos, totalSamples, samplesPerBlock, mixLeftSpan, mixRightSpan);
-            }
-        }
-
-        private int ProcessEventsForBlock(List<UniversalMidiEvent> allEvents, long framePos, int samplesPerBlock,
-                                        int currentEventIndex, IntPtr[] channelToSynth,
-                                        Dictionary<int, IntPtr> programToSynth)
-        {
-            while (currentEventIndex < allEvents.Count &&
-                   allEvents[currentEventIndex].SampleTime < framePos + samplesPerBlock)
-            {
-                var evt = allEvents[currentEventIndex];
-                int frameDelay = (int)(evt.SampleTime - framePos);
-                frameDelay = Math.Max(0, Math.Min(frameDelay, samplesPerBlock - 1));
-
-                var targetSynth = channelToSynth[evt.Channel - 1];
-
-                switch (evt.Type)
-                {
-                    case UniversalMidiEventType.NoteOn:
-                        SfizzPInvoke.sfizz_note_on(targetSynth, frameDelay, evt.Data1, evt.Data2);
-                        break;
-                    case UniversalMidiEventType.NoteOff:
-                        SfizzPInvoke.sfizz_note_off(targetSynth, frameDelay, evt.Data1, evt.Data2);
-                        break;
-                    case UniversalMidiEventType.ControlChange:
-                        SfizzPInvoke.sfizz_cc(targetSynth, frameDelay, evt.Data1, evt.Data2);
-                        break;
-                    case UniversalMidiEventType.PitchWheel:
-                        SfizzPInvoke.sfizz_pitch_wheel(targetSynth, frameDelay, evt.Data1 | (evt.Data2 << 7));
-                        break;
-                    case UniversalMidiEventType.PatchChange:
-                        if (programToSynth.TryGetValue(evt.Data1, out var newSynth))
-                        {
-                            channelToSynth[evt.Channel - 1] = newSynth;
-                        }
-                        break;
-                }
-                currentEventIndex++;
-            }
-            return currentEventIndex;
         }
 
         private void RenderSynthsForBlock(List<IntPtr> allSynths, int samplesPerBlock, IntPtr pointersPtr,

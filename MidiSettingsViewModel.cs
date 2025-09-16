@@ -95,8 +95,22 @@ namespace MIDI
 
             Settings.SFZ.ProgramMaps.CollectionChanged += (s, e) => RefreshAllFiles();
             Settings.SoundFont.Rules.CollectionChanged += (s, e) => RefreshAllFiles();
+            Settings.Performance.GPU.PropertyChanged += OnGpuSettingsChanged;
 
             _ = CheckForUpdates();
+        }
+
+        private void OnGpuSettingsChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Settings.Performance.GPU.EnableGpuSynthesis))
+            {
+                if (!Settings.Performance.GPU.EnableGpuSynthesis &&
+                    (Settings.Performance.RenderingMode == RenderingMode.HighQualityGPU ||
+                     Settings.Performance.RenderingMode == RenderingMode.RealtimeGPU))
+                {
+                    Settings.Performance.RenderingMode = RenderingMode.HighQualityCPU;
+                }
+            }
         }
 
         private async Task CheckForUpdates()

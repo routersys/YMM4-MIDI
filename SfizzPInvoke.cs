@@ -40,6 +40,9 @@ namespace MIDI
         internal static extern void sfizz_pitch_wheel(IntPtr synth, int delay, int pitch);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void sfizz_all_sounds_off(IntPtr synth);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void sfizz_render_block(IntPtr synth, IntPtr stero_out_buffer, int num_channels, int num_frames);
     }
 }

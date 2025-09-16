@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -27,6 +29,25 @@ namespace MIDI
                     viewModel.EditSoundFontRuleCommand.Execute(vm);
                 }
             }
+        }
+    }
+
+    public class EnumDescriptionConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return string.Empty;
+            var type = value.GetType();
+            if (!type.IsEnum) return value.ToString()!;
+
+            var member = type.GetMember(value.ToString()!).FirstOrDefault();
+            var description = member?.GetCustomAttribute<DescriptionAttribute>()?.Description ?? value.ToString()!;
+            return description;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
         }
     }
 

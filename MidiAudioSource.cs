@@ -10,11 +10,14 @@ using MeltySynth;
 using NAudio.Midi;
 using System.Threading;
 using System.Buffers;
+using ComputeSharp;
 
 namespace MIDI
 {
     public class MidiAudioSource : IAudioFileSource
     {
+        private enum RenderMethod { Synthesis, SoundFont, Sfz }
+
         private static readonly ConcurrentDictionary<string, (float[] audioBuffer, TimeSpan duration, int sampleRate)> audioCache = new();
         private static bool hasNotifiedGpuError = false;
 
@@ -27,23 +30,35 @@ namespace MIDI
         private long position = 0;
         private float[]? audioBuffer;
         private readonly Task loadingTask;
-        private Dictionary<int, InstrumentSettings>? instrumentSettings;
         private readonly MidiConfiguration config;
         private readonly SynthesisEngine synthesisEngine;
         private readonly AudioRenderer audioRenderer;
         private readonly EffectsProcessor effectsProcessor;
         private readonly SfzProcessor sfzProcessor;
+        private readonly string midiFilePath;
+
+        private readonly RenderMethod _renderMethod;
+        private List<EnhancedNoteEvent>? allNoteEvents;
+        private List<ControlEvent>? allControlEvents;
+
+        private readonly SfzRealtimeState? _sfzState;
+
+        private Synthesizer? _soundFontSynthesizer;
+        private MidiFileSequencer? _soundFontSequencer;
+        private readonly MeltySynth.MidiFile? _soundFontMidiFile;
+
+        private readonly GraphicsDevice? realtimeGpuDevice;
+
 
         public MidiAudioSource(string filePath, MidiConfiguration? configuration = null)
         {
+            this.midiFilePath = filePath;
             config = configuration ?? MidiConfiguration.Default;
             sampleRate = config.Audio.SampleRate;
             synthesisEngine = new SynthesisEngine(config, sampleRate);
             effectsProcessor = new EffectsProcessor(config, sampleRate);
             audioRenderer = new AudioRenderer(config, sampleRate);
             sfzProcessor = new SfzProcessor(config, sampleRate);
-
-            instrumentSettings = synthesisEngine.InitializeInstrumentSettings();
 
             if (audioCache.TryGetValue(filePath, out var cachedData) && cachedData.sampleRate == this.sampleRate)
             {
@@ -63,6 +78,29 @@ namespace MIDI
                 LogError($"MIDIのDuration読み込み中にエラーが発生しました: {ex.Message}", ex);
                 this.Duration = TimeSpan.Zero;
                 this.loadingTask = Task.FromException(ex);
+                return;
+            }
+
+            _renderMethod = DetermineRenderMethod();
+
+            bool isRealtime = config.Performance.RenderingMode == RenderingMode.RealtimeCPU || config.Performance.RenderingMode == RenderingMode.RealtimeGPU;
+
+            if (isRealtime)
+            {
+                if (config.Performance.RenderingMode == RenderingMode.RealtimeGPU && _renderMethod == RenderMethod.Synthesis)
+                {
+                    try
+                    {
+                        realtimeGpuDevice = GraphicsDevice.GetDefault();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError($"GPUデバイスの取得に失敗しました: {ex.Message}", ex);
+                    }
+                }
+
+                PrepareRealtimeRendering(out _sfzState, out _soundFontSynthesizer, out _soundFontMidiFile, out _soundFontSequencer);
+                this.loadingTask = Task.CompletedTask;
                 return;
             }
 
@@ -86,6 +124,58 @@ namespace MIDI
 
             this.loadingTask = Task.Run(() => LoadFullAudioAsync(filePath));
         }
+
+        private RenderMethod DetermineRenderMethod()
+        {
+            if (config.SFZ.EnableSfz)
+            {
+                return RenderMethod.Sfz;
+            }
+            if (config.SoundFont.EnableSoundFont && FindSoundFont(midiFilePath, GetAssemblyLocation()) != null)
+            {
+                return RenderMethod.SoundFont;
+            }
+            return RenderMethod.Synthesis;
+        }
+
+        private void PrepareRealtimeRendering(out SfzRealtimeState? sfzState, out Synthesizer? sfSynthesizer, out MeltySynth.MidiFile? sfMidiFile, out MidiFileSequencer? sfSequencer)
+        {
+            sfzState = null;
+            sfSynthesizer = null;
+            sfMidiFile = null;
+            sfSequencer = null;
+
+            try
+            {
+                var naudioMidiFile = new NAudio.Midi.MidiFile(midiFilePath, false);
+                var tempoMap = MidiProcessor.ExtractTempoMap(naudioMidiFile, config);
+                allNoteEvents = MidiProcessor.ExtractNoteEvents(naudioMidiFile, naudioMidiFile.DeltaTicksPerQuarterNote, tempoMap, config, sampleRate);
+                allControlEvents = MidiProcessor.ExtractControlEvents(naudioMidiFile, naudioMidiFile.DeltaTicksPerQuarterNote, tempoMap, config);
+
+                switch (_renderMethod)
+                {
+                    case RenderMethod.Sfz:
+                        var allUniversalMidiEvents = MidiProcessor.ExtractAllMidiEvents(naudioMidiFile, naudioMidiFile.DeltaTicksPerQuarterNote, tempoMap, sampleRate);
+                        sfzState = sfzProcessor.Initialize(allUniversalMidiEvents);
+                        break;
+                    case RenderMethod.SoundFont:
+                        var sf2Path = FindSoundFont(midiFilePath, GetAssemblyLocation());
+                        if (sf2Path != null)
+                        {
+                            sfSynthesizer = new Synthesizer(sf2Path, sampleRate);
+                            sfMidiFile = new MeltySynth.MidiFile(midiFilePath);
+                            sfSequencer = new MidiFileSequencer(sfSynthesizer);
+                            sfSequencer.Play(sfMidiFile, false);
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"リアルタイムレンダリングの準備中にエラーが発生しました: {ex.Message}", ex);
+            }
+        }
+
 
         private void RenderInitialChunk(string filePath)
         {
@@ -121,42 +211,39 @@ namespace MIDI
 
         private float[] RenderAudio(string filePath, TimeSpan? durationLimit)
         {
-            if (config.SFZ.EnableSfz)
+            switch (_renderMethod)
             {
-                try
-                {
-                    var sfzAudio = sfzProcessor.ProcessWithSfz(filePath, durationLimit);
-                    if (sfzAudio.Length > 0)
-                    {
-                        return sfzAudio;
-                    }
-                    LogError("SFZレンダリングが空のバッファを返しました。フォールバックします。");
-                }
-                catch (Exception ex)
-                {
-                    LogError($"SFZのレンダリングに失敗しました。SoundFontまたは内蔵シンセにフォールバックします。: {ex.Message}", ex);
-                }
-            }
-
-            if (config.SoundFont.EnableSoundFont)
-            {
-                var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new DirectoryNotFoundException();
-                var sf2Path = FindSoundFont(filePath, assemblyLocation);
-                if (sf2Path != null && File.Exists(sf2Path))
-                {
+                case RenderMethod.Sfz:
                     try
                     {
-                        return ProcessWithSoundFont(filePath, sf2Path, durationLimit);
+                        var sfzAudio = sfzProcessor.ProcessWithSfz(filePath, durationLimit);
+                        if (sfzAudio.Length > 0) return sfzAudio;
+                        LogError("SFZレンダリングが空のバッファを返しました。フォールバックします。");
                     }
                     catch (Exception ex)
                     {
-                        LogError($"SoundFontの処理中にエラーが発生しました。内蔵シンセにフォールバックします。: {ex.Message}", ex);
+                        LogError($"SFZのレンダリングに失敗しました。SoundFontまたは内蔵シンセにフォールバックします。: {ex.Message}", ex);
                     }
-                }
+                    break;
+                case RenderMethod.SoundFont:
+                    var sf2Path = FindSoundFont(filePath, GetAssemblyLocation());
+                    if (sf2Path != null)
+                    {
+                        try
+                        {
+                            return ProcessWithSoundFont(filePath, sf2Path, durationLimit);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogError($"SoundFontの処理中にエラーが発生しました。内蔵シンセにフォールバックします。: {ex.Message}", ex);
+                        }
+                    }
+                    break;
             }
-
             return ProcessWithSynthesis(filePath, durationLimit);
         }
+
+        private static string GetAssemblyLocation() => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new DirectoryNotFoundException();
 
         private string? FindSoundFont(string midiFilePath, string assemblyLocation)
         {
@@ -165,9 +252,10 @@ namespace MIDI
 
             if (!Directory.Exists(userSf2Directory))
             {
-                Directory.CreateDirectory(userSf2Directory);
+                try { Directory.CreateDirectory(userSf2Directory); } catch { }
             }
-            var allUserSf2Files = Directory.GetFiles(userSf2Directory, "*.sf2", SearchOption.AllDirectories);
+
+            var allUserSf2Files = Directory.Exists(userSf2Directory) ? Directory.GetFiles(userSf2Directory, "*.sf2", SearchOption.AllDirectories) : Array.Empty<string>();
 
             var meltyMidiFile = new MeltySynth.MidiFile(midiFilePath);
             var durationSeconds = meltyMidiFile.Length.TotalSeconds;
@@ -273,12 +361,12 @@ namespace MIDI
 
         private float[] ProcessWithSynthesis(string filePath, TimeSpan? durationLimit)
         {
-            var midiFile = new NAudio.Midi.MidiFile(filePath, false);
-            var ticksPerQuarterNote = midiFile.DeltaTicksPerQuarterNote;
+            var naudioMidiFile = new NAudio.Midi.MidiFile(filePath, false);
+            var ticksPerQuarterNote = naudioMidiFile.DeltaTicksPerQuarterNote;
 
-            var tempoMap = MidiProcessor.ExtractTempoMap(midiFile, config);
-            var noteEvents = MidiProcessor.ExtractNoteEvents(midiFile, ticksPerQuarterNote, tempoMap, config, sampleRate);
-            var controlEvents = MidiProcessor.ExtractControlEvents(midiFile, ticksPerQuarterNote, tempoMap, config);
+            var tempoMap = MidiProcessor.ExtractTempoMap(naudioMidiFile, config);
+            var noteEvents = MidiProcessor.ExtractNoteEvents(naudioMidiFile, ticksPerQuarterNote, tempoMap, config, sampleRate);
+            var controlEvents = MidiProcessor.ExtractControlEvents(naudioMidiFile, ticksPerQuarterNote, tempoMap, config);
 
             long totalTicks = 0;
             if (noteEvents.Any()) totalTicks = Math.Max(totalTicks, noteEvents.Max(e => e.EndTicks));
@@ -297,10 +385,10 @@ namespace MIDI
             }
             MidiProcessor.ApplyControlEvents(controlEvents, channelStates, config);
 
-            var currentInstrumentSettings = instrumentSettings ?? synthesisEngine.InitializeInstrumentSettings();
+            var currentInstrumentSettings = synthesisEngine.InitializeInstrumentSettings();
 
             bool gpuSucceeded = true;
-            if (config.Performance.GPU.EnableGpuSynthesis && ComputeSharp.GraphicsDevice.GetDefault() != null)
+            if (config.Performance.RenderingMode == RenderingMode.HighQualityGPU && GraphicsDevice.GetDefault() != null)
             {
                 if (!audioRenderer.RenderAudioGpu(bufferSpan, noteEvents, channelStates, currentInstrumentSettings))
                 {
@@ -308,7 +396,7 @@ namespace MIDI
                     audioRenderer.RenderAudioHighQuality(buffer, noteEvents, channelStates, currentInstrumentSettings);
                 }
             }
-            else if (config.Performance.EnableParallelProcessing)
+            else if (config.Performance.RenderingMode == RenderingMode.HighQualityCPU || config.Performance.EnableParallelProcessing)
             {
                 audioRenderer.RenderAudioHighQuality(buffer, noteEvents, channelStates, currentInstrumentSettings);
             }
@@ -317,89 +405,16 @@ namespace MIDI
                 audioRenderer.RenderAudioStandard(bufferSpan, noteEvents, channelStates);
             }
 
-            if (config.Synthesis.EnableEnvelopeSmoothing)
+            if (!gpuSucceeded)
             {
-                var attackSamples = (int)(config.Synthesis.SmoothingAttackSeconds * sampleRate) * 2;
-                var releaseSamples = (int)(config.Synthesis.SmoothingReleaseSeconds * sampleRate) * 2;
-
-                foreach (var note in noteEvents)
-                {
-                    var startSample = (int)note.StartSample * 2;
-                    var endSample = (int)note.EndSample * 2;
-
-                    for (int i = 0; i < attackSamples; i++)
-                    {
-                        if (startSample + i >= buffer.Length) break;
-                        var fade = (float)i / attackSamples;
-                        buffer[startSample + i] *= fade;
-                    }
-
-                    for (int i = 0; i < releaseSamples; i++)
-                    {
-                        var index = endSample - releaseSamples + i;
-                        if (index < 0) continue;
-                        if (index >= buffer.Length) break;
-                        var fade = 1.0f - (float)i / releaseSamples;
-                        buffer[index] *= fade;
-                    }
-                }
-            }
-
-            if (config.Synthesis.EnableAntiPop)
-            {
-                var attackSamples = (int)(config.Synthesis.AntiPopAttackSeconds * sampleRate);
-                var releaseSamples = (int)(config.Synthesis.AntiPopReleaseSeconds * sampleRate);
-
-                foreach (var note in noteEvents)
-                {
-                    var startSample = note.StartSample * 2;
-                    var endSample = note.EndSample * 2;
-                    var noteSamples = endSample - startSample;
-
-                    var actualAttackSamples = Math.Min(attackSamples * 2, noteSamples);
-                    for (long i = 0; i < actualAttackSamples; i += 2)
-                    {
-                        var index = startSample + i;
-                        if (index + 1 >= buffer.Length) break;
-                        var fade = (float)i / actualAttackSamples;
-                        buffer[index] *= fade;
-                        buffer[index + 1] *= fade;
-                    }
-
-                    var actualReleaseSamples = Math.Min(releaseSamples * 2, noteSamples);
-                    for (long i = 0; i < actualReleaseSamples; i += 2)
-                    {
-                        var index = endSample - actualReleaseSamples + i;
-                        if (index < 0 || index + 1 >= buffer.Length) continue;
-                        var fade = 1.0f - ((float)i / actualReleaseSamples);
-                        buffer[index] *= fade;
-                        buffer[index + 1] *= fade;
-                    }
-                }
+                NotifyGpuFallbackToCpu();
             }
 
             if (config.Effects.EnableEffects)
             {
                 if (!effectsProcessor.ApplyAudioEnhancements(bufferSpan))
                 {
-                    gpuSucceeded = false;
-                }
-            }
-
-            if (!gpuSucceeded)
-            {
-                NotifyGpuFallbackToCpu();
-            }
-
-            if (config.Audio.EnableGlobalFadeOut)
-            {
-                var fadeSamples = (int)(config.Audio.GlobalFadeOutSeconds * sampleRate) * 2;
-                fadeSamples = Math.Min(fadeSamples, buffer.Length);
-                for (int i = 0; i < fadeSamples; i++)
-                {
-                    var index = buffer.Length - fadeSamples + i;
-                    var fade = 1.0f - (float)i / fadeSamples;
-                    buffer[index] *= fade;
+                    NotifyGpuFallbackToCpu();
                 }
             }
 
@@ -427,25 +442,128 @@ namespace MIDI
 
             try
             {
-                var logPath = Path.Combine(
-                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "",
-                    config.Debug.LogFilePath
-                );
-
+                var logPath = Path.Combine(GetAssemblyLocation(), config.Debug.LogFilePath);
                 var logEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
                 if (ex != null) logEntry += $"\n{ex}";
                 logEntry += "\n\n";
-
                 File.AppendAllText(logPath, logEntry);
             }
-            catch
-            {
-            }
+            catch { }
         }
+
+        private Dictionary<int, ChannelState> GetChannelStatesAtSample(long sample)
+        {
+            var states = new Dictionary<int, ChannelState>();
+            for (int i = 0; i < 16; i++)
+            {
+                states[i] = new ChannelState();
+            }
+
+            if (allControlEvents != null)
+            {
+                var eventsToApply = allControlEvents.Where(e => (e.Time.TotalSeconds * sampleRate) < sample);
+                MidiProcessor.ApplyControlEvents(eventsToApply.ToList(), states, config);
+            }
+
+            return states;
+        }
+
+        private int RenderRealtimeChunk(Span<float> destBuffer)
+        {
+            var startSample = position / 2;
+            var numSamples = destBuffer.Length / 2;
+            var endSample = startSample + numSamples;
+
+            destBuffer.Clear();
+
+            switch (_renderMethod)
+            {
+                case RenderMethod.Sfz:
+                    if (_sfzState != null)
+                    {
+                        sfzProcessor.RenderRealtimeChunk(_sfzState, destBuffer, startSample);
+                    }
+                    break;
+                case RenderMethod.SoundFont:
+                    if (_soundFontSynthesizer != null && _soundFontSequencer != null)
+                    {
+                        var left = ArrayPool<float>.Shared.Rent(numSamples);
+                        var right = ArrayPool<float>.Shared.Rent(numSamples);
+                        try
+                        {
+                            _soundFontSequencer.Render(left.AsSpan(0, numSamples), right.AsSpan(0, numSamples));
+                            for (int i = 0; i < numSamples; i++)
+                            {
+                                destBuffer[i * 2] = left[i] * config.Audio.MasterVolume;
+                                destBuffer[i * 2 + 1] = right[i] * config.Audio.MasterVolume;
+                            }
+                        }
+                        finally
+                        {
+                            ArrayPool<float>.Shared.Return(left);
+                            ArrayPool<float>.Shared.Return(right);
+                        }
+                    }
+                    break;
+                case RenderMethod.Synthesis:
+                    if (allNoteEvents == null || allControlEvents == null)
+                    {
+                        return destBuffer.Length;
+                    }
+
+                    var channelStates = GetChannelStatesAtSample(startSample);
+                    var notesInChunk = allNoteEvents.Where(n => n.StartSample < endSample && n.EndSample > startSample).ToList();
+
+                    if (config.Performance.RenderingMode == RenderingMode.RealtimeGPU && realtimeGpuDevice != null)
+                    {
+                        if (!audioRenderer.RenderAudioGpuRealtime(realtimeGpuDevice, destBuffer, notesInChunk, channelStates, synthesisEngine.InitializeInstrumentSettings(), startSample))
+                        {
+                            NotifyGpuFallbackToCpu();
+                            audioRenderer.RenderAudioStandard(destBuffer, notesInChunk, channelStates, startSample);
+                        }
+                    }
+                    else
+                    {
+                        audioRenderer.RenderAudioStandard(destBuffer, notesInChunk, channelStates, startSample);
+                    }
+                    break;
+            }
+
+            if (config.Effects.EnableEffects)
+            {
+                if (!effectsProcessor.ApplyAudioEnhancements(destBuffer))
+                {
+                    NotifyGpuFallbackToCpu();
+                }
+            }
+
+            if (config.Audio.EnableNormalization)
+            {
+                effectsProcessor.NormalizeAudio(destBuffer);
+            }
+
+            return destBuffer.Length;
+        }
+
 
         public int Read(float[] destBuffer, int offset, int count)
         {
+            bool isRealtime = config.Performance.RenderingMode == RenderingMode.RealtimeCPU || config.Performance.RenderingMode == RenderingMode.RealtimeGPU;
+
+            if (isRealtime)
+            {
+                var destSpan = new Span<float>(destBuffer, offset, count);
+                var renderedCount = RenderRealtimeChunk(destSpan);
+                Interlocked.Add(ref position, renderedCount);
+                return renderedCount;
+            }
+
             var currentBuffer = Volatile.Read(ref audioBuffer);
+            if (currentBuffer == null)
+            {
+                loadingTask.Wait();
+                currentBuffer = Volatile.Read(ref audioBuffer);
+            }
 
             if (currentBuffer == null)
             {
@@ -468,16 +586,60 @@ namespace MIDI
             return count;
         }
 
+        private void SeekRealtime(long newPosition)
+        {
+            var samplesToSeek = newPosition / 2;
+
+            if (_renderMethod == RenderMethod.Sfz && _sfzState != null)
+            {
+                sfzProcessor.Seek(_sfzState, samplesToSeek);
+            }
+            else if (_renderMethod == RenderMethod.SoundFont && _soundFontSynthesizer != null && _soundFontMidiFile != null)
+            {
+                _soundFontSequencer = new MidiFileSequencer(_soundFontSynthesizer);
+                _soundFontSequencer.Play(_soundFontMidiFile, false);
+
+                var samplesToRender = samplesToSeek;
+                var bufferSize = config.Performance.BufferSize;
+                var left = ArrayPool<float>.Shared.Rent(bufferSize);
+                var right = ArrayPool<float>.Shared.Rent(bufferSize);
+                try
+                {
+                    while (samplesToRender > 0)
+                    {
+                        var count = (int)Math.Min(samplesToRender, bufferSize);
+                        _soundFontSequencer.Render(left.AsSpan(0, count), right.AsSpan(0, count));
+                        samplesToRender -= count;
+                    }
+                }
+                finally
+                {
+                    ArrayPool<float>.Shared.Return(left);
+                    ArrayPool<float>.Shared.Return(right);
+                }
+            }
+            else if (_renderMethod == RenderMethod.Synthesis)
+            {
+            }
+        }
+
         public void Seek(TimeSpan time)
         {
-            var currentBuffer = Volatile.Read(ref audioBuffer);
-            var bufferLength = currentBuffer?.Length ?? 0;
-            var newPosition = Math.Min((long)(sampleRate * time.TotalSeconds) * 2, bufferLength);
+            var newPosition = (long)(sampleRate * time.TotalSeconds) * 2;
+
+            bool isRealtime = config.Performance.RenderingMode == RenderingMode.RealtimeCPU || config.Performance.RenderingMode == RenderingMode.RealtimeGPU;
+            if (isRealtime)
+            {
+                SeekRealtime(newPosition);
+            }
+
             Interlocked.Exchange(ref position, newPosition);
         }
 
         public void Dispose()
         {
+            (realtimeGpuDevice as IDisposable)?.Dispose();
+            _sfzState?.Dispose();
             effectsProcessor?.Dispose();
             GC.SuppressFinalize(this);
         }

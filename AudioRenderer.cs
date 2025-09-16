@@ -41,6 +41,8 @@ namespace MIDI
             Parallel.ForEach(groupedNotes, parallelOptions, kvp =>
             {
                 var channel = kvp.Key;
+                if (channel < 1 || channel > 16) return;
+
                 var notes = kvp.Value;
                 float[] channelBuffer = ArrayPool<float>.Shared.Rent(buffer.Length);
                 var channelSpan = channelBuffer.AsSpan(0, buffer.Length);
@@ -48,7 +50,7 @@ namespace MIDI
                 try
                 {
                     channelSpan.Clear();
-                    var channelState = channelStates[channel];
+                    var channelState = channelStates[channel - 1];
 
                     foreach (var note in notes)
                     {
@@ -86,7 +88,8 @@ namespace MIDI
                 var noteDataList = new List<GpuNoteData>();
                 foreach (var note in noteEvents)
                 {
-                    var channelState = channelStates[note.Channel];
+                    if (note.Channel < 1 || note.Channel > 16) continue;
+                    var channelState = channelStates[note.Channel - 1];
                     var instrument = synthesisEngine.GetInstrumentSettings(note.Channel, channelState.Program, instrumentSettings);
                     var frequency = (float)synthesisEngine.GetFrequency(note.NoteNumber, channelState.PitchBend);
                     var baseAmplitude = (note.Velocity / 127.0f) * channelState.Volume * channelState.Expression * instrument.VolumeMultiplier * config.Audio.MasterVolume;
@@ -145,30 +148,37 @@ namespace MIDI
         }
 
         public void RenderAudioStandard(Span<float> buffer, List<EnhancedNoteEvent> noteEvents,
-                                      Dictionary<int, ChannelState> channelStates)
+                                      Dictionary<int, ChannelState> channelStates, long startSampleOffset = 0)
         {
             foreach (var note in noteEvents)
             {
-                var channelState = channelStates[note.Channel];
+                if (note.Channel < 1 || note.Channel > 16) continue;
+                var channelState = channelStates[note.Channel - 1];
                 var frequency = synthesisEngine.GetFrequency(note.NoteNumber, channelState.PitchBend);
                 var amplitude = note.Velocity / 127.0f * config.Audio.MasterVolume;
-                var startSample = (long)(note.StartTime.TotalSeconds * sampleRate);
-                var endSample = (long)(note.EndTime.TotalSeconds * sampleRate);
+
+                var startSample = note.StartSample;
+                var endSample = note.EndSample;
 
                 var attackTime = config.Synthesis.DefaultAttack;
                 var releaseTime = config.Synthesis.DefaultRelease;
                 var attackSamples = (long)(attackTime * sampleRate);
                 var releaseSamples = (long)(releaseTime * sampleRate);
 
-                for (long i = startSample; i < endSample && i * 2 + 1 < buffer.Length; i++)
+                long bufferStartSample = startSample - startSampleOffset;
+                long bufferEndSample = endSample - startSampleOffset;
+
+                for (long i = bufferStartSample; i < bufferEndSample; i++)
                 {
-                    var time = (i - startSample) / (double)sampleRate;
+                    if (i * 2 + 1 >= buffer.Length || i < 0) continue;
+
+                    var time = (i + startSampleOffset - startSample) / (double)sampleRate;
                     double envelope = 1.0;
 
-                    if (i - startSample < attackSamples)
-                        envelope = (double)(i - startSample) / attackSamples;
-                    else if (endSample - i < releaseSamples)
-                        envelope = (double)(endSample - i) / releaseSamples;
+                    if (i + startSampleOffset - startSample < attackSamples)
+                        envelope = (double)(i + startSampleOffset - startSample) / attackSamples;
+                    else if (endSample - (i + startSampleOffset) < releaseSamples)
+                        envelope = (double)(endSample - (i + startSampleOffset)) / releaseSamples;
 
                     var waveType = config.Synthesis.DefaultWaveform;
                     var sampleValue = amplitude * envelope * synthesisEngine.GenerateBasicWaveform(waveType, frequency, time);
@@ -177,6 +187,70 @@ namespace MIDI
                 }
             }
         }
+
+        public bool RenderAudioGpuRealtime(GraphicsDevice device, Span<float> buffer, List<EnhancedNoteEvent> noteEvents, Dictionary<int, ChannelState> channelStates, Dictionary<int, InstrumentSettings> instrumentSettings, long startSampleOffset)
+        {
+            if (device == null) return false;
+
+            try
+            {
+                var noteDataList = new List<GpuNoteData>();
+                foreach (var note in noteEvents)
+                {
+                    if (note.Channel < 1 || note.Channel > 16) continue;
+                    var channelState = channelStates[note.Channel - 1];
+                    var instrument = synthesisEngine.GetInstrumentSettings(note.Channel, channelState.Program, instrumentSettings);
+                    var frequency = (float)synthesisEngine.GetFrequency(note.NoteNumber, channelState.PitchBend);
+                    var baseAmplitude = (note.Velocity / 127.0f) * channelState.Volume * channelState.Expression * instrument.VolumeMultiplier * config.Audio.MasterVolume;
+                    var panAngle = (channelState.Pan + 1) * Math.PI / 4;
+
+                    noteDataList.Add(new GpuNoteData
+                    {
+                        NoteNumber = note.NoteNumber,
+                        Velocity = note.Velocity,
+                        Channel = note.Channel,
+                        StartSample = (int)(note.StartSample - startSampleOffset),
+                        EndSample = (int)(note.EndSample - startSampleOffset),
+                        Frequency = frequency,
+                        BaseAmplitude = baseAmplitude,
+                        WaveType = (int)instrument.WaveType,
+                        Attack = (float)(instrument.Attack * config.Synthesis.EnvelopeScale * channelState.AttackMultiplier),
+                        Decay = (float)(instrument.Decay * config.Synthesis.EnvelopeScale * channelState.DecayMultiplier),
+                        Sustain = (float)instrument.Sustain,
+                        Release = (float)(instrument.Release * config.Synthesis.EnvelopeScale * channelState.ReleaseMultiplier),
+                        FilterType = (int)instrument.FilterType,
+                        FilterCutoff = (float)instrument.FilterCutoff,
+                        FilterResonance = (float)instrument.FilterResonance,
+                        PanLeft = (float)Math.Cos(panAngle),
+                        PanRight = (float)Math.Sin(panAngle)
+                    });
+                }
+
+                using var gpuBuffer = device.AllocateReadWriteBuffer<float>(buffer.Length);
+                using var noteBuffer = device.AllocateReadOnlyBuffer(noteDataList.ToArray());
+
+                int numSamples = buffer.Length / 2;
+                var shader = new WaveformGenerationShader(
+                    gpuBuffer,
+                    noteBuffer,
+                    noteBuffer.Length,
+                    sampleRate,
+                    0,
+                    (float)config.Synthesis.FmModulatorFrequency,
+                    (float)config.Synthesis.FmModulationIndex,
+                    config.Synthesis.EnableBandlimitedSynthesis
+                );
+                device.For(numSamples, shader);
+
+                gpuBuffer.CopyTo(buffer);
+                return true;
+            }
+            catch (Exception ex) when (ex is ObjectDisposedException || ex is ArgumentOutOfRangeException || ex is NotSupportedException || ex is OutOfMemoryException)
+            {
+                return false;
+            }
+        }
+
 
         private void RenderNoteWithEffects(EnhancedNoteEvent note, Span<float> buffer, ChannelState channelState,
                                          Dictionary<int, InstrumentSettings> instrumentSettings)

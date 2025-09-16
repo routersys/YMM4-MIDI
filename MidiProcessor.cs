@@ -133,7 +133,8 @@ namespace MIDI
         {
             foreach (var controlEvent in controlEvents)
             {
-                var state = channelStates[controlEvent.Channel];
+                if (controlEvent.Channel < 1 || controlEvent.Channel > 16) continue;
+                var state = channelStates[controlEvent.Channel - 1];
 
                 switch (controlEvent.Type)
                 {

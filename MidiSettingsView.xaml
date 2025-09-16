@@ -15,6 +15,13 @@
     <UserControl.Resources>
         <local:IntListToStringConverter x:Key="IntListConverter" />
         <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <local:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+
+        <ObjectDataProvider x:Key="RenderingModeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:RenderingMode"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
 
         <Style TargetType="Label">
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -394,7 +401,7 @@
 
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                 <Button Command="{Binding RefreshFilesCommand}" ToolTip="SFZとSoundFontのファイルリストを更新します。" Style="{StaticResource CompactButtonStyle}">
-                    <Path Data="M12,4V1L8,5l4,4V6c3.31,0,6,2.69,6,6s-2.69,6-6,6s-6-2.69-6-6H4c0,4.42,3.58,8,8,8s8-3.58,8-8S16.42,4,12,4z" 
+                    <Path Data="M12,4V1L8,5l4,4V6c3.31,0,6,2.69,6,6s-2.69,6-6,6s-6-2.69,6-6H4c0,4.42,3.58,8,8,8s8-3.58,8-8S16.42,4,12,4z" 
                           Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="16" Height="16" Stretch="Uniform"/>
                 </Button>
                 <Button Command="{Binding ReloadConfigCommand}" Margin="5,0,0,0"
@@ -499,6 +506,59 @@
             <TabItem Header="パフォーマンス" ToolTip="CPU負荷やメモリ使用量など、処理性能に関する設定を行います。">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="0,10,2,10">
+                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="レンダリング設定" FontWeight="Bold" Margin="0,0,0,10"/>
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="レンダリングモード" ToolTip="音声のレンダリング方法を選択します。リアルタイムモードは低遅延ですが、品質が若干低下する可能性があります。GPUモードは対応したグラフィックボードが必要で、データ転送によるオーバーヘッドが発生することがあります。"/>
+                                    <ComboBox Grid.Row="0" Grid.Column="1"
+                                              ItemsSource="{Binding Source={StaticResource RenderingModeEnum}}"
+                                              SelectedItem="{Binding Settings.Performance.RenderingMode}"
+                                              Margin="10,0,0,0"
+                                              ToolTip="音声のレンダリング方法を選択します。リアルタイムモードは低遅延ですが、品質が若干低下する可能性があります。GPUモードは対応したグラフィックボードが必要で、データ転送によるオーバーヘッドが発生することがあります。">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                        <ComboBox.ItemContainerStyle>
+                                            <Style TargetType="ComboBoxItem">
+                                                <Setter Property="Padding" Value="4,3"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding}" Value="{x:Static local:RenderingMode.HighQualityGPU}"/>
+                                                            <Condition Binding="{Binding DataContext.Settings.Performance.GPU.EnableGpuSynthesis, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding}" Value="{x:Static local:RenderingMode.RealtimeGPU}"/>
+                                                            <Condition Binding="{Binding DataContext.Settings.Performance.GPU.EnableGpuSynthesis, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ComboBox.ItemContainerStyle>
+                                    </ComboBox>
+                                </Grid>
+                            </Grid>
+                        </Border>
                         <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -1107,7 +1167,7 @@
                                         <Label Grid.Row="1" Grid.Column="0" Content="レート (Hz)" ToolTip="うねりの速さ（Hz）。"/>
                                         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.FlangerRate}" Margin="10,0,0,10"
                                                  ToolTip="うねりの速さ（Hz）。"/>
-                                        <Label Grid.Row="2" Grid.Column="0" Content="深さ" ToolTip="うneりの深さ。"/>
+                                        <Label Grid.Row="2" Grid.Column="0" Content="深さ" ToolTip="うねりの深さ。"/>
                                         <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.FlangerDepth}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
                                                          ToolTip="うねりの深さ。"/>
                                     </Grid>
