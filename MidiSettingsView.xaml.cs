@@ -7,8 +7,10 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace MIDI
 {
@@ -29,6 +31,51 @@ namespace MIDI
                     viewModel.EditSoundFontRuleCommand.Execute(vm);
                 }
             }
+        }
+
+        private T? FindVisualChild<T>(DependencyObject? parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t)
+                {
+                    return t;
+                }
+                var result = FindVisualChild<T>(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private void MidiSettingsView_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            var tabPanel = FindVisualChild<TabPanel>(MainTabControl);
+
+            if (e.NewSize.Width < 750)
+            {
+                VisualStateManager.GoToState(this, "Compact", true);
+                if (tabPanel != null)
+                {
+                    tabPanel.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                VisualStateManager.GoToState(this, "Wide", true);
+                if (tabPanel != null)
+                {
+                    tabPanel.Visibility = Visibility.Visible;
+                }
+                MenuPopup.IsOpen = false;
+            }
+        }
+
+        private void TabListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            MenuPopup.IsOpen = false;
         }
     }
 

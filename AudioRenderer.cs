@@ -24,7 +24,8 @@ namespace MIDI
             this.sampleRate = sampleRate;
             this.synthesisEngine = new SynthesisEngine(config, sampleRate);
             this.filterProcessor = new FilterProcessor(sampleRate);
-            this.effectsProcessor = new EffectsProcessor(config, sampleRate);
+            var gpuDevice = (config.Performance.RenderingMode == RenderingMode.HighQualityGPU || config.Performance.RenderingMode == RenderingMode.RealtimeGPU) ? GraphicsDevice.GetDefault() : null;
+            this.effectsProcessor = new EffectsProcessor(config, sampleRate, gpuDevice);
         }
 
         public void RenderAudioHighQuality(float[] buffer, List<EnhancedNoteEvent> noteEvents,
@@ -57,6 +58,11 @@ namespace MIDI
                         RenderNoteWithEffects(note, channelSpan, channelState, instrumentSettings);
                     }
 
+                    if (config.Synthesis.EnableNoteCrossfade)
+                    {
+                        ApplyNoteCrossfade(notes, channelSpan);
+                    }
+
                     lock (bufferLock)
                     {
                         var bufferSpan = buffer.AsSpan();
@@ -80,6 +86,27 @@ namespace MIDI
                 }
             });
         }
+
+        private void ApplyNoteCrossfade(List<EnhancedNoteEvent> notes, Span<float> buffer)
+        {
+            var fadeSamples = (long)(config.Synthesis.NoteCrossfadeDuration * sampleRate);
+            if (fadeSamples <= 0) return;
+
+            foreach (var note in notes)
+            {
+                for (long i = 0; i < fadeSamples; i++)
+                {
+                    var sampleIndex = note.EndSample + i;
+                    var bufferIndex = sampleIndex * 2;
+                    if (bufferIndex + 1 >= buffer.Length) break;
+
+                    float multiplier = 1.0f - (float)i / fadeSamples;
+                    buffer[(int)bufferIndex] *= multiplier;
+                    buffer[(int)bufferIndex + 1] *= multiplier;
+                }
+            }
+        }
+
 
         public bool RenderAudioGpu(GraphicsDevice device, Span<float> buffer, List<EnhancedNoteEvent> noteEvents, Dictionary<int, ChannelState> channelStates, Dictionary<int, InstrumentSettings> instrumentSettings)
         {
@@ -280,36 +307,61 @@ namespace MIDI
                                          Dictionary<int, InstrumentSettings> instrumentSettings)
         {
             var instrument = synthesisEngine.GetInstrumentSettings(note.Channel, channelState.Program, instrumentSettings);
-            var frequency = synthesisEngine.GetFrequency(note.NoteNumber, channelState.PitchBend);
-            var baseAmplitude = (note.Velocity / 127.0f) * channelState.Volume * channelState.Expression *
-                               instrument.VolumeMultiplier * config.Audio.MasterVolume;
 
             var startSample = note.StartSample;
             var endSample = note.EndSample;
             var noteDuration = endSample - startSample;
 
-            var envelope = new ADSREnvelope(
-                instrument.Attack * config.Synthesis.EnvelopeScale * channelState.AttackMultiplier,
-                instrument.Decay * config.Synthesis.EnvelopeScale * channelState.DecayMultiplier,
-                instrument.Sustain,
-                instrument.Release * config.Synthesis.EnvelopeScale * channelState.ReleaseMultiplier,
-                noteDuration,
-                sampleRate,
-                config
-            );
+            object envelope;
+            if (instrument.AmplitudeEnvelope != null && instrument.AmplitudeEnvelope.Any())
+            {
+                envelope = new EnvelopeGenerator(
+                    instrument.AmplitudeEnvelope,
+                    instrument.Release * config.Synthesis.EnvelopeScale * channelState.ReleaseMultiplier,
+                    sampleRate,
+                    config);
+            }
+            else
+            {
+                envelope = new ADSREnvelope(
+                    instrument.Attack * config.Synthesis.EnvelopeScale * channelState.AttackMultiplier,
+                    instrument.Decay * config.Synthesis.EnvelopeScale * channelState.DecayMultiplier,
+                    instrument.Sustain,
+                    instrument.Release * config.Synthesis.EnvelopeScale * channelState.ReleaseMultiplier,
+                    noteDuration,
+                    sampleRate,
+                    config
+                );
+            }
 
             for (long i = startSample; i < endSample && i < buffer.Length / 2; i++)
             {
                 var time = (i - startSample) / (double)sampleRate;
-                var envelopeValue = (float)envelope.GetValue(i - startSample);
 
-                var amplitude = baseAmplitude;
-                if (channelState.Sustain && envelopeValue > instrument.Sustain)
+                var pitchLfoValue = synthesisEngine.GetLfoValue(instrument.PitchLfo, time) * instrument.PitchLfo.Depth;
+                var ampLfoValue = 1.0 + synthesisEngine.GetLfoValue(instrument.AmplitudeLfo, time) * instrument.AmplitudeLfo.Depth;
+
+                var frequency = synthesisEngine.GetFrequency(note.NoteNumber, channelState.PitchBend, pitchLfoValue);
+
+                var baseAmplitude = (note.Velocity / 127.0f) * channelState.Volume * channelState.Expression *
+                                   instrument.VolumeMultiplier * config.Audio.MasterVolume * ampLfoValue;
+
+                double envelopeValue;
+                if (envelope is EnvelopeGenerator eg)
                 {
-                    envelopeValue = (float)Math.Max(envelopeValue, instrument.Sustain);
+                    envelopeValue = eg.GetValue(i - startSample, noteDuration);
+                }
+                else
+                {
+                    envelopeValue = ((ADSREnvelope)envelope).GetValue(i - startSample);
                 }
 
-                var waveValue = synthesisEngine.GenerateWaveform(instrument.WaveType, frequency, time, amplitude, envelopeValue, note.NoteNumber);
+                if (channelState.Sustain && envelopeValue > instrument.Sustain)
+                {
+                    envelopeValue = Math.Max(envelopeValue, instrument.Sustain);
+                }
+
+                var waveValue = synthesisEngine.GenerateWaveform(instrument.WaveType, frequency, time, (float)baseAmplitude, envelopeValue, note.NoteNumber, instrument.UserWavetableFile);
                 waveValue = filterProcessor.ApplyFilters(waveValue, instrument, time, channelState);
                 waveValue = effectsProcessor.ApplyChannelEffects(waveValue, channelState, time);
 

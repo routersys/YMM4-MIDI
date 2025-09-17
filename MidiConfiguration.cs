@@ -274,22 +274,22 @@ namespace MIDI
         {
             return new ObservableCollection<InstrumentPreset>
             {
-                new InstrumentPreset { Name = "Piano", StartProgram = 0, EndProgram = 7, Waveform = "Sine", Attack = 0.01, Decay = 0.3, Sustain = 0.7, Release = 0.5, Volume = 1.0f, Filter = new FilterSettings { Type = "None", Cutoff = 22050, Resonance = 1.0, Modulation = 0.0, ModulationRate = 5.0 } },
-                new InstrumentPreset { Name = "ChromaticPercussion", StartProgram = 8, EndProgram = 15, Waveform = "Triangle", Attack = 0.05, Decay = 0.2, Sustain = 0.6, Release = 0.8, Volume = 0.8f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 8000, Resonance = 1.2, Modulation = 0.1, ModulationRate = 3.0 } },
-                new InstrumentPreset { Name = "Organ", StartProgram = 16, EndProgram = 23, Waveform = "Organ", Attack = 0.001, Decay = 0.1, Sustain = 0.9, Release = 0.2, Volume = 0.9f, Filter = new FilterSettings { Type = "None", Cutoff = 22050, Resonance = 1.0, Modulation = 0.0, ModulationRate = 5.0 } },
-                new InstrumentPreset { Name = "Guitar", StartProgram = 24, EndProgram = 31, Waveform = "Sawtooth", Attack = 0.02, Decay = 0.15, Sustain = 0.5, Release = 0.6, Volume = 0.7f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 5000, Resonance = 1.5, Modulation = 0.2, ModulationRate = 4.0 } },
-                new InstrumentPreset { Name = "Bass", StartProgram = 32, EndProgram = 39, Waveform = "Square", Attack = 0.01, Decay = 0.1, Sustain = 0.8, Release = 0.3, Volume = 0.6f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 2000, Resonance = 1.3, Modulation = 0.0, ModulationRate = 5.0 } },
-                new InstrumentPreset { Name = "Strings", StartProgram = 40, EndProgram = 47, Waveform = "Sawtooth", Attack = 0.3, Decay = 0.2, Sustain = 0.8, Release = 1.0, Volume = 0.8f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 12000, Resonance = 1.1, Modulation = 0.05, ModulationRate = 2.0 } },
-                new InstrumentPreset { Name = "Ensemble", StartProgram = 48, EndProgram = 55, Waveform = "Triangle", Attack = 0.2, Decay = 0.3, Sustain = 0.7, Release = 0.8, Volume = 0.7f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 8000, Resonance = 1.0, Modulation = 0.1, ModulationRate = 1.5 } },
-                new InstrumentPreset { Name = "Brass", StartProgram = 56, EndProgram = 63, Waveform = "Square", Attack = 0.05, Decay = 0.1, Sustain = 0.9, Release = 0.2, Volume = 0.9f, Filter = new FilterSettings { Type = "BandPass", Cutoff = 4000, Resonance = 1.4, Modulation = 0.15, ModulationRate = 6.0 } },
-                new InstrumentPreset { Name = "Reed", StartProgram = 64, EndProgram = 71, Waveform = "Sawtooth", Attack = 0.02, Decay = 0.15, Sustain = 0.8, Release = 0.4, Volume = 0.8f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 6000, Resonance = 1.3, Modulation = 0.1, ModulationRate = 4.5 } },
-                new InstrumentPreset { Name = "Pipe", StartProgram = 72, EndProgram = 79, Waveform = "Sine", Attack = 0.1, Decay = 0.2, Sustain = 0.9, Release = 0.3, Volume = 0.7f, Filter = new FilterSettings { Type = "HighPass", Cutoff = 1000, Resonance = 1.0, Modulation = 0.05, ModulationRate = 3.0 } },
-                new InstrumentPreset { Name = "SynthLead", StartProgram = 80, EndProgram = 87, Waveform = "Square", Attack = 0.001, Decay = 0.05, Sustain = 0.6, Release = 0.2, Volume = 0.8f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 8000, Resonance = 1.8, Modulation = 0.3, ModulationRate = 7.0 } },
-                new InstrumentPreset { Name = "SynthPad", StartProgram = 88, EndProgram = 95, Waveform = "Triangle", Attack = 0.5, Decay = 0.3, Sustain = 0.8, Release = 1.5, Volume = 0.6f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 10000, Resonance = 1.1, Modulation = 0.2, ModulationRate = 1.0 } },
-                new InstrumentPreset { Name = "SynthEffects", StartProgram = 96, EndProgram = 103, Waveform = "Noise", Attack = 0.1, Decay = 0.2, Sustain = 0.5, Release = 0.8, Volume = 0.5f, Filter = new FilterSettings { Type = "BandPass", Cutoff = 2000, Resonance = 2.0, Modulation = 0.5, ModulationRate = 10.0 } },
-                new InstrumentPreset { Name = "Ethnic", StartProgram = 104, EndProgram = 111, Waveform = "Sawtooth", Attack = 0.05, Decay = 0.3, Sustain = 0.6, Release = 0.7, Volume = 0.8f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 7000, Resonance = 1.2, Modulation = 0.1, ModulationRate = 3.5 } },
-                new InstrumentPreset { Name = "Percussive", StartProgram = 112, EndProgram = 119, Waveform = "Noise", Attack = 0.001, Decay = 0.1, Sustain = 0.3, Release = 0.2, Volume = 1.0f, Filter = new FilterSettings { Type = "BandPass", Cutoff = 3000, Resonance = 1.5, Modulation = 0.0, ModulationRate = 5.0 } },
-                new InstrumentPreset { Name = "SoundEffects", StartProgram = 120, EndProgram = 127, Waveform = "Noise", Attack = 0.01, Decay = 0.5, Sustain = 0.2, Release = 1.0, Volume = 0.7f, Filter = new FilterSettings { Type = "HighPass", Cutoff = 500, Resonance = 1.0, Modulation = 0.8, ModulationRate = 15.0 } }
+                new InstrumentPreset { Name = "Piano", StartProgram = 0, EndProgram = 7, Waveform = "Sine", Attack = 0.01, Decay = 0.3, Sustain = 0.7, Release = 0.5, Volume = 1.0f, Filter = new FilterSettings { Type = "None", Cutoff = 22050, Resonance = 1.0, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "ChromaticPercussion", StartProgram = 8, EndProgram = 15, Waveform = "Triangle", Attack = 0.05, Decay = 0.2, Sustain = 0.6, Release = 0.8, Volume = 0.8f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 8000, Resonance = 1.2, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "Organ", StartProgram = 16, EndProgram = 23, Waveform = "Organ", Attack = 0.001, Decay = 0.1, Sustain = 0.9, Release = 0.2, Volume = 0.9f, Filter = new FilterSettings { Type = "None", Cutoff = 22050, Resonance = 1.0, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "Guitar", StartProgram = 24, EndProgram = 31, Waveform = "Sawtooth", Attack = 0.02, Decay = 0.15, Sustain = 0.5, Release = 0.6, Volume = 0.7f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 5000, Resonance = 1.5, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "Bass", StartProgram = 32, EndProgram = 39, Waveform = "Square", Attack = 0.01, Decay = 0.1, Sustain = 0.8, Release = 0.3, Volume = 0.6f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 2000, Resonance = 1.3, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "Strings", StartProgram = 40, EndProgram = 47, Waveform = "Sawtooth", Attack = 0.3, Decay = 0.2, Sustain = 0.8, Release = 1.0, Volume = 0.8f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 12000, Resonance = 1.1, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "Ensemble", StartProgram = 48, EndProgram = 55, Waveform = "Triangle", Attack = 0.2, Decay = 0.3, Sustain = 0.7, Release = 0.8, Volume = 0.7f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 8000, Resonance = 1.0, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "Brass", StartProgram = 56, EndProgram = 63, Waveform = "Square", Attack = 0.05, Decay = 0.1, Sustain = 0.9, Release = 0.2, Volume = 0.9f, Filter = new FilterSettings { Type = "BandPass", Cutoff = 4000, Resonance = 1.4, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "Reed", StartProgram = 64, EndProgram = 71, Waveform = "Sawtooth", Attack = 0.02, Decay = 0.15, Sustain = 0.8, Release = 0.4, Volume = 0.8f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 6000, Resonance = 1.3, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "Pipe", StartProgram = 72, EndProgram = 79, Waveform = "Sine", Attack = 0.1, Decay = 0.2, Sustain = 0.9, Release = 0.3, Volume = 0.7f, Filter = new FilterSettings { Type = "HighPass", Cutoff = 1000, Resonance = 1.0, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "SynthLead", StartProgram = 80, EndProgram = 87, Waveform = "Square", Attack = 0.001, Decay = 0.05, Sustain = 0.6, Release = 0.2, Volume = 0.8f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 8000, Resonance = 1.8, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "SynthPad", StartProgram = 88, EndProgram = 95, Waveform = "Triangle", Attack = 0.5, Decay = 0.3, Sustain = 0.8, Release = 1.5, Volume = 0.6f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 10000, Resonance = 1.1, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "SynthEffects", StartProgram = 96, EndProgram = 103, Waveform = "Noise", Attack = 0.1, Decay = 0.2, Sustain = 0.5, Release = 0.8, Volume = 0.5f, Filter = new FilterSettings { Type = "BandPass", Cutoff = 2000, Resonance = 2.0, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "Ethnic", StartProgram = 104, EndProgram = 111, Waveform = "Sawtooth", Attack = 0.05, Decay = 0.3, Sustain = 0.6, Release = 0.7, Volume = 0.8f, Filter = new FilterSettings { Type = "LowPass", Cutoff = 7000, Resonance = 1.2, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "Percussive", StartProgram = 112, EndProgram = 119, Waveform = "Noise", Attack = 0.001, Decay = 0.1, Sustain = 0.3, Release = 0.2, Volume = 1.0f, Filter = new FilterSettings { Type = "BandPass", Cutoff = 3000, Resonance = 1.5, Lfo = new LfoSettings() } },
+                new InstrumentPreset { Name = "SoundEffects", StartProgram = 120, EndProgram = 127, Waveform = "Noise", Attack = 0.01, Decay = 0.5, Sustain = 0.2, Release = 1.0, Volume = 0.7f, Filter = new FilterSettings { Type = "HighPass", Cutoff = 500, Resonance = 1.0, Lfo = new LfoSettings() } }
             };
         }
 
@@ -492,6 +492,21 @@ namespace MIDI
         }
     }
 
+    public class SoundFontLayer : INotifyPropertyChanged
+    {
+        private string _soundFontFile = string.Empty;
+        public string SoundFontFile { get => _soundFontFile; set => SetField(ref _soundFontFile, value); }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
+        }
+    }
+
     public class SoundFontSettings : INotifyPropertyChanged
     {
         private bool _enableSoundFont = true;
@@ -508,6 +523,9 @@ namespace MIDI
 
         private bool _fallbackToSynthesis = true;
         public bool FallbackToSynthesis { get => _fallbackToSynthesis; set => SetField(ref _fallbackToSynthesis, value); }
+
+        private ObservableCollection<SoundFontLayer> _layers = new();
+        public ObservableCollection<SoundFontLayer> Layers { get => _layers; set => SetField(ref _layers, value); }
 
         private ObservableCollection<SoundFontRule> _rules = new();
         public ObservableCollection<SoundFontRule> Rules { get => _rules; set => SetField(ref _rules, value); }
@@ -567,6 +585,9 @@ namespace MIDI
         private string _defaultWaveform = "Sine";
         public string DefaultWaveform { get => _defaultWaveform; set => SetField(ref _defaultWaveform, value); }
 
+        private string _wavetableDirectory = "Wavetables";
+        public string WavetableDirectory { get => _wavetableDirectory; set => SetField(ref _wavetableDirectory, value); }
+
         private double _a4Frequency = 440.0;
         public double A4Frequency { get => _a4Frequency; set => SetField(ref _a4Frequency, value); }
 
@@ -597,16 +618,7 @@ namespace MIDI
         private double _fmModulationIndex = 1.0;
         public double FmModulationIndex { get => _fmModulationIndex; set => SetField(ref _fmModulationIndex, value); }
 
-        private bool _enableEnvelopeSmoothing = true;
-        public bool EnableEnvelopeSmoothing { get => _enableEnvelopeSmoothing; set => SetField(ref _enableEnvelopeSmoothing, value); }
-
-        private double _smoothingAttackSeconds = 0.005;
-        public double SmoothingAttackSeconds { get => _smoothingAttackSeconds; set => SetField(ref _smoothingAttackSeconds, value); }
-
-        private double _smoothingReleaseSeconds = 0.01;
-        public double SmoothingReleaseSeconds { get => _smoothingReleaseSeconds; set => SetField(ref _smoothingReleaseSeconds, value); }
-
-        private bool _enableAntiPop;
+        private bool _enableAntiPop = true;
         public bool EnableAntiPop { get => _enableAntiPop; set => SetField(ref _enableAntiPop, value); }
 
         private double _antiPopAttackSeconds = 0.001;
@@ -614,6 +626,12 @@ namespace MIDI
 
         private double _antiPopReleaseSeconds = 0.005;
         public double AntiPopReleaseSeconds { get => _antiPopReleaseSeconds; set => SetField(ref _antiPopReleaseSeconds, value); }
+
+        private bool _enableNoteCrossfade = true;
+        public bool EnableNoteCrossfade { get => _enableNoteCrossfade; set => SetField(ref _enableNoteCrossfade, value); }
+
+        private double _noteCrossfadeDuration = 0.005;
+        public double NoteCrossfadeDuration { get => _noteCrossfadeDuration; set => SetField(ref _noteCrossfadeDuration, value); }
 
         private bool _enableBandlimitedSynthesis = true;
         public bool EnableBandlimitedSynthesis { get => _enableBandlimitedSynthesis; set => SetField(ref _enableBandlimitedSynthesis, value); }
@@ -648,17 +666,8 @@ namespace MIDI
         private float _compressionRelease = 0.1f;
         public float CompressionRelease { get => _compressionRelease; set => SetField(ref _compressionRelease, value); }
 
-        private bool _enableReverb;
-        public bool EnableReverb { get => _enableReverb; set => SetField(ref _enableReverb, value); }
-
-        private float _reverbDelay = 30.0f;
-        public float ReverbDelay { get => _reverbDelay; set => SetField(ref _reverbDelay, value); }
-
-        private float _reverbDecay = 0.3f;
-        public float ReverbDecay { get => _reverbDecay; set => SetField(ref _reverbDecay, value); }
-
-        private float _reverbStrength = 0.2f;
-        public float ReverbStrength { get => _reverbStrength; set => SetField(ref _reverbStrength, value); }
+        private AlgorithmicReverbSettings _algorithmicReverb = new();
+        public AlgorithmicReverbSettings AlgorithmicReverb { get => _algorithmicReverb; set => SetField(ref _algorithmicReverb, value); }
 
         private bool _enableChorus;
         public bool EnableChorus { get => _enableChorus; set => SetField(ref _enableChorus, value); }
@@ -679,19 +688,13 @@ namespace MIDI
         public bool EnableEqualizer { get => _enableEqualizer; set => SetField(ref _enableEqualizer, value); }
 
         private EqualizerSettings _eq = new();
-        public EqualizerSettings EQ
-        {
-            get => _eq;
-            set
-            {
-                if (_eq != null) _eq.PropertyChanged -= OnNestedPropertyChanged;
-                SetField(ref _eq!, value ?? new EqualizerSettings());
-                if (_eq != null) _eq.PropertyChanged += OnNestedPropertyChanged;
-            }
-        }
+        public EqualizerSettings EQ { get => _eq; set => SetField(ref _eq, value); }
 
         private bool _enableConvolutionReverb;
         public bool EnableConvolutionReverb { get => _enableConvolutionReverb; set => SetField(ref _enableConvolutionReverb, value); }
+
+        private string _impulseResponseFilePath = string.Empty;
+        public string ImpulseResponseFilePath { get => _impulseResponseFilePath; set => SetField(ref _impulseResponseFilePath, value); }
 
         private bool _enablePhaser;
         public bool EnablePhaser { get => _enablePhaser; set => SetField(ref _enablePhaser, value); }
@@ -726,15 +729,24 @@ namespace MIDI
         private bool _enableDCOffsetRemoval = true;
         public bool EnableDCOffsetRemoval { get => _enableDCOffsetRemoval; set => SetField(ref _enableDCOffsetRemoval, value); }
 
-        public EffectsSettings()
-        {
-            if (_eq != null) _eq.PropertyChanged += OnNestedPropertyChanged;
-        }
+        private bool _enablePingPongDelay;
+        public bool EnablePingPongDelay { get => _enablePingPongDelay; set => SetField(ref _enablePingPongDelay, value); }
 
-        private void OnNestedPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EQ)));
-        }
+        private float _delayTime = 0.5f;
+        public float DelayTime { get => _delayTime; set => SetField(ref _delayTime, value); }
+
+        private float _feedback = 0.5f;
+        public float Feedback { get => _feedback; set => SetField(ref _feedback, value); }
+
+        private float _wetDryMix = 0.5f;
+        public float WetDryMix { get => _wetDryMix; set => SetField(ref _wetDryMix, value); }
+
+        private DistortionSettings _distortion = new();
+        public DistortionSettings Distortion { get => _distortion; set => SetField(ref _distortion, value); }
+
+        private BitCrusherSettings _bitCrusher = new();
+        public BitCrusherSettings BitCrusher { get => _bitCrusher; set => SetField(ref _bitCrusher, value); }
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -745,6 +757,82 @@ namespace MIDI
             return true;
         }
     }
+
+    public class AlgorithmicReverbSettings : INotifyPropertyChanged
+    {
+        private bool _enable = false;
+        public bool Enable { get => _enable; set => SetField(ref _enable, value); }
+
+        private float _roomSize = 0.7f;
+        public float RoomSize { get => _roomSize; set => SetField(ref _roomSize, value); }
+
+        private float _damping = 0.5f;
+        public float Damping { get => _damping; set => SetField(ref _damping, value); }
+
+        private float _wetLevel = 0.3f;
+        public float WetLevel { get => _wetLevel; set => SetField(ref _wetLevel, value); }
+
+        private float _dryLevel = 0.7f;
+        public float DryLevel { get => _dryLevel; set => SetField(ref _dryLevel, value); }
+
+        private float _width = 0.5f;
+        public float Width { get => _width; set => SetField(ref _width, value); }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
+        }
+    }
+
+    public class DistortionSettings : INotifyPropertyChanged
+    {
+        private bool _enable = false;
+        public bool Enable { get => _enable; set => SetField(ref _enable, value); }
+
+        private DistortionType _type = DistortionType.SoftClip;
+        public DistortionType Type { get => _type; set => SetField(ref _type, value); }
+
+        private float _drive = 0.5f;
+        public float Drive { get => _drive; set => SetField(ref _drive, value); }
+
+        private float _mix = 0.5f;
+        public float Mix { get => _mix; set => SetField(ref _mix, value); }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
+        }
+    }
+
+    public class BitCrusherSettings : INotifyPropertyChanged
+    {
+        private bool _enable = false;
+        public bool Enable { get => _enable; set => SetField(ref _enable, value); }
+
+        private int _bitDepth = 16;
+        public int BitDepth { get => _bitDepth; set => SetField(ref _bitDepth, value); }
+
+        private float _rateReduction = 1.0f;
+        public float RateReduction { get => _rateReduction; set => SetField(ref _rateReduction, value); }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
+        }
+    }
+
 
     public class EqualizerSettings : INotifyPropertyChanged
     {
@@ -777,19 +865,19 @@ namespace MIDI
         private int _endProgram;
         public int EndProgram { get => _endProgram; set => SetField(ref _endProgram, value); }
 
-        private string _waveform = string.Empty;
+        private string _waveform = "Sine";
         public string Waveform { get => _waveform; set => SetField(ref _waveform, value); }
 
-        private double _attack;
+        private double _attack = 0.01;
         public double Attack { get => _attack; set => SetField(ref _attack, value); }
 
-        private double _decay;
+        private double _decay = 0.2;
         public double Decay { get => _decay; set => SetField(ref _decay, value); }
 
-        private double _sustain;
+        private double _sustain = 0.7;
         public double Sustain { get => _sustain; set => SetField(ref _sustain, value); }
 
-        private double _release;
+        private double _release = 0.5;
         public double Release { get => _release; set => SetField(ref _release, value); }
 
         private float _volume;
@@ -835,14 +923,14 @@ namespace MIDI
         private string _waveform = string.Empty;
         public string Waveform { get => _waveform; set => SetField(ref _waveform, value); }
 
-        private double _attack;
-        public double Attack { get => _attack; set => SetField(ref _attack, value); }
+        private string _userWavetableFile = string.Empty;
+        public string UserWavetableFile { get => _userWavetableFile; set => SetField(ref _userWavetableFile, value); }
 
-        private double _decay;
-        public double Decay { get => _decay; set => SetField(ref _decay, value); }
-
-        private double _sustain;
-        public double Sustain { get => _sustain; set => SetField(ref _sustain, value); }
+        private ObservableCollection<EnvelopePoint> _amplitudeEnvelope = new ObservableCollection<EnvelopePoint>
+        {
+            new EnvelopePoint(0.0, 0.0), new EnvelopePoint(0.01, 1.0), new EnvelopePoint(0.2, 0.7)
+        };
+        public ObservableCollection<EnvelopePoint> AmplitudeEnvelope { get => _amplitudeEnvelope; set => SetField(ref _amplitudeEnvelope, value); }
 
         private double _release;
         public double Release { get => _release; set => SetField(ref _release, value); }
@@ -861,6 +949,12 @@ namespace MIDI
                 if (_filter != null) _filter.PropertyChanged += OnNestedPropertyChanged;
             }
         }
+
+        private LfoSettings _pitchLfo = new();
+        public LfoSettings PitchLfo { get => _pitchLfo; set => SetField(ref _pitchLfo, value); }
+
+        private LfoSettings _amplitudeLfo = new();
+        public LfoSettings AmplitudeLfo { get => _amplitudeLfo; set => SetField(ref _amplitudeLfo, value); }
 
         public CustomInstrument()
         {
@@ -884,20 +978,18 @@ namespace MIDI
 
     public class FilterSettings : INotifyPropertyChanged
     {
-        private string _type = string.Empty;
+        private string _type = "None";
         public string Type { get => _type; set => SetField(ref _type, value); }
 
-        private double _cutoff;
+        private double _cutoff = 22050;
         public double Cutoff { get => _cutoff; set => SetField(ref _cutoff, value); }
 
-        private double _resonance;
+        private double _resonance = 1.0;
         public double Resonance { get => _resonance; set => SetField(ref _resonance, value); }
 
-        private double _modulation;
-        public double Modulation { get => _modulation; set => SetField(ref _modulation, value); }
+        private LfoSettings _lfo = new();
+        public LfoSettings Lfo { get => _lfo; set => SetField(ref _lfo, value); }
 
-        private double _modulationRate;
-        public double ModulationRate { get => _modulationRate; set => SetField(ref _modulationRate, value); }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

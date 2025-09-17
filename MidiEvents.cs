@@ -1,6 +1,7 @@
 ﻿using System;
 using NAudio.Midi;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MIDI
 {
@@ -13,6 +14,7 @@ namespace MIDI
         Organ,
         Noise,
         Wavetable,
+        UserWavetable,
         Fm,
         KarplusStrong
     }
@@ -22,7 +24,35 @@ namespace MIDI
         None,
         LowPass,
         HighPass,
-        BandPass
+        BandPass,
+        Notch,
+        Peak
+    }
+
+    public enum LfoWaveformType
+    {
+        Sine,
+        Square,
+        Sawtooth,
+        Triangle,
+        Noise,
+        RandomHold
+    }
+
+    public enum LfoTarget
+    {
+        None,
+        Pitch,
+        Amplitude,
+        FilterCutoff
+    }
+
+    public enum DistortionType
+    {
+        None,
+        HardClip,
+        SoftClip,
+        Saturation
     }
 
     public enum ControlEventType
@@ -154,16 +184,140 @@ namespace MIDI
     public class InstrumentSettings
     {
         public WaveformType WaveType { get; set; } = WaveformType.Sine;
+        public string UserWavetableFile { get; set; } = string.Empty;
+
         public double Attack { get; set; } = 0.01;
         public double Decay { get; set; } = 0.2;
         public double Sustain { get; set; } = 0.7;
         public double Release { get; set; } = 0.5;
+
+        public List<EnvelopePoint> AmplitudeEnvelope { get; set; } = new List<EnvelopePoint>();
+
         public float VolumeMultiplier { get; set; } = 1.0f;
         public FilterType FilterType { get; set; } = FilterType.None;
         public double FilterCutoff { get; set; } = 22050;
         public double FilterResonance { get; set; } = 1.0;
         public double FilterModulation { get; set; } = 0.0;
         public double FilterModulationRate { get; set; } = 5.0;
+
+        public LfoSettings PitchLfo { get; set; } = new LfoSettings();
+        public LfoSettings AmplitudeLfo { get; set; } = new LfoSettings();
+        public LfoSettings FilterLfo { get; set; } = new LfoSettings { Waveform = LfoWaveformType.Sine, Rate = 5.0, Depth = 0.0 };
+
+        public LfoWaveformType LfoWaveform { get => FilterLfo.Waveform; set => FilterLfo.Waveform = value; }
+        public double LfoRate { get => FilterLfo.Rate; set => FilterLfo.Rate = value; }
+        public double LfoDepth { get => FilterLfo.Depth; set => FilterLfo.Depth = value; }
+    }
+
+    public class LfoSettings
+    {
+        public LfoWaveformType Waveform { get; set; } = LfoWaveformType.Sine;
+        public double Rate { get; set; } = 5.0;
+        public double Depth { get; set; } = 0.0;
+    }
+
+    public class EnvelopePoint
+    {
+        public double Time { get; set; }
+        public double Value { get; set; }
+
+        public EnvelopePoint() { }
+        public EnvelopePoint(double time, double value)
+        {
+            Time = time;
+            Value = value;
+        }
+    }
+
+    public class EnvelopeGenerator
+    {
+        private readonly List<EnvelopePoint> points;
+        private readonly double releaseTime;
+        private readonly int sampleRate;
+
+        private readonly long[] stageSamples;
+        private readonly double[] stageValues;
+
+        public EnvelopeGenerator(List<EnvelopePoint> envelopePoints, double releaseTime, int sampleRate, MidiConfiguration config)
+        {
+            this.sampleRate = sampleRate;
+            this.releaseTime = Math.Max(config.Synthesis.AntiPopReleaseSeconds, releaseTime);
+
+            if (envelopePoints == null || !envelopePoints.Any())
+            {
+                this.points = new List<EnvelopePoint>
+                {
+                    new EnvelopePoint(0.0, 0.0),
+                    new EnvelopePoint(Math.Max(0.001, config.Synthesis.AntiPopAttackSeconds), 1.0),
+                    new EnvelopePoint(0.2, 0.7),
+                };
+            }
+            else
+            {
+                this.points = envelopePoints.OrderBy(p => p.Time).ToList();
+                if (!this.points.Any() || this.points.First().Time > 0)
+                {
+                    this.points.Insert(0, new EnvelopePoint(0, 0));
+                }
+                if (this.points.Count > 1)
+                {
+                    this.points[1].Time = Math.Max(this.points[1].Time, config.Synthesis.AntiPopAttackSeconds);
+                }
+            }
+
+            this.stageSamples = new long[this.points.Count];
+            this.stageValues = new double[this.points.Count];
+
+            for (int i = 0; i < this.points.Count; i++)
+            {
+                stageSamples[i] = (long)(this.points[i].Time * sampleRate);
+                stageValues[i] = this.points[i].Value;
+            }
+        }
+
+        public double GetValue(long sample, long noteDurationSamples)
+        {
+            if (sample < 0) return 0;
+
+            long releaseSamples = (long)(releaseTime * sampleRate);
+            long releaseStartSample = noteDurationSamples > releaseSamples ? noteDurationSamples - releaseSamples : 0;
+
+            if (sample < releaseStartSample)
+            {
+                if (stageSamples.Length == 0) return 0.0;
+                if (sample >= stageSamples.Last())
+                {
+                    return stageValues.Last();
+                }
+
+                for (int i = 1; i < stageSamples.Length; i++)
+                {
+                    if (sample < stageSamples[i])
+                    {
+                        long prevSample = stageSamples[i - 1];
+                        double prevValue = stageValues[i - 1];
+                        long currentSample = stageSamples[i];
+                        double currentValue = stageValues[i];
+
+                        if (currentSample <= prevSample) return currentValue;
+
+                        double progress = (double)(sample - prevSample) / (currentSample - prevSample);
+                        return prevValue + (currentValue - prevValue) * progress;
+                    }
+                }
+                return stageValues.Last();
+            }
+            else
+            {
+                if (releaseSamples == 0) return 0.0;
+
+                long sampleIntoRelease = sample - releaseStartSample;
+                if (sampleIntoRelease < 0) return stageValues.Last();
+
+                double releaseProgress = (double)sampleIntoRelease / releaseSamples;
+                return stageValues.Last() * (1.0 - releaseProgress);
+            }
+        }
     }
 
     public class ADSREnvelope

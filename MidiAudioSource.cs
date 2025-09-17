@@ -11,6 +11,7 @@ using NAudio.Midi;
 using System.Threading;
 using System.Buffers;
 using ComputeSharp;
+using System.Numerics;
 
 namespace MIDI
 {
@@ -43,8 +44,8 @@ namespace MIDI
 
         private readonly SfzRealtimeState? _sfzState;
 
-        private Synthesizer? _soundFontSynthesizer;
-        private MidiFileSequencer? _soundFontSequencer;
+        private List<Synthesizer>? _soundFontSynthesizers;
+        private List<MidiFileSequencer>? _soundFontSequencers;
         private readonly MeltySynth.MidiFile? _soundFontMidiFile;
 
         private readonly GraphicsDevice? gpuDevice;
@@ -105,7 +106,7 @@ namespace MIDI
 
             if (isRealtime)
             {
-                PrepareRealtimeRendering(out _sfzState, out _soundFontSynthesizer, out _soundFontMidiFile, out _soundFontSequencer);
+                PrepareRealtimeRendering(out _sfzState, out _soundFontSynthesizers, out _soundFontMidiFile, out _soundFontSequencers);
                 this.loadingTask = Task.CompletedTask;
                 return;
             }
@@ -137,19 +138,19 @@ namespace MIDI
             {
                 return RenderMethod.Sfz;
             }
-            if (config.SoundFont.EnableSoundFont && FindSoundFont(midiFilePath, GetAssemblyLocation()) != null)
+            if (config.SoundFont.EnableSoundFont && FindActiveSoundFonts(midiFilePath, GetAssemblyLocation()).Any())
             {
                 return RenderMethod.SoundFont;
             }
             return RenderMethod.Synthesis;
         }
 
-        private void PrepareRealtimeRendering(out SfzRealtimeState? sfzState, out Synthesizer? sfSynthesizer, out MeltySynth.MidiFile? sfMidiFile, out MidiFileSequencer? sfSequencer)
+        private void PrepareRealtimeRendering(out SfzRealtimeState? sfzState, out List<Synthesizer>? sfSynthesizers, out MeltySynth.MidiFile? sfMidiFile, out List<MidiFileSequencer>? sfSequencers)
         {
             sfzState = null;
-            sfSynthesizer = null;
+            sfSynthesizers = null;
             sfMidiFile = null;
-            sfSequencer = null;
+            sfSequencers = null;
 
             try
             {
@@ -165,13 +166,21 @@ namespace MIDI
                         sfzState = sfzProcessor.Initialize(allUniversalMidiEvents);
                         break;
                     case RenderMethod.SoundFont:
-                        var sf2Path = FindSoundFont(midiFilePath, GetAssemblyLocation());
-                        if (sf2Path != null)
+                        var sf2Paths = FindActiveSoundFonts(midiFilePath, GetAssemblyLocation());
+                        if (sf2Paths.Any())
                         {
-                            sfSynthesizer = new Synthesizer(sf2Path, sampleRate);
+                            sfSynthesizers = new List<Synthesizer>();
+                            sfSequencers = new List<MidiFileSequencer>();
                             sfMidiFile = new MeltySynth.MidiFile(midiFilePath);
-                            sfSequencer = new MidiFileSequencer(sfSynthesizer);
-                            sfSequencer.Play(sfMidiFile, false);
+
+                            foreach (var sf2Path in sf2Paths)
+                            {
+                                var synthesizer = new Synthesizer(sf2Path, sampleRate);
+                                var sequencer = new MidiFileSequencer(synthesizer);
+                                sequencer.Play(sfMidiFile, false);
+                                sfSynthesizers.Add(synthesizer);
+                                sfSequencers.Add(sequencer);
+                            }
                         }
                         break;
                 }
@@ -232,12 +241,12 @@ namespace MIDI
                     }
                     break;
                 case RenderMethod.SoundFont:
-                    var sf2Path = FindSoundFont(filePath, GetAssemblyLocation());
-                    if (sf2Path != null)
+                    var sf2Paths = FindActiveSoundFonts(filePath, GetAssemblyLocation());
+                    if (sf2Paths.Any())
                     {
                         try
                         {
-                            return ProcessWithSoundFont(filePath, sf2Path, durationLimit);
+                            return ProcessWithSoundFont(filePath, sf2Paths, durationLimit);
                         }
                         catch (Exception ex)
                         {
@@ -251,9 +260,9 @@ namespace MIDI
 
         private static string GetAssemblyLocation() => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new DirectoryNotFoundException();
 
-        private string? FindSoundFont(string midiFilePath, string assemblyLocation)
+        private List<string> FindActiveSoundFonts(string midiFilePath, string assemblyLocation)
         {
-            var defaultSf2Path = Path.Combine(assemblyLocation, "GeneralUser-GS.sf2");
+            var activeFonts = new List<string>();
             var userSf2Directory = Path.Combine(assemblyLocation, config.SoundFont.DefaultSoundFontDirectory);
 
             if (!Directory.Exists(userSf2Directory))
@@ -261,7 +270,19 @@ namespace MIDI
                 try { Directory.CreateDirectory(userSf2Directory); } catch { }
             }
 
-            var allUserSf2Files = Directory.Exists(userSf2Directory) ? Directory.GetFiles(userSf2Directory, "*.sf2", SearchOption.AllDirectories) : Array.Empty<string>();
+            var allUserSf2Files = Directory.Exists(userSf2Directory)
+                ? Directory.GetFiles(userSf2Directory, "*.sf2", SearchOption.AllDirectories)
+                : Array.Empty<string>();
+
+            foreach (var layer in config.SoundFont.Layers)
+            {
+                var fontPath = allUserSf2Files.FirstOrDefault(f =>
+                    Path.GetFileName(f).Equals(layer.SoundFontFile, StringComparison.OrdinalIgnoreCase));
+                if (fontPath != null && !activeFonts.Contains(fontPath))
+                {
+                    activeFonts.Add(fontPath);
+                }
+            }
 
             var meltyMidiFile = new MeltySynth.MidiFile(midiFilePath);
             var durationSeconds = meltyMidiFile.Length.TotalSeconds;
@@ -291,7 +312,10 @@ namespace MIDI
                 {
                     var matchedFontPath = allUserSf2Files.FirstOrDefault(f =>
                         Path.GetFileName(f).Equals(rule.SoundFontFile, StringComparison.OrdinalIgnoreCase));
-                    if (matchedFontPath != null) return matchedFontPath;
+                    if (matchedFontPath != null && !activeFonts.Contains(matchedFontPath))
+                    {
+                        activeFonts.Add(matchedFontPath);
+                    }
                 }
             }
 
@@ -299,58 +323,68 @@ namespace MIDI
             {
                 var preferred = allUserSf2Files.FirstOrDefault(f =>
                     Path.GetFileName(f).Equals(config.SoundFont.PreferredSoundFont, StringComparison.OrdinalIgnoreCase));
-                if (preferred != null) return preferred;
+                if (preferred != null && !activeFonts.Contains(preferred))
+                {
+                    activeFonts.Add(preferred);
+                }
             }
 
-            if (config.SoundFont.UseDefaultSoundFont && File.Exists(defaultSf2Path))
+            var defaultSf2Path = Path.Combine(assemblyLocation, "GeneralUser-GS.sf2");
+            if (config.SoundFont.UseDefaultSoundFont && File.Exists(defaultSf2Path) && !activeFonts.Contains(defaultSf2Path))
             {
-                return defaultSf2Path;
+                activeFonts.Add(defaultSf2Path);
             }
 
-            if (allUserSf2Files.Any())
+            if (!activeFonts.Any() && allUserSf2Files.Any())
             {
-                return allUserSf2Files.OrderByDescending(f => new FileInfo(f).Length).FirstOrDefault();
+                var largestSf2 = allUserSf2Files.OrderByDescending(f => new FileInfo(f).Length).FirstOrDefault();
+                if (largestSf2 != null) activeFonts.Add(largestSf2);
             }
 
-            return null;
+            return activeFonts;
         }
 
-        private float[] ProcessWithSoundFont(string filePath, string sf2Path, TimeSpan? durationLimit)
+        private float[] ProcessWithSoundFont(string filePath, List<string> sf2Paths, TimeSpan? durationLimit)
         {
             var midiFile = new MeltySynth.MidiFile(filePath);
-            var synthesizer = new Synthesizer(sf2Path, sampleRate);
-            var sequencer = new MidiFileSequencer(synthesizer);
-            sequencer.Play(midiFile, false);
-
             var renderDuration = durationLimit ?? midiFile.Length.Add(TimeSpan.FromSeconds(2.0));
             var totalSamplesToRender = (long)(renderDuration.TotalSeconds * sampleRate) * 2;
+            if (totalSamplesToRender <= 0) return Array.Empty<float>();
+
+            var finalBuffer = new float[totalSamplesToRender];
+            var finalBufferSpan = finalBuffer.AsSpan();
 
             var bufferSize = config.Performance.BufferSize;
             var leftBuffer = ArrayPool<float>.Shared.Rent(bufferSize);
             var rightBuffer = ArrayPool<float>.Shared.Rent(bufferSize);
 
-            var audioData = new float[totalSamplesToRender];
-            var audioDataSpan = audioData.AsSpan();
-            long renderedSamples = 0;
-
             try
             {
-                while (renderedSamples < totalSamplesToRender && !sequencer.EndOfSequence)
+                foreach (var sf2Path in sf2Paths)
                 {
-                    sequencer.Render(leftBuffer, rightBuffer);
-                    var samplesToCopy = (int)Math.Min(bufferSize * 2, totalSamplesToRender - renderedSamples);
+                    var synthesizer = new Synthesizer(sf2Path, sampleRate);
+                    var sequencer = new MidiFileSequencer(synthesizer);
+                    sequencer.Play(midiFile, false);
 
-                    for (int i = 0; i < samplesToCopy / 2; i++)
+                    long renderedSamples = 0;
+                    while (renderedSamples < totalSamplesToRender && !sequencer.EndOfSequence)
                     {
-                        audioDataSpan[(int)renderedSamples + i * 2] = leftBuffer[i] * config.Audio.MasterVolume;
-                        audioDataSpan[(int)renderedSamples + i * 2 + 1] = rightBuffer[i] * config.Audio.MasterVolume;
+                        sequencer.Render(leftBuffer, rightBuffer);
+                        var samplesToCopy = (int)Math.Min(bufferSize * 2, totalSamplesToRender - renderedSamples);
+                        var samplesToCopyPerChannel = samplesToCopy / 2;
+
+                        for (int i = 0; i < samplesToCopyPerChannel; i++)
+                        {
+                            finalBufferSpan[(int)renderedSamples + i * 2] += leftBuffer[i] * config.Audio.MasterVolume;
+                            finalBufferSpan[(int)renderedSamples + i * 2 + 1] += rightBuffer[i] * config.Audio.MasterVolume;
+                        }
+                        renderedSamples += samplesToCopy;
                     }
-                    renderedSamples += samplesToCopy;
                 }
 
                 if (config.Effects.EnableEffects)
                 {
-                    if (!effectsProcessor.ApplyAudioEnhancements(audioDataSpan))
+                    if (!effectsProcessor.ApplyAudioEnhancements(finalBufferSpan))
                     {
                         NotifyGpuFallbackToCpu();
                     }
@@ -362,7 +396,7 @@ namespace MIDI
                 ArrayPool<float>.Shared.Return(rightBuffer);
             }
 
-            return audioData;
+            return finalBuffer;
         }
 
         private float[] ProcessWithSynthesis(string filePath, TimeSpan? durationLimit)
@@ -491,13 +525,33 @@ namespace MIDI
                     }
                     break;
                 case RenderMethod.SoundFont:
-                    if (_soundFontSynthesizer != null && _soundFontSequencer != null)
+                    if (_soundFontSynthesizers != null && _soundFontSequencers != null)
                     {
                         var left = ArrayPool<float>.Shared.Rent(numSamples);
                         var right = ArrayPool<float>.Shared.Rent(numSamples);
+                        var tempLeft = ArrayPool<float>.Shared.Rent(numSamples);
+                        var tempRight = ArrayPool<float>.Shared.Rent(numSamples);
                         try
                         {
-                            _soundFontSequencer.Render(left.AsSpan(0, numSamples), right.AsSpan(0, numSamples));
+                            var leftSpan = left.AsSpan(0, numSamples);
+                            var rightSpan = right.AsSpan(0, numSamples);
+                            leftSpan.Clear();
+                            rightSpan.Clear();
+
+                            for (int i = 0; i < _soundFontSequencers.Count; i++)
+                            {
+                                var tempLeftSpan = tempLeft.AsSpan(0, numSamples);
+                                var tempRightSpan = tempRight.AsSpan(0, numSamples);
+
+                                _soundFontSequencers[i].Render(tempLeftSpan, tempRightSpan);
+
+                                for (int j = 0; j < numSamples; j++)
+                                {
+                                    leftSpan[j] += tempLeftSpan[j];
+                                    rightSpan[j] += tempRightSpan[j];
+                                }
+                            }
+
                             for (int i = 0; i < numSamples; i++)
                             {
                                 destBuffer[i * 2] = left[i] * config.Audio.MasterVolume;
@@ -508,6 +562,8 @@ namespace MIDI
                         {
                             ArrayPool<float>.Shared.Return(left);
                             ArrayPool<float>.Shared.Return(right);
+                            ArrayPool<float>.Shared.Return(tempLeft);
+                            ArrayPool<float>.Shared.Return(tempRight);
                         }
                     }
                     break;
@@ -600,28 +656,33 @@ namespace MIDI
             {
                 sfzProcessor.Seek(_sfzState, samplesToSeek);
             }
-            else if (_renderMethod == RenderMethod.SoundFont && _soundFontSynthesizer != null && _soundFontMidiFile != null)
+            else if (_renderMethod == RenderMethod.SoundFont && _soundFontSynthesizers != null && _soundFontSequencers != null && _soundFontMidiFile != null)
             {
-                _soundFontSequencer = new MidiFileSequencer(_soundFontSynthesizer);
-                _soundFontSequencer.Play(_soundFontMidiFile, false);
+                _soundFontSequencers.Clear();
+                for (int i = 0; i < _soundFontSynthesizers.Count; i++)
+                {
+                    var sequencer = new MidiFileSequencer(_soundFontSynthesizers[i]);
+                    sequencer.Play(_soundFontMidiFile, false);
 
-                var samplesToRender = samplesToSeek;
-                var bufferSize = config.Performance.BufferSize;
-                var left = ArrayPool<float>.Shared.Rent(bufferSize);
-                var right = ArrayPool<float>.Shared.Rent(bufferSize);
-                try
-                {
-                    while (samplesToRender > 0)
+                    var samplesToRender = samplesToSeek;
+                    var bufferSize = config.Performance.BufferSize;
+                    var left = ArrayPool<float>.Shared.Rent(bufferSize);
+                    var right = ArrayPool<float>.Shared.Rent(bufferSize);
+                    try
                     {
-                        var count = (int)Math.Min(samplesToRender, bufferSize);
-                        _soundFontSequencer.Render(left.AsSpan(0, count), right.AsSpan(0, count));
-                        samplesToRender -= count;
+                        while (samplesToRender > 0)
+                        {
+                            var count = (int)Math.Min(samplesToRender, bufferSize);
+                            sequencer.Render(left.AsSpan(0, count), right.AsSpan(0, count));
+                            samplesToRender -= count;
+                        }
                     }
-                }
-                finally
-                {
-                    ArrayPool<float>.Shared.Return(left);
-                    ArrayPool<float>.Shared.Return(right);
+                    finally
+                    {
+                        ArrayPool<float>.Shared.Return(left);
+                        ArrayPool<float>.Shared.Return(right);
+                    }
+                    _soundFontSequencers.Add(sequencer);
                 }
             }
             else if (_renderMethod == RenderMethod.Synthesis)

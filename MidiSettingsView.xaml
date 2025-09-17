@@ -11,7 +11,8 @@
              d:DataContext="{d:DesignInstance Type=local:MidiSettingsViewModel}"
              d:DesignHeight="600" d:DesignWidth="800"
              Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
-             Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
+             Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+             SizeChanged="MidiSettingsView_SizeChanged">
     <UserControl.Resources>
         <local:IntListToStringConverter x:Key="IntListConverter" />
         <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
@@ -20,6 +21,18 @@
         <ObjectDataProvider x:Key="RenderingModeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="local:RenderingMode"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <ObjectDataProvider x:Key="LfoWaveformEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:LfoWaveformType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <ObjectDataProvider x:Key="DistortionTypeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:DistortionType"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
@@ -217,9 +230,34 @@
             </Setter>
         </Style>
 
-        <Style TargetType="TabControl">
+        <Style x:Key="ResponsiveTabControlStyle" TargetType="TabControl">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TabPanel x:Name="HeaderPanel" 
+                                      Grid.Row="0" 
+                                      IsItemsHost="true" 
+                                      Background="Transparent"/>
+                            <Border x:Name="ContentPanel" 
+                                    Grid.Row="1"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter x:Name="PART_SelectedContentHost"
+                                                  ContentSource="SelectedContent"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style TargetType="TabItem">
@@ -314,6 +352,45 @@
             <Setter Property="Padding" Value="6"/>
         </Style>
 
+        <Style x:Key="HamburgerToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Focusable="False"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.56"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style TargetType="{x:Type ScrollBar}">
             <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false"/>
             <Setter Property="Stylus.IsFlicksEnabled" Value="false"/>
@@ -383,23 +460,49 @@
 
     </UserControl.Resources>
 
-    <Grid Margin="15">
+    <Grid x:Name="LayoutRoot" Margin="15">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="WindowStates">
+                <VisualState x:Name="Wide">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="HamburgerButton" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Collapsed}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+                <VisualState x:Name="Compact">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="HamburgerButton" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel LastChildFill="False" Margin="0,0,0,10">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <WrapPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                 <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="8,4" Margin="0,0,10,0">
                     <TextBlock Text="{Binding CurrentVersionText}" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
                 </Border>
                 <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="8,4" Visibility="{Binding UpdateStatusVisibility}">
                     <TextBlock Text="{Binding UpdateStatusText}" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
                 </Border>
-            </StackPanel>
-
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+            </WrapPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Command="{Binding OpenPluginDirectoryCommand}" ToolTip="プラグインのフォルダを開きます。" Style="{StaticResource CompactButtonStyle}" Margin="0,0,5,0">
+                    <Path Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" 
+                          Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="16" Height="16" Stretch="Uniform"/>
+                </Button>
                 <Button Command="{Binding RefreshFilesCommand}" ToolTip="SFZとSoundFontのファイルリストを更新します。" Style="{StaticResource CompactButtonStyle}">
                     <Path Data="M12,4V1L8,5l4,4V6c3.31,0,6,2.69,6,6s-2.69,6-6,6s-6-2.69,6-6H4c0,4.42,3.58,8,8,8s8-3.58,8-8S16.42,4,12,4z" 
                           Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="16" Height="16" Stretch="Uniform"/>
@@ -410,51 +513,40 @@
                           Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="16" Height="16" Stretch="Uniform"/>
                 </Button>
             </StackPanel>
-        </DockPanel>
+        </Grid>
 
-        <TabControl Grid.Row="1">
-            <TabItem Header="音声" ToolTip="音声出力に関する全体的な設定を行います。">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Margin="0,10,2,10">
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="基本設定" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+        <DockPanel Grid.Row="1">
+            <ToggleButton x:Name="HamburgerButton" Style="{StaticResource HamburgerToggleButtonStyle}" DockPanel.Dock="Left" VerticalAlignment="Top" Visibility="Collapsed" Width="32" Height="32" Margin="0,0,5,0">
+                <Path Data="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Stretch="Uniform" Width="16" Height="16"/>
+            </ToggleButton>
+
+            <Popup x:Name="MenuPopup" IsOpen="{Binding IsChecked, ElementName=HamburgerButton, Mode=TwoWay}" StaysOpen="False" Placement="Bottom" PlacementTarget="{Binding ElementName=HamburgerButton}">
+                <Border Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1">
+                    <ListBox x:Name="TabListBox" 
+                             ItemsSource="{Binding Items, ElementName=MainTabControl}"
+                             SelectedItem="{Binding SelectedItem, ElementName=MainTabControl, Mode=TwoWay}"
+                             SelectionChanged="TabListBox_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Header}" Margin="5"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </Popup>
+
+            <TabControl x:Name="MainTabControl" Style="{StaticResource ResponsiveTabControlStyle}">
+                <TabItem Header="音声" ToolTip="音声出力に関する全体的な設定を行います。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-
-                                    <Label Grid.Row="0" Grid.Column="0" Content="サンプルレート (Hz)" ToolTip="1秒間に音声をサンプリングする回数です。値が高いほど音質が向上しますが、CPU負荷も増加します。CD音質は44100Hzです。"/>
-                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Audio.SampleRate, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,0,10"
-                                             ToolTip="1秒間に音声をサンプリングする回数です。値が高いほど音質が向上しますが、CPU負荷も増加します。CD音質は44100Hzです。"/>
-
-                                    <Label Grid.Row="1" Grid.Column="0" Content="マスターボリューム (0-1)" ToolTip="アプリケーション全体のマスターボリュームを調整します。0 (無音) から 1 (最大) の範囲で設定します。"/>
-                                    <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Audio.MasterVolume, Mode=TwoWay}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
-                                                     ToolTip="アプリケーション全体のマスターボリュームを調整します。0 (無音) から 1 (最大) の範囲で設定します。"/>
-                                </Grid>
-                            </Grid>
-                        </Border>
-
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="正規化" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Audio.EnableNormalization}" Content="正規化を有効にする"
-                                              ToolTip="音量を自動的に調整して、音割れを防ぎ、全体の音量を均一化します。"/>
-                                    <Grid IsEnabled="{Binding Settings.Audio.EnableNormalization}" Margin="0,5,0,0">
+                                    <TextBlock Text="基本設定" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
                                             <ColumnDefinition Width="*"/>
@@ -463,29 +555,88 @@
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="閾値" ToolTip="正規化が作動する音量のしきい値です。この値を超えた場合に正規化が適用されます。"/>
-                                        <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Audio.NormalizationThreshold, Mode=TwoWay}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
-                                                         ToolTip="正規化が作動する音量のしきい値です。この値を超えた場合に正規化が適用されます。"/>
 
-                                        <Label Grid.Row="1" Grid.Column="0" Content="レベル" ToolTip="正規化後の目標音量レベルです。"/>
-                                        <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Audio.NormalizationLevel, Mode=TwoWay}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
-                                                         ToolTip="正規化後の目標音量レベルです。"/>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="サンプルレート (Hz)" ToolTip="1秒間に音声をサンプリングする回数です。値が高いほど音質が向上しますが、CPU負荷も増加します。CD音質は44100Hzです。"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Audio.SampleRate, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,0,10"
+                                                 ToolTip="1秒間に音声をサンプリングする回数です。値が高いほど音質が向上しますが、CPU負荷も増加します。CD音質は44100Hzです。"/>
+
+                                        <Label Grid.Row="1" Grid.Column="0" Content="マスターボリューム (0-1)" ToolTip="アプリケーション全体のマスターボリュームを調整します。0 (無音) から 1 (最大) の範囲で設定します。"/>
+                                        <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Audio.MasterVolume, Mode=TwoWay}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                         ToolTip="アプリケーション全体のマスターボリュームを調整します。0 (無音) から 1 (最大) の範囲で設定します。"/>
                                     </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
+                                </Grid>
+                            </Border>
 
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="グローバル・フェードアウト" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Audio.EnableGlobalFadeOut}" Content="最終音声のフェードアウトを有効にする"
-                                              ToolTip="再生終了時に音を滑らかにフェードアウトさせ、突然の音切れを防ぎます。"/>
-                                    <Grid IsEnabled="{Binding Settings.Audio.EnableGlobalFadeOut}" Margin="0,5,0,0">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="正規化" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Audio.EnableNormalization}" Content="正規化を有効にする"
+                                                  ToolTip="音量を自動的に調整して、音割れを防ぎ、全体の音量を均一化します。"/>
+                                        <Grid IsEnabled="{Binding Settings.Audio.EnableNormalization}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="閾値" ToolTip="正規化が作動する音量のしきい値です。この値を超えた場合に正規化が適用されます。"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Audio.NormalizationThreshold, Mode=TwoWay}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                             ToolTip="正規化が作動する音量のしきい値です。この値を超えた場合に正規化が適用されます。"/>
+
+                                            <Label Grid.Row="1" Grid.Column="0" Content="レベル" ToolTip="正規化後の目標音量レベルです。"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Audio.NormalizationLevel, Mode=TwoWay}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                             ToolTip="正規化後の目標音量レベルです。"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="グローバル・フェードアウト" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Audio.EnableGlobalFadeOut}" Content="最終音声のフェードアウトを有効にする"
+                                                  ToolTip="再生終了時に音を滑らかにフェードアウトさせ、突然の音切れを防ぎます。"/>
+                                        <Grid IsEnabled="{Binding Settings.Audio.EnableGlobalFadeOut}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="フェードアウト時間 (s)" ToolTip="フェードアウトにかける時間（秒）です。"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Audio.GlobalFadeOutSeconds}" Margin="10,0,0,0"
+                                                     ToolTip="フェードアウトにかける時間（秒）です。"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="パフォーマンス" ToolTip="CPU負荷やメモリ使用量など、処理性能に関する設定を行います。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="レンダリング設定" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
                                             <ColumnDefinition Width="*"/>
@@ -493,849 +644,986 @@
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="フェードアウト時間 (s)" ToolTip="フェードアウトにかける時間（秒）です。"/>
-                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Audio.GlobalFadeOutSeconds}" Margin="10,0,0,0"
-                                                 ToolTip="フェードアウトにかける時間（秒）です。"/>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="レンダリングモード" ToolTip="音声のレンダリング方法を選択します。リアルタイムモードは低遅延ですが、品質が若干低下する可能性があります。GPUモードは対応したグラフィックボードが必要で、データ転送によるオーバーヘッドが発生することがあります。"/>
+                                        <ComboBox Grid.Row="0" Grid.Column="1"
+                                                  ItemsSource="{Binding Source={StaticResource RenderingModeEnum}}"
+                                                  SelectedItem="{Binding Settings.Performance.RenderingMode}"
+                                                  Margin="10,0,0,0"
+                                                  ToolTip="音声のレンダリング方法を選択します。リアルタイムモードは低遅延ですが、品質が若干低下する可能性があります。GPUモードは対応したグラフィックボードが必要で、データ転送によるオーバーヘッドが発生することがあります。">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                            <ComboBox.ItemContainerStyle>
+                                                <Style TargetType="ComboBoxItem">
+                                                    <Setter Property="Padding" Value="4,3"/>
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding}" Value="{x:Static local:RenderingMode.HighQualityGPU}"/>
+                                                                <Condition Binding="{Binding DataContext.Settings.Performance.GPU.EnableGpuSynthesis, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding}" Value="{x:Static local:RenderingMode.RealtimeGPU}"/>
+                                                                <Condition Binding="{Binding DataContext.Settings.Performance.GPU.EnableGpuSynthesis, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ComboBox.ItemContainerStyle>
+                                        </ComboBox>
                                     </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="パフォーマンス" ToolTip="CPU負荷やメモリ使用量など、処理性能に関する設定を行います。">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Margin="0,10,2,10">
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="レンダリング設定" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-                                    <Label Grid.Row="0" Grid.Column="0" Content="レンダリングモード" ToolTip="音声のレンダリング方法を選択します。リアルタイムモードは低遅延ですが、品質が若干低下する可能性があります。GPUモードは対応したグラフィックボードが必要で、データ転送によるオーバーヘッドが発生することがあります。"/>
-                                    <ComboBox Grid.Row="0" Grid.Column="1"
-                                              ItemsSource="{Binding Source={StaticResource RenderingModeEnum}}"
-                                              SelectedItem="{Binding Settings.Performance.RenderingMode}"
-                                              Margin="10,0,0,0"
-                                              ToolTip="音声のレンダリング方法を選択します。リアルタイムモードは低遅延ですが、品質が若干低下する可能性があります。GPUモードは対応したグラフィックボードが必要で、データ転送によるオーバーヘッドが発生することがあります。">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                        <ComboBox.ItemContainerStyle>
-                                            <Style TargetType="ComboBoxItem">
-                                                <Setter Property="Padding" Value="4,3"/>
-                                                <Setter Property="Background" Value="Transparent"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-                                                <Style.Triggers>
-                                                    <MultiDataTrigger>
-                                                        <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding}" Value="{x:Static local:RenderingMode.HighQualityGPU}"/>
-                                                            <Condition Binding="{Binding DataContext.Settings.Performance.GPU.EnableGpuSynthesis, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
-                                                        </MultiDataTrigger.Conditions>
-                                                        <Setter Property="IsEnabled" Value="False"/>
-                                                    </MultiDataTrigger>
-                                                    <MultiDataTrigger>
-                                                        <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding}" Value="{x:Static local:RenderingMode.RealtimeGPU}"/>
-                                                            <Condition Binding="{Binding DataContext.Settings.Performance.GPU.EnableGpuSynthesis, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
-                                                        </MultiDataTrigger.Conditions>
-                                                        <Setter Property="IsEnabled" Value="False"/>
-                                                    </MultiDataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </ComboBox.ItemContainerStyle>
-                                    </ComboBox>
+                                    <TextBlock Text="基本設定" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="バッファサイズ" ToolTip="一度に処理するオーディオサンプルの数です。値が小さいほど遅延は少なくなりますが、CPU負荷は高くなり、音飛びの原因になることがあります。"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Performance.BufferSize}" Margin="10,0,0,10"
+                                                 ToolTip="一度に処理するオーディオサンプルの数です。値が小さいほど遅延は少なくなりますが、CPU負荷は高くなり、音飛びの原因になることがあります。"/>
+
+                                        <Label Grid.Row="1" Grid.Column="0" Content="最大同時発音数" ToolTip="同時に再生できる最大ノート数です。この値を超えると、古いノートが発音されなくなることがあります。"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Performance.MaxPolyphony}" Margin="10,0,0,10"
+                                                 ToolTip="同時に再生できる最大ノート数です。この値を超えると、古いノートが発音されなくなることがあります。"/>
+
+                                        <Label Grid.Row="2" Grid.Column="0" Content="最大スレッド数" ToolTip="音声処理に使用するCPUの最大スレッド数です。通常はCPUのコア数に合わせると効果的です。"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Performance.MaxThreads}" Margin="10,0,0,10"
+                                                 ToolTip="音声処理に使用するCPUの最大スレッド数です。通常はCPUのコア数に合わせると効果的です。"/>
+
+                                        <Label Grid.Row="3" Grid.Column="0" Content="初期読み込み時間 (秒)" ToolTip="ファイル読み込み時に、最初に同期的に読み込んでおく再生時間（秒）です。長いほど再生開始前の待ち時間が長くなりますが、再生中の読み込み処理が軽減されます。"/>
+                                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Performance.InitialSyncDurationSeconds}" Margin="10,0,0,0"
+                                                 ToolTip="ファイル読み込み時に、最初に同期的に読み込んでおく再生時間（秒）です。長いほど再生開始前の待ち時間が長くなりますが、再生中の読み込み処理が軽減されます。"/>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="基本設定" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-                                    <Label Grid.Row="0" Grid.Column="0" Content="バッファサイズ" ToolTip="一度に処理するオーディオサンプルの数です。値が小さいほど遅延は少なくなりますが、CPU負荷は高くなり、音飛びの原因になることがあります。"/>
-                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Performance.BufferSize}" Margin="10,0,0,10"
-                                             ToolTip="一度に処理するオーディオサンプルの数です。値が小さいほど遅延は少なくなりますが、CPU負荷は高くなり、音飛びの原因になることがあります。"/>
-
-                                    <Label Grid.Row="1" Grid.Column="0" Content="最大同時発音数" ToolTip="同時に再生できる最大ノート数です。この値を超えると、古いノートが発音されなくなることがあります。"/>
-                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Performance.MaxPolyphony}" Margin="10,0,0,10"
-                                             ToolTip="同時に再生できる最大ノート数です。この値を超えると、古いノートが発音されなくなることがあります。"/>
-
-                                    <Label Grid.Row="2" Grid.Column="0" Content="最大スレッド数" ToolTip="音声処理に使用するCPUの最大スレッド数です。通常はCPUのコア数に合わせると効果的です。"/>
-                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Performance.MaxThreads}" Margin="10,0,0,10"
-                                             ToolTip="音声処理に使用するCPUの最大スレッド数です。通常はCPUのコア数に合わせると効果的です。"/>
-
-                                    <Label Grid.Row="3" Grid.Column="0" Content="初期読み込み時間 (秒)" ToolTip="ファイル読み込み時に、最初に同期的に読み込んでおく再生時間（秒）です。長いほど再生開始前の待ち時間が長くなりますが、再生中の読み込み処理が軽減されます。"/>
-                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Performance.InitialSyncDurationSeconds}" Margin="10,0,0,0"
-                                             ToolTip="ファイル読み込み時に、最初に同期的に読み込んでおく再生時間（秒）です。長いほど再生開始前の待ち時間が長くなりますが、再生中の読み込み処理が軽減されます。"/>
+                                    <TextBlock Text="GPUアクセラレーション (試験的)" FontWeight="Bold" Margin="0,0,0,10"
+                                               ToolTip="試験的な機能です。GPUを使用して音声処理の一部を高速化します。対応したグラフィックボードが必要です。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuSynthesis}" Content="シンセシス"
+                                                  ToolTip="GPUを使用して波形合成処理を行います。"/>
+                                        <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuEqualizer}" Content="イコライザー"
+                                                  ToolTip="GPUを使用してイコライザー処理を行います。"/>
+                                        <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuEffectsChain}" Content="エフェクトチェーン"
+                                                  ToolTip="GPUを使用して複数のエフェクト（リバーブ、コンプなど）をまとめて処理します。"/>
+                                        <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuConvolutionReverb}" Content="畳み込みリバーブ"
+                                                  ToolTip="GPUを使用して高品質な畳み込みリバーブを処理します。"/>
+                                    </StackPanel>
                                 </Grid>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="GPUアクセラレーション (試験的)" FontWeight="Bold" Margin="0,0,0,10"
-                                           ToolTip="試験的な機能です。GPUを使用して音声処理の一部を高速化します。対応したグラフィックボードが必要です。"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuSynthesis}" Content="シンセシス"
-                                              ToolTip="GPUを使用して波形合成処理を行います。"/>
-                                    <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuEqualizer}" Content="イコライザー"
-                                              ToolTip="GPUを使用してイコライザー処理を行います。"/>
-                                    <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuEffectsChain}" Content="エフェクトチェーン"
-                                              ToolTip="GPUを使用して複数のエフェクト（リバーブ、コンプなど）をまとめて処理します。"/>
-                                    <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuConvolutionReverb}" Content="畳み込みリバーブ"
-                                              ToolTip="GPUを使用して高品質な畳み込みリバーブを処理します。"/>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <CheckBox IsChecked="{Binding Settings.Performance.EnableParallelProcessing}" Content="並列処理を有効にする (CPU)"
-                                  ToolTip="CPUのマルチコアを活用して、チャンネルごとの音声処理を並列実行し、レンダリングを高速化します。"/>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="MIDI" ToolTip="MIDIファイルの読み込みと解釈に関する設定を行います。">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Margin="0,10,2,10">
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="再生設定" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                            </Border>
+                            <CheckBox IsChecked="{Binding Settings.Performance.EnableParallelProcessing}" Content="並列処理を有効にする (CPU)"
+                                      ToolTip="CPUのマルチコアを活用して、チャンネルごとの音声処理を並列実行し、レンダリングを高速化します。"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="MIDI" ToolTip="MIDIファイルの読み込みと解釈に関する設定を行います。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-                                    <Label Grid.Row="0" Grid.Column="0" Content="デフォルトテンポ" ToolTip="MIDIファイルにテンポ情報が含まれていない場合に使用されるデフォルトのテンポです。マイクロ秒/四分音符で指定します (例: 120BPM = 500000)。"/>
-                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.MIDI.DefaultTempo}" Margin="10,0,0,10"
-                                             ToolTip="MIDIファイルにテンポ情報が含まれていない場合に使用されるデフォルトのテンポです。マイクロ秒/四分音符で指定します (例: 120BPM = 500000)。"/>
+                                    <TextBlock Text="再生設定" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="デフォルトテンポ" ToolTip="MIDIファイルにテンポ情報が含まれていない場合に使用されるデフォルトのテンポです。マイクロ秒/四分音符で指定します (例: 120BPM = 500000)。"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.MIDI.DefaultTempo}" Margin="10,0,0,10"
+                                                 ToolTip="MIDIファイルにテンポ情報が含まれていない場合に使用されるデフォルトのテンポです。マイクロ秒/四分音符で指定します (例: 120BPM = 500000)。"/>
 
-                                    <Label Grid.Row="1" Grid.Column="0" Content="ピッチベンド範囲" ToolTip="ピッチベンドの変化範囲を半音単位で設定します。例えば、2を設定すると、ピッチベンドで±2半音の範囲で音程が変化します。"/>
-                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.MIDI.PitchBendRange}" Margin="10,0,0,10"
-                                             ToolTip="ピッチベンドの変化範囲を半音単位で設定します。例えば、2を設定すると、ピッチベンドで±2半音の範囲で音程が変化します。"/>
+                                        <Label Grid.Row="1" Grid.Column="0" Content="ピッチベンド範囲" ToolTip="ピッチベンドの変化範囲を半音単位で設定します。例えば、2を設定すると、ピッチベンドで±2半音の範囲で音程が変化します。"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.MIDI.PitchBendRange}" Margin="10,0,0,10"
+                                                 ToolTip="ピッチベンドの変化範囲を半音単位で設定します。例えば、2を設定すると、ピッチベンドで±2半音の範囲で音程が変化します。"/>
 
-                                    <Label Grid.Row="2" Grid.Column="0" Content="最小ベロシティ" ToolTip="処理するノートの最小ベロシティです。これより小さいベロシティのノートは無視されます。音量の小さい不要なノートを除去するのに役立ちます。"/>
-                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.MIDI.MinVelocity}" Margin="10,0,0,0"
-                                             ToolTip="処理するノートの最小ベロシティです。これより小さいベロシティのノートは無視されます。音量の小さい不要なノートを除去するのに役立ちます。"/>
+                                        <Label Grid.Row="2" Grid.Column="0" Content="最小ベロシティ" ToolTip="処理するノートの最小ベロシティです。これより小さいベロシティのノートは無視されます。音量の小さい不要なノートを除去するのに役立ちます。"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.MIDI.MinVelocity}" Margin="10,0,0,0"
+                                                 ToolTip="処理するノートの最小ベロシティです。これより小さいベロシティのノートは無視されます。音量の小さい不要なノートを除去するのに役立ちます。"/>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="処理設定" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.MIDI.ProcessControlChanges}" Content="コントロールチェンジを処理する"
-                                              ToolTip="ボリュームやパンなどのコントロールチェンジメッセージを処理します。"/>
-                                    <CheckBox IsChecked="{Binding Settings.MIDI.ProcessPitchBend}" Content="ピッチベンドを処理する"
-                                              ToolTip="ピッチベンドメッセージを処理し、音程を滑らかに変化させます。"/>
-                                    <CheckBox IsChecked="{Binding Settings.MIDI.ProcessProgramChanges}" Content="プログラムチェンジを処理する"
-                                              ToolTip="音色を切り替えるプログラムチェンジメッセージを処理します。"/>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="除外設定" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-                                    <Label Grid.Row="0" Grid.Column="0" Content="除外チャンネル (カンマ区切り)" ToolTip="ここで指定したMIDIチャンネルは再生時に無視されます（カンマ区切り）。"/>
-                                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Settings.MIDI.ExcludedChannels, Converter={StaticResource IntListConverter}}" Margin="0,0,5,0"
-                                             ToolTip="ここで指定したMIDIチャンネルは再生時に無視されます（カンマ区切り）。"/>
-                                    <Label Grid.Row="0" Grid.Column="1" Content="除外トラック (カンマ区切り)" Margin="5,0,0,0" ToolTip="ここで指定したトラックは再生時に無視されます（カンマ区切り）。"/>
-                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.MIDI.ExcludedTracks, Converter={StaticResource IntListConverter}}" Margin="5,0,0,0"
-                                             ToolTip="ここで指定したトラックは再生時に無視されます（カンマ区切り）。"/>
+                                    <TextBlock Text="処理設定" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.MIDI.ProcessControlChanges}" Content="コントロールチェンジを処理する"
+                                                  ToolTip="ボリュームやパンなどのコントロールチェンジメッセージを処理します。"/>
+                                        <CheckBox IsChecked="{Binding Settings.MIDI.ProcessPitchBend}" Content="ピッチベンドを処理する"
+                                                  ToolTip="ピッチベンドメッセージを処理し、音程を滑らかに変化させます。"/>
+                                        <CheckBox IsChecked="{Binding Settings.MIDI.ProcessProgramChanges}" Content="プログラムチェンジを処理する"
+                                                  ToolTip="音色を切り替えるプログラムチェンジメッセージを処理します。"/>
+                                    </StackPanel>
                                 </Grid>
-                            </Grid>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="SFZ" ToolTip="SFZ形式のサンプラー音源を使用するための設定です。">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0,10,2,10">
-                        <CheckBox IsChecked="{Binding Settings.SFZ.EnableSfz}" Content="SFZを有効にする (SoundFontより優先)"
-                                  ToolTip="SFZ形式のサンプラー音源を使用してMIDIを再生します。有効な場合、SoundFontより優先されます。"/>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,10,0,0" IsEnabled="{Binding Settings.SFZ.EnableSfz}">
-                            <Grid>
-                                <TextBlock Text="設定 (ダブルクリックで編集)" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <DockPanel Margin="0,30,0,0">
-                                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                                        <Label DockPanel.Dock="Left" Content="SFZ 検索フォルダ:" ToolTip="SFZファイルを検索するフォルダのパスを指定します。"/>
-                                        <TextBox Text="{Binding Settings.SFZ.SfzSearchPath}"/>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="除外設定" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="除外チャンネル (カンマ区切り)" ToolTip="ここで指定したMIDIチャンネルは再生時に無視されます（カンマ区切り）。"/>
+                                        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Settings.MIDI.ExcludedChannels, Converter={StaticResource IntListConverter}}" Margin="0,0,5,0"
+                                                 ToolTip="ここで指定したMIDIチャンネルは再生時に無視されます（カンマ区切り）。"/>
+                                        <Label Grid.Row="0" Grid.Column="1" Content="除外トラック (カンマ区切り)" Margin="5,0,0,0" ToolTip="ここで指定したトラックは再生時に無視されます（カンマ区切り）。"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.MIDI.ExcludedTracks, Converter={StaticResource IntListConverter}}" Margin="5,0,0,0"
+                                                 ToolTip="ここで指定したトラックは再生時に無視されます（カンマ区切り）。"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="SFZ" ToolTip="SFZ形式のサンプラー音源を使用するための設定です。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,10,2,10">
+                            <CheckBox IsChecked="{Binding Settings.SFZ.EnableSfz}" Content="SFZを有効にする (SoundFontより優先)"
+                                      ToolTip="SFZ形式のサンプラー音源を使用してMIDIを再生します。有効な場合、SoundFontより優先されます。"/>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,10,0,0" IsEnabled="{Binding Settings.SFZ.EnableSfz}">
+                                <Grid>
+                                    <TextBlock Text="設定 (ダブルクリックで編集)" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <DockPanel Margin="0,30,0,0">
+                                        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                                            <Label DockPanel.Dock="Left" Content="SFZ 検索フォルダ:" ToolTip="SFZファイルを検索するフォルダのパスを指定します。"/>
+                                            <TextBox Text="{Binding Settings.SFZ.SfzSearchPath}"/>
+                                        </DockPanel>
+
+                                        <DataGrid ItemsSource="{Binding SfzFiles}" x:Name="SfzDataGrid" 
+                                                  AutoGenerateColumns="False" CanUserAddRows="False" MinHeight="250"
+                                                  IsReadOnly="True">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDoubleClick">
+                                                    <i:InvokeCommandAction Command="{Binding EditSfzMapCommand}" CommandParameter="{Binding ElementName=SfzDataGrid, Path=SelectedItem}"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                            <DataGrid.Columns>
+                                                <DataGridTemplateColumn Width="Auto" MinWidth="40" Header="状態">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <Ellipse Width="10" Height="10" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="{Binding IsMissing, StringFormat='ファイルが見つかりません: {0}'}">
+                                                                <Ellipse.Style>
+                                                                    <Style TargetType="Ellipse">
+                                                                        <Setter Property="Fill" Value="Gray"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsMapped}" Value="True">
+                                                                                <Setter Property="Fill" Value="Green"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding IsMissing}" Value="True">
+                                                                                <Setter Property="Fill" Value="Red"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Ellipse.Style>
+                                                            </Ellipse>
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
+                                                <DataGridTextColumn Header="SFZ ファイルパス" Binding="{Binding FileName}" Width="Auto" MinWidth="180"/>
+                                                <DataGridTextColumn Header="プログラム番号" Binding="{Binding Map.Program}" Width="Auto" MinWidth="90"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
                                     </DockPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="SoundFont" ToolTip="SoundFont (.sf2) ファイルを使用してMIDIを再生するための設定です。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,10,2,10">
+                            <CheckBox IsChecked="{Binding Settings.SoundFont.EnableSoundFont}" Content="SoundFontを有効にする"
+                                      ToolTip="SoundFont（.sf2）ファイルを使用してMIDIを再生します。"/>
+                            <Grid IsEnabled="{Binding Settings.SoundFont.EnableSoundFont}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
 
-                                    <DataGrid ItemsSource="{Binding SfzFiles}" x:Name="SfzDataGrid" 
-                                              AutoGenerateColumns="False" CanUserAddRows="False" MinHeight="250"
-                                              IsReadOnly="True">
-                                        <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="MouseDoubleClick">
-                                                <i:InvokeCommandAction Command="{Binding EditSfzMapCommand}" CommandParameter="{Binding ElementName=SfzDataGrid, Path=SelectedItem}"/>
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers>
+                                <Border Grid.Row="0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,10,0,10">
+                                    <Grid>
+                                        <TextBlock Text="基本設定" FontWeight="Bold" Margin="0,0,0,10"/>
+                                        <StackPanel Margin="0,30,0,0">
+                                            <CheckBox IsChecked="{Binding Settings.SoundFont.UseDefaultSoundFont}" Content="デフォルトのSoundFontを使用する"
+                                                      ToolTip="プラグインに同梱されているデフォルトのSoundFont (GeneralUser-GS.sf2) を使用します。"/>
+                                            <CheckBox IsChecked="{Binding Settings.SoundFont.FallbackToSynthesis}" Content="SoundFontがない場合シンセシスにフォールバックする"
+                                                      ToolTip="適切なSoundFontが見つからない場合に、内蔵シンセサイザーでの再生に切り替えます。"/>
+                                            <Grid Margin="0,5,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Label Grid.Row="0" Grid.Column="0" Content="SoundFontディレクトリ" ToolTip="ユーザーが追加したSoundFontファイルを格納するディレクトリのパスです。"/>
+                                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.SoundFont.DefaultSoundFontDirectory}" Margin="10,0,0,10"
+                                                         ToolTip="ユーザーが追加したSoundFontファイルを格納するディレクトリのパスです。"/>
+                                                <Label Grid.Row="1" Grid.Column="0" Content="優先SoundFontファイル名" ToolTip="ルールに一致しない場合でも優先的に使用するSoundFontファイル名を指定します。"/>
+                                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.SoundFont.PreferredSoundFont}" Margin="10,0,0,0"
+                                                         ToolTip="ルールに一致しない場合でも優先的に使用するSoundFontファイル名を指定します。"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Row="1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Text="SoundFontレイヤー (重ねて使用、上から順に優先)" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                                        <DockPanel Grid.Row="1">
+                                            <StackPanel DockPanel.Dock="Right" Margin="5,0,0,0">
+                                                <Button Command="{Binding MoveSoundFontLayerUpCommand}" CommandParameter="{Binding ElementName=SoundFontLayerGrid, Path=SelectedItem}" Margin="0,0,0,5" Style="{StaticResource CompactButtonStyle}" ToolTip="レイヤーを上に移動します。">
+                                                    <Path Width="10" Height="10" Stretch="Uniform" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Data="M0,5 L5,0 L10,5 Z" />
+                                                </Button>
+                                                <Button Command="{Binding MoveSoundFontLayerDownCommand}" CommandParameter="{Binding ElementName=SoundFontLayerGrid, Path=SelectedItem}" Style="{StaticResource CompactButtonStyle}" ToolTip="レイヤーを下に移動します。">
+                                                    <Path Width="10" Height="10" Stretch="Uniform" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Data="M0,0 L5,5 L10,0 Z" />
+                                                </Button>
+                                                <Button Command="{Binding RemoveSoundFontLayerCommand}" CommandParameter="{Binding ElementName=SoundFontLayerGrid, Path=SelectedItem}" Margin="0,10,0,0" Style="{StaticResource RichButtonStyle}" ToolTip="選択したレイヤーを削除します。">
+                                                    <Path Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Data="M9,3V4H4V6H5V19C5,20.1 5.9,21 7,21H17C18.1,21 19,20.1 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z" />
+                                                </Button>
+                                            </StackPanel>
+                                            <DataGrid ItemsSource="{Binding SoundFontLayers}" x:Name="SoundFontLayerGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" MinHeight="150">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="ファイル名" Binding="{Binding SoundFontFile}" Width="Auto" MinWidth="175"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </DockPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Button Grid.Row="2" Content="レイヤーに追加" Command="{Binding AddSoundFontLayerCommand}" CommandParameter="{Binding ElementName=SoundFontRuleGrid, Path=SelectedItem}" Margin="0,0,0,10" HorizontalAlignment="Center" Style="{StaticResource RichButtonStyle}"/>
+
+                                <Border Grid.Row="3" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
+                                    <Grid>
+                                        <TextBlock Text="利用可能なSoundFontとルール (ダブルクリックで編集)" FontWeight="Bold" Margin="0,0,0,10"/>
+                                        <DataGrid ItemsSource="{Binding SoundFontFiles}" x:Name="SoundFontRuleGrid" AutoGenerateColumns="False" CanUserAddRows="False" Margin="0,30,0,0" MinHeight="200" IsReadOnly="True">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDoubleClick">
+                                                    <i:InvokeCommandAction Command="{Binding EditSoundFontRuleCommand}" CommandParameter="{Binding ElementName=SoundFontRuleGrid, Path=SelectedItem}"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                            <DataGrid.Columns>
+                                                <DataGridTemplateColumn Width="Auto" MinWidth="40" Header="状態">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <Ellipse Width="10" Height="10" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="{Binding IsMissing, StringFormat='ファイルが見つかりません: {0}'}">
+                                                                <Ellipse.Style>
+                                                                    <Style TargetType="Ellipse">
+                                                                        <Setter Property="Fill" Value="Gray"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsMapped}" Value="True">
+                                                                                <Setter Property="Fill" Value="Green"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding IsMissing}" Value="True">
+                                                                                <Setter Property="Fill" Value="Red"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Ellipse.Style>
+                                                            </Ellipse>
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
+                                                <DataGridTextColumn Header="SoundFontファイル" Binding="{Binding FileName}" Width="180"/>
+                                                <DataGridTextColumn Header="最小時間(s)" Binding="{Binding Rule.MinDurationSeconds, TargetNullValue=''}" Width="Auto" MinWidth="90"/>
+                                                <DataGridTextColumn Header="最大時間(s)" Binding="{Binding Rule.MaxDurationSeconds, TargetNullValue=''}" Width="Auto" MinWidth="90"/>
+                                                <DataGridTextColumn Header="最小トラック" Binding="{Binding Rule.MinTrackCount, TargetNullValue=''}" Width="Auto" MinWidth="75"/>
+                                                <DataGridTextColumn Header="最大トラック" Binding="{Binding Rule.MaxTrackCount, TargetNullValue=''}" Width="Auto" MinWidth="75"/>
+                                                <DataGridTextColumn Header="必須プログラム" Binding="{Binding Rule.RequiredPrograms, Converter={StaticResource IntListConverter}, TargetNullValue=''}" Width="125"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Grid>
+                                </Border>
+
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="シンセシス" ToolTip="内蔵シンセサイザーの音作りに関する設定です。SoundFontやSFZを使用しない場合に適用されます。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="基本設定" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="デフォルト波形" ToolTip="音色の基本となる波形の種類を選択します。"/>
+                                        <ComboBox Grid.Row="0" Grid.Column="1" SelectedItem="{Binding Settings.Synthesis.DefaultWaveform}" Margin="10,0,0,10"
+                                                  ToolTip="音色の基本となる波形の種類を選択します。">
+                                            <sys:String>Sine</sys:String>
+                                            <sys:String>Square</sys:String>
+                                            <sys:String>Sawtooth</sys:String>
+                                            <sys:String>Triangle</sys:String>
+                                            <sys:String>Organ</sys:String>
+                                            <sys:String>Noise</sys:String>
+                                            <sys:String>Wavetable</sys:String>
+                                            <sys:String>UserWavetable</sys:String>
+                                        </ComboBox>
+
+                                        <Label Grid.Row="1" Grid.Column="0" Content="Wavetableフォルダ" ToolTip="ユーザー定義のWAVファイルを配置するフォルダ"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.WavetableDirectory}" Margin="10,0,0,10"
+                                                 ToolTip="ユーザー定義のWAVファイルを配置するフォルダ"/>
+
+                                        <Label Grid.Row="2" Grid.Column="0" Content="A4周波数 (Hz)" ToolTip="基準音となるA4（ラ）の周波数を設定します。現代の標準は440Hzですが、古楽などでは異なる値が使われます。"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Synthesis.A4Frequency}" Margin="10,0,0,10"
+                                                 ToolTip="基準音となるA4（ラ）の周波数を設定します。現代の標準は440Hzですが、古楽などでは異なる値が使われます。"/>
+
+                                        <Label Grid.Row="3" Grid.Column="0" Content="最小周波数 (Hz)" ToolTip="生成する音声の周波数の下限です。これを超える周波数はクリップされます。"/>
+                                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Synthesis.MinFrequency}" Margin="10,0,0,10"
+                                                 ToolTip="生成する音声の周波数の下限です。これを超える周波数はクリップされます。"/>
+
+                                        <Label Grid.Row="4" Grid.Column="0" Content="最大周波数 (Hz)" ToolTip="生成する音声の周波数の上限です。これを超える周波数はクリップされます。"/>
+                                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Settings.Synthesis.MaxFrequency}" Margin="10,0,0,10"
+                                                 ToolTip="生成する音声の周波数の上限です。これを超える周波数はクリップされます。"/>
+
+                                        <Label Grid.Row="5" Grid.Column="0" Content="エンベロープスケール" ToolTip="ADSRエンベロープ（音の立ち上がりや減衰）の時間的なスケールを調整します。1より大きいと長くなり、小さいと短くなります。"/>
+                                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Settings.Synthesis.EnvelopeScale}" Margin="10,0,0,0"
+                                                 ToolTip="ADSRエンベロープ（音の立ち上がりや減衰）の時間的なスケールを調整します。1より大きいと長くなり、小さいと短くなります。"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="デフォルトエンベロープ" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音の時間的な変化（ADSR）のデフォルト値を設定します。"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="アタック" ToolTip="音が鳴り始めてから最大音量に達するまでの時間（秒）。"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultAttack}" Margin="10,0,0,10"
+                                                 ToolTip="音が鳴り始めてから最大音量に達するまでの時間（秒）。"/>
+                                        <Label Grid.Row="1" Grid.Column="0" Content="ディケイ" ToolTip="最大音量からサステインレベルまで減衰する時間（秒）。"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultDecay}" Margin="10,0,0,10"
+                                                 ToolTip="最大音量からサステインレベルまで減衰する時間（秒）。"/>
+                                        <Label Grid.Row="2" Grid.Column="0" Content="サステイン" ToolTip="ノートが押されている間の音量レベル (0-1)。"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultSustain}" Margin="10,0,0,10"
+                                                 ToolTip="ノートが押されている間の音量レベル (0-1)。"/>
+                                        <Label Grid.Row="3" Grid.Column="0" Content="リリース" ToolTip="ノートが離されてから音が消えるまでの時間（秒）。"/>
+                                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultRelease}" Margin="10,0,0,0"
+                                                 ToolTip="ノートが離されてから音が消えるまでの時間（秒）。"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="FM音源" FontWeight="Bold" Margin="0,0,0,10" ToolTip="FM音源方式のシンセサイズに関する設定です。"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="変調周波数 (Hz)" ToolTip="FM合成における変調波の周波数です。音色を複雑にします。"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Synthesis.FmModulatorFrequency}" Margin="10,0,0,10"
+                                                 ToolTip="FM合成における変調波の周波数です。音色を複雑にします。"/>
+                                        <Label Grid.Row="1" Grid.Column="0" Content="変調指数" ToolTip="FM合成における変調の深さです。値が大きいほど、より複雑で金属的な音色になります。"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.FmModulationIndex}" Margin="10,0,0,0"
+                                                 ToolTip="FM合成における変調の深さです。値が大きいほど、より複雑で金属的な音色になります。"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="品質・ノイズ対策" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Synthesis.EnableBandlimitedSynthesis}" Content="バンドリミテッド合成を有効にする (エイリアシングを削減)"
+                                                  ToolTip="波形生成時にエイリアシング（折り返しノイズ）を低減する技術を有効にします。音質が向上しますが、CPU負荷がわずかに増加します。"/>
+                                        <CheckBox IsChecked="{Binding Settings.Synthesis.EnableAntiPop}" Content="アンチポップを有効にする (クリックノイズを削減)"
+                                                  ToolTip="ノートの開始時と終了時に短いフェードを適用し、「プツッ」というポップノイズを低減します。"/>
+                                        <Grid IsEnabled="{Binding Settings.Synthesis.EnableAntiPop}" Margin="20,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="アタック (s)"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Synthesis.AntiPopAttackSeconds}" Margin="10,0,0,10"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="リリース (s)"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.AntiPopReleaseSeconds}" Margin="10,0,0,0"/>
+                                        </Grid>
+                                        <CheckBox IsChecked="{Binding Settings.Synthesis.EnableNoteCrossfade}" Content="ノートクロスフェードを有効にする" ToolTip="ノートの切り替わりをスムーズにし、ノイズを低減します。" Margin="0,10,0,0"/>
+                                        <Grid IsEnabled="{Binding Settings.Synthesis.EnableNoteCrossfade}" Margin="20,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="クロスフェード時間(s)"/>
+                                            <TextBox Grid.Column="1" Text="{Binding Settings.Synthesis.NoteCrossfadeDuration}" Margin="10,0,0,0"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="エフェクト" ToolTip="音質を調整するための様々なエフェクトを設定します。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <CheckBox IsChecked="{Binding Settings.Effects.EnableEffects}" Content="エフェクトを有効にする" ToolTip="すべてのオーディオエフェクトの有効/無効を切り替えます。"/>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,10,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="コンプレッサー" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音量のばらつきを抑え、音圧を上げるエフェクトです。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableCompression}" Content="コンプレッサーを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableCompression}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="閾値" ToolTip="コンプレッサーが作動を開始する音量のしきい値。"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.CompressionThreshold}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                             ToolTip="コンプレッサーが作動を開始する音量のしきい値。"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="レシオ" ToolTip="しきい値を超えた音を圧縮する比率。4:1の場合、しきい値を4dB超えた音は1dB超えた音に圧縮されます。"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.CompressionRatio}" Margin="10,0,0,10"
+                                                     ToolTip="しきい値を超えた音を圧縮する比率。4:1の場合、しきい値を4dB超えた音は1dB超えた音に圧縮されます。"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="アタック (s)" ToolTip="コンプレッサーが作動し始めるまでの時間（秒）。"/>
+                                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Effects.CompressionAttack}" Margin="10,0,0,10"
+                                                     ToolTip="コンプレッサーが作動し始めるまでの時間（秒）。"/>
+                                            <Label Grid.Row="3" Grid.Column="0" Content="リリース (s)" ToolTip="コンプレッサーが解除されるまでの時間（秒）。"/>
+                                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Effects.CompressionRelease}" Margin="10,0,0,0"
+                                                     ToolTip="コンプレッサーが解除されるまでの時間（秒）。"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="アルゴリズミックリバーブ" FontWeight="Bold" Margin="0,0,0,10" ToolTip="計算によって残響を生成する高品質なリバーブです。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.AlgorithmicReverb.Enable}" Content="アルゴリズミックリバーブを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.AlgorithmicReverb.Enable}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="部屋の広さ"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.AlgorithmicReverb.RoomSize}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="減衰"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.AlgorithmicReverb.Damping}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="ウェット"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.AlgorithmicReverb.WetLevel}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"/>
+                                            <Label Grid.Row="3" Grid.Column="0" Content="ドライ"/>
+                                            <c:TextBoxSlider Grid.Row="3" Grid.Column="1" Value="{Binding Settings.Effects.AlgorithmicReverb.DryLevel}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"/>
+                                            <Label Grid.Row="4" Grid.Column="0" Content="広がり"/>
+                                            <c:TextBoxSlider Grid.Row="4" Grid.Column="1" Value="{Binding Settings.Effects.AlgorithmicReverb.Width}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="畳み込みリバーブ" FontWeight="Bold" Margin="0,0,0,10" ToolTip="インパルス応答(IR)ファイルを使用して、リアルな残響を再現します。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableConvolutionReverb}" Content="畳み込みリバーブを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableConvolutionReverb}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="IRファイルパス"/>
+                                            <TextBox Grid.Column="1" Text="{Binding Settings.Effects.ImpulseResponseFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,5,0" IsReadOnly="True"/>
+                                            <Button Grid.Column="2" Content="..." Command="{Binding SelectImpulseResponseFileCommand}" Style="{StaticResource CompactButtonStyle}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="ディストーション" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音を歪ませて力強いサウンドを作ります。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.Distortion.Enable}" Content="ディストーションを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.Distortion.Enable}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="種類"/>
+                                            <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Source={StaticResource DistortionTypeEnum}}" SelectedItem="{Binding Settings.Effects.Distortion.Type}" Margin="10,0,0,10"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="ドライブ"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.Distortion.Drive}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="ミックス"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.Distortion.Mix}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="ビットクラッシャー" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音質を意図的に劣化させ、レトロなサウンドを作ります。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.BitCrusher.Enable}" Content="ビットクラッシャーを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.BitCrusher.Enable}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="ビット深度"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.BitCrusher.BitDepth}" Min="1" Max="16" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="レート削減"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.BitCrusher.RateReduction}" Min="1" Max="50" StringFormat="F1" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="ピンポンディレイ" FontWeight="Bold" Margin="0,0,0,10" ToolTip="左右のチャンネルで交互にやまびこ効果を生み出すディレイです。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnablePingPongDelay}" Content="ピンポンディレイを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnablePingPongDelay}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="ディレイタイム (s)" ToolTip="やまびこの間隔（秒）。"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.DelayTime}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                             ToolTip="やまびこの間隔（秒）。"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="フィードバック" ToolTip="やまびこが繰り返される回数。"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.Feedback}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                             ToolTip="やまびこが繰り返される回数。"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="Mix" ToolTip="原音とエフェクト音のバランス。"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.WetDryMix}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                             ToolTip="原音とエフェクト音のバランス。"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="コーラス" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音をわずかに揺らして重ねることで、音に厚みと広がりを与えます。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableChorus}" Content="コーラスを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableChorus}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="ディレイ (s)" ToolTip="原音と重ねる音の遅延時間（秒）。"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Effects.ChorusDelay}" Margin="10,0,0,10"
+                                                     ToolTip="原音と重ねる音の遅延時間（秒）。"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="深さ" ToolTip="音の揺れの深さ。"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.ChorusDepth}" Margin="10,0,0,10"
+                                                     ToolTip="音の揺れの深さ。"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="レート (Hz)" ToolTip="音を揺らす速さ（Hz）。"/>
+                                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Effects.ChorusRate}" Margin="10,0,0,10"
+                                                     ToolTip="音を揺らす速さ（Hz）。"/>
+                                            <Label Grid.Row="3" Grid.Column="0" Content="強度" ToolTip="原音に対するコーラス音の強さ。"/>
+                                            <c:TextBoxSlider Grid.Row="3" Grid.Column="1" Value="{Binding Settings.Effects.ChorusStrength}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                             ToolTip="原音に対するコーラス音の強さ。"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="フェイザー" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音の位相をずらして独特のうねりを生み出すエフェクトです。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnablePhaser}" Content="フェイザーを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnablePhaser}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="レート (Hz)" ToolTip="位相を変化させる速さ（Hz）。"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Effects.PhaserRate}" Margin="10,0,0,10"
+                                                     ToolTip="位相を変化させる速さ（Hz）。"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="ステージ数" ToolTip="フェイザーのフィルターの段数。多いほど複雑な効果になります。"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.PhaserStages}" Margin="10,0,0,10"
+                                                     ToolTip="フェイザーのフィルターの段数。多いほど複雑な効果になります。"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="フィードバック" ToolTip="エフェクト音を再度入力に戻す量。効果を強調します。"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.PhaserFeedback}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                             ToolTip="エフェクト音を再度入力に戻す量。効果を強調します。"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="フランジャー" FontWeight="Bold" Margin="0,0,0,10" ToolTip="コーラスに似ていますが、より短く周期的な遅延を用いて金属的なうねりを生み出します。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableFlanger}" Content="フランジャーを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableFlanger}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="ディレイ (s)" ToolTip="遅延時間（秒）。"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Effects.FlangerDelay}" Margin="10,0,0,10"
+                                                     ToolTip="遅延時間（秒）。"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="レート (Hz)" ToolTip="うねりの速さ（Hz）。"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.FlangerRate}" Margin="10,0,0,10"
+                                                     ToolTip="うねりの速さ（Hz）。"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="深さ" ToolTip="うねりの深さ。"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.FlangerDepth}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                             ToolTip="うねりの深さ。"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="リミッター" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音量が一定のしきい値を超えないように制限し、音割れ（クリッピング）を防ぎます。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableLimiter}" Content="リミッターを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableLimiter}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="閾値" ToolTip="音量を制限する上限値。"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.LimiterThreshold}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                             ToolTip="音量を制限する上限値。"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="イコライザー" FontWeight="Bold" Margin="0,0,0,10" ToolTip="特定の周波数帯域を強調したり、抑制したりして音質を調整します。"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableEqualizer}" Content="イコライザーを有効にする"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableEqualizer}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="低音ゲイン" ToolTip="低音域のゲイン（音量）を調整します。"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.EQ.BassGain}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                             ToolTip="低音域のゲイン（音量）を調整します。"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="中音ゲイン" ToolTip="中音域のゲイン（音量）を調整します。"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.EQ.MidGain}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                             ToolTip="中音域のゲイン（音量）を調整します。"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="高音ゲイン" ToolTip="高音域のゲイン（音量）を調整します。"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.EQ.TrebleGain}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                             ToolTip="高音域のゲイン（音量）を調整します。"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="その他" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableDCOffsetRemoval}" Content="DCオフセット除去を有効にする"
+                                                  ToolTip="音声信号に含まれる直流成分（DCオフセット）を除去します。不要なノイズや歪みを防ぎます。"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="インストゥルメント" ToolTip="MIDIのプログラム番号に応じた音色の設定を行います。">
+                    <TabControl Margin="0,10,0,0">
+                        <TabItem Header="プリセット" ToolTip="MIDIプログラム番号の範囲に対して、音色の設定を割り当てます。">
+                            <DockPanel Margin="0,10,0,10">
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                    <Button Content="追加" Command="{Binding AddInstrumentPresetCommand}" Margin="5" ToolTip="新しいインストゥルメントプリセットを追加します。" Style="{StaticResource RichButtonStyle}"/>
+                                    <Button Content="削除" Command="{Binding RemoveInstrumentPresetCommand}" CommandParameter="{Binding ElementName=InstrumentPresetGrid, Path=SelectedItem}" Margin="5"
+                                            ToolTip="選択したプリセットを削除します。" Style="{StaticResource RichButtonStyle}"/>
+                                </StackPanel>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                    <DataGrid ItemsSource="{Binding Settings.InstrumentPresets}" x:Name="InstrumentPresetGrid" AutoGenerateColumns="False" CanUserAddRows="False">
                                         <DataGrid.Columns>
-                                            <DataGridTemplateColumn Width="Auto" MinWidth="40" Header="状態">
-                                                <DataGridTemplateColumn.CellTemplate>
-                                                    <DataTemplate>
-                                                        <Ellipse Width="10" Height="10" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="{Binding IsMissing, StringFormat='ファイルが見つかりません: {0}'}">
-                                                            <Ellipse.Style>
-                                                                <Style TargetType="Ellipse">
-                                                                    <Setter Property="Fill" Value="Gray"/>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding IsMapped}" Value="True">
-                                                                            <Setter Property="Fill" Value="Green"/>
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding IsMissing}" Value="True">
-                                                                            <Setter Property="Fill" Value="Red"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </Ellipse.Style>
-                                                        </Ellipse>
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.CellTemplate>
-                                            </DataGridTemplateColumn>
-                                            <DataGridTextColumn Header="SFZ ファイルパス" Binding="{Binding FileName}" Width="Auto" MinWidth="180"/>
-                                            <DataGridTextColumn Header="プログラム番号" Binding="{Binding Map.Program}" Width="Auto" MinWidth="90"/>
+                                            <DataGridTextColumn Header="名前" Binding="{Binding Name}" Width="Auto" MinWidth="120"/>
+                                            <DataGridTextColumn Header="開始" Binding="{Binding StartProgram}" Width="Auto" MinWidth="40"/>
+                                            <DataGridTextColumn Header="終了" Binding="{Binding EndProgram}" Width="Auto" MinWidth="40"/>
+                                            <DataGridTextColumn Header="波形" Binding="{Binding Waveform}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="アタック" Binding="{Binding Attack}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="ディケイ" Binding="{Binding Decay}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="サステイン" Binding="{Binding Sustain}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="リリース" Binding="{Binding Release}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="音量" Binding="{Binding Volume}" Width="Auto" MinWidth="40"/>
+                                            <DataGridTextColumn Header="フィルター" Binding="{Binding Filter.Type}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="カットオフ" Binding="{Binding Filter.Cutoff}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="レゾナンス" Binding="{Binding Filter.Resonance}" Width="Auto" MinWidth="75"/>
+                                            <DataGridComboBoxColumn Header="Filter LFO" SelectedItemBinding="{Binding Filter.Lfo.Waveform}" ItemsSource="{Binding Source={StaticResource LfoWaveformEnum}}" Width="Auto" MinWidth="90"/>
+                                            <DataGridTextColumn Header="F-LFO Rate" Binding="{Binding Filter.Lfo.Rate}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="F-LFO Depth" Binding="{Binding Filter.Lfo.Depth}" Width="Auto" MinWidth="60"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
-                                </DockPanel>
-                            </Grid>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="SoundFont" ToolTip="SoundFont (.sf2) ファイルを使用してMIDIを再生するための設定です。">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0,10,2,10">
-                        <CheckBox IsChecked="{Binding Settings.SoundFont.EnableSoundFont}" Content="SoundFontを有効にする"
-                                  ToolTip="SoundFont（.sf2）ファイルを使用してMIDIを再生します。"/>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,10,0,10" IsEnabled="{Binding Settings.SoundFont.EnableSoundFont}">
-                            <Grid>
-                                <TextBlock Text="基本設定" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <StackPanel Margin="0,30,0,0">
-                                    <CheckBox IsChecked="{Binding Settings.SoundFont.UseDefaultSoundFont}" Content="デフォルトのSoundFontを使用する"
-                                              ToolTip="プラグインに同梱されているデフォルトのSoundFont (GeneralUser-GS.sf2) を使用します。"/>
-                                    <CheckBox IsChecked="{Binding Settings.SoundFont.FallbackToSynthesis}" Content="SoundFontがない場合シンセシスにフォールバックする"
-                                              ToolTip="適切なSoundFontが見つからない場合に、内蔵シンセサイザーでの再生に切り替えます。"/>
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="SoundFontディレクトリ" ToolTip="ユーザーが追加したSoundFontファイルを格納するディレクトリのパスです。"/>
-                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.SoundFont.DefaultSoundFontDirectory}" Margin="10,0,0,10"
-                                                 ToolTip="ユーザーが追加したSoundFontファイルを格納するディレクトリのパスです。"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="優先SoundFontファイル名" ToolTip="ルールに一致しない場合でも優先的に使用するSoundFontファイル名を指定します。"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.SoundFont.PreferredSoundFont}" Margin="10,0,0,0"
-                                                 ToolTip="ルールに一致しない場合でも優先的に使用するSoundFontファイル名を指定します。"/>
-                                    </Grid>
+                                </ScrollViewer>
+                            </DockPanel>
+                        </TabItem>
+                        <TabItem Header="カスタム" ToolTip="特定のMIDIプログラム番号に対して、個別の音色設定を割り当てます。パーカッションチャンネル（10）の場合は-1として設定します。">
+                            <DockPanel Margin="0,10,0,10">
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                    <Button Content="追加" Command="{Binding AddCustomInstrumentCommand}" Margin="5" ToolTip="新しいカスタムインストゥルメントを追加します。" Style="{StaticResource RichButtonStyle}"/>
+                                    <Button Content="削除" Command="{Binding RemoveCustomInstrumentCommand}" CommandParameter="{Binding ElementName=CustomInstrumentGrid, Path=SelectedItem}" Margin="5"
+                                            ToolTip="選択したカスタムインストゥルメントを削除します。" Style="{StaticResource RichButtonStyle}"/>
                                 </StackPanel>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" IsEnabled="{Binding Settings.SoundFont.EnableSoundFont}">
-                            <Grid>
-                                <TextBlock Text="ルール設定 (ダブルクリックで編集)" FontWeight="Bold" Margin="0,0,0,10" ToolTip="MIDIファイルの特徴に応じて使用するSoundFontを動的に切り替えるためのルールを設定します。"/>
-                                <DataGrid ItemsSource="{Binding SoundFontFiles}" x:Name="SoundFontRuleGrid" AutoGenerateColumns="False" CanUserAddRows="False" Margin="0,30,0,0" MinHeight="200" IsReadOnly="True">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="MouseDoubleClick">
-                                            <i:InvokeCommandAction Command="{Binding EditSoundFontRuleCommand}" CommandParameter="{Binding ElementName=SoundFontRuleGrid, Path=SelectedItem}"/>
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                    <DataGrid.Columns>
-                                        <DataGridTemplateColumn Width="Auto" MinWidth="40" Header="状態">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <Ellipse Width="10" Height="10" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="{Binding IsMissing, StringFormat='ファイルが見つかりません: {0}'}">
-                                                        <Ellipse.Style>
-                                                            <Style TargetType="Ellipse">
-                                                                <Setter Property="Fill" Value="Gray"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding IsMapped}" Value="True">
-                                                                        <Setter Property="Fill" Value="Green"/>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding IsMissing}" Value="True">
-                                                                        <Setter Property="Fill" Value="Red"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Ellipse.Style>
-                                                    </Ellipse>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                        <DataGridTextColumn Header="SoundFontファイル" Binding="{Binding FileName}" Width="180"/>
-                                        <DataGridTextColumn Header="最小時間(s)" Binding="{Binding Rule.MinDurationSeconds, TargetNullValue=''}" Width="Auto" MinWidth="90"/>
-                                        <DataGridTextColumn Header="最大時間(s)" Binding="{Binding Rule.MaxDurationSeconds, TargetNullValue=''}" Width="Auto" MinWidth="90"/>
-                                        <DataGridTextColumn Header="最小トラック" Binding="{Binding Rule.MinTrackCount, TargetNullValue=''}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="最大トラック" Binding="{Binding Rule.MaxTrackCount, TargetNullValue=''}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="必須プログラム" Binding="{Binding Rule.RequiredPrograms, Converter={StaticResource IntListConverter}, TargetNullValue=''}" Width="125"/>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </Grid>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="シンセシス" ToolTip="内蔵シンセサイザーの音作りに関する設定です。SoundFontやSFZを使用しない場合に適用されます。">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Margin="0,10,2,10">
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="基本設定" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                    <DataGrid ItemsSource="{Binding Settings.CustomInstruments}" x:Name="CustomInstrumentGrid" AutoGenerateColumns="False" CanUserAddRows="False">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="プログラム" Binding="{Binding Program}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="波形" Binding="{Binding Waveform}" Width="Auto" MinWidth="75"/>
+                                            <DataGridComboBoxColumn Header="Wavetableファイル" 
+                                                                    SelectedItemBinding="{Binding UserWavetableFile}" 
+                                                                    Width="Auto" MinWidth="125">
+                                                <DataGridComboBoxColumn.ElementStyle>
+                                                    <Style TargetType="ComboBox">
+                                                        <Setter Property="ItemsSource" Value="{Binding DataContext.WavetableFiles, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                    </Style>
+                                                </DataGridComboBoxColumn.ElementStyle>
+                                                <DataGridComboBoxColumn.EditingElementStyle>
+                                                    <Style TargetType="ComboBox">
+                                                        <Setter Property="ItemsSource" Value="{Binding DataContext.WavetableFiles, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                    </Style>
+                                                </DataGridComboBoxColumn.EditingElementStyle>
+                                            </DataGridComboBoxColumn>
+                                            <DataGridTextColumn Header="リリース" Binding="{Binding Release}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="音量" Binding="{Binding Volume}" Width="Auto" MinWidth="40"/>
+                                            <DataGridTextColumn Header="フィルター" Binding="{Binding Filter.Type}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="カットオフ" Binding="{Binding Filter.Cutoff}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="レゾナンス" Binding="{Binding Filter.Resonance}" Width="Auto" MinWidth="75"/>
+                                            <DataGridComboBoxColumn Header="F-LFO波形" SelectedItemBinding="{Binding Filter.Lfo.Waveform}" ItemsSource="{Binding Source={StaticResource LfoWaveformEnum}}" Width="Auto" MinWidth="90"/>
+                                            <DataGridTextColumn Header="F-LFO Rate" Binding="{Binding Filter.Lfo.Rate}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="F-LFO Depth" Binding="{Binding Filter.Lfo.Depth}" Width="Auto" MinWidth="60"/>
+                                            <DataGridComboBoxColumn Header="P-LFO波形" SelectedItemBinding="{Binding PitchLfo.Waveform}" ItemsSource="{Binding Source={StaticResource LfoWaveformEnum}}" Width="Auto" MinWidth="90"/>
+                                            <DataGridTextColumn Header="P-LFO Rate" Binding="{Binding PitchLfo.Rate}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="P-LFO Depth" Binding="{Binding PitchLfo.Depth}" Width="Auto" MinWidth="60"/>
+                                            <DataGridComboBoxColumn Header="A-LFO波形" SelectedItemBinding="{Binding AmplitudeLfo.Waveform}" ItemsSource="{Binding Source={StaticResource LfoWaveformEnum}}" Width="Auto" MinWidth="90"/>
+                                            <DataGridTextColumn Header="A-LFO Rate" Binding="{Binding AmplitudeLfo.Rate}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="A-LFO Depth" Binding="{Binding AmplitudeLfo.Depth}" Width="Auto" MinWidth="60"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </ScrollViewer>
+                            </DockPanel>
+                        </TabItem>
+                    </TabControl>
+                </TabItem>
+                <TabItem Header="デバッグ" ToolTip="問題が発生した際の調査に役立つデバッグ用の設定です。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
+                                <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-                                    <Label Grid.Row="0" Grid.Column="0" Content="デフォルト波形" ToolTip="音色の基本となる波形の種類を選択します。Sine (正弦波), Square (矩形波), Sawtooth (ノコギリ波), Triangle (三角波)などがあります。"/>
-                                    <ComboBox Grid.Row="0" Grid.Column="1" SelectedItem="{Binding Settings.Synthesis.DefaultWaveform}" Margin="10,0,0,10"
-                                              ToolTip="音色の基本となる波形の種類を選択します。Sine (正弦波), Square (矩形波), Sawtooth (ノコギリ波), Triangle (三角波)などがあります。">
-                                        <sys:String>Sine</sys:String>
-                                        <sys:String>Square</sys:String>
-                                        <sys:String>Sawtooth</sys:String>
-                                        <sys:String>Triangle</sys:String>
-                                        <sys:String>Organ</sys:String>
-                                        <sys:String>Noise</sys:String>
-                                    </ComboBox>
-                                    <Label Grid.Row="1" Grid.Column="0" Content="A4周波数 (Hz)" ToolTip="基準音となるA4（ラ）の周波数を設定します。現代の標準は440Hzですが、古楽などでは異なる値が使われます。"/>
-                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.A4Frequency}" Margin="10,0,0,10"
-                                             ToolTip="基準音となるA4（ラ）の周波数を設定します。現代の標準は440Hzですが、古楽などでは異なる値が使われます。"/>
-                                    <Label Grid.Row="2" Grid.Column="0" Content="最小周波数 (Hz)" ToolTip="生成する音声の周波数の下限です。これを超える周波数はクリップされます。"/>
-                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Synthesis.MinFrequency}" Margin="10,0,0,10"
-                                             ToolTip="生成する音声の周波数の下限です。これを超える周波数はクリップされます。"/>
-                                    <Label Grid.Row="3" Grid.Column="0" Content="最大周波数 (Hz)" ToolTip="生成する音声の周波数の上限です。これを超える周波数はクリップされます。"/>
-                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Synthesis.MaxFrequency}" Margin="10,0,0,10"
-                                             ToolTip="生成する音声の周波数の上限です。これを超える周波数はクリップされます。"/>
-                                    <Label Grid.Row="4" Grid.Column="0" Content="エンベロープスケール" ToolTip="ADSRエンベロープ（音の立ち上がりや減衰）の時間的なスケールを調整します。1より大きいと長くなり、小さいと短くなります。"/>
-                                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Settings.Synthesis.EnvelopeScale}" Margin="10,0,0,0"
-                                             ToolTip="ADSRエンベロープ（音の立ち上がりや減衰）の時間的なスケールを調整します。1より大きいと長くなり、小さいと短くなります。"/>
+                                    <TextBlock Text="ロギング" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Debug.EnableLogging}" Content="ログを有効にする"
+                                                  ToolTip="プラグインの動作ログをファイルに出力します。問題が発生した際の原因調査に役立ちます。"/>
+                                        <CheckBox IsChecked="{Binding Settings.Debug.VerboseLogging}" Content="詳細ログを有効にする" IsEnabled="{Binding Settings.Debug.EnableLogging}"
+                                                  ToolTip="より詳細なログを出力します。"/>
+                                        <Grid IsEnabled="{Binding Settings.Debug.EnableLogging}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="ログファイルパス" ToolTip="ログファイルの出力先パスを指定します。"/>
+                                            <TextBox Grid.Column="1" Text="{Binding Settings.Debug.LogFilePath}" Margin="10,0,0,0"
+                                                     ToolTip="ログファイルの出力先パスを指定します。"/>
+                                        </Grid>
+                                    </StackPanel>
                                 </Grid>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="デフォルトエンベロープ" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音の時間的な変化（ADSR）のデフォルト値を設定します。"/>
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    <Label Grid.Row="0" Grid.Column="0" Content="アタック" ToolTip="音が鳴り始めてから最大音量に達するまでの時間（秒）。"/>
-                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultAttack}" Margin="10,0,0,10"
-                                             ToolTip="音が鳴り始めてから最大音量に達するまでの時間（秒）。"/>
-                                    <Label Grid.Row="1" Grid.Column="0" Content="ディケイ" ToolTip="最大音量からサステインレベルまで減衰する時間（秒）。"/>
-                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultDecay}" Margin="10,0,0,10"
-                                             ToolTip="最大音量からサステインレベルまで減衰する時間（秒）。"/>
-                                    <Label Grid.Row="2" Grid.Column="0" Content="サステイン" ToolTip="ノートが押されている間の音量レベル (0-1)。"/>
-                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultSustain}" Margin="10,0,0,10"
-                                             ToolTip="ノートが押されている間の音量レベル (0-1)。"/>
-                                    <Label Grid.Row="3" Grid.Column="0" Content="リリース" ToolTip="ノートが離されてから音が消えるまでの時間（秒）。"/>
-                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultRelease}" Margin="10,0,0,0"
-                                             ToolTip="ノートが離されてから音が消えるまでの時間（秒）。"/>
-                                </Grid>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="FM音源" FontWeight="Bold" Margin="0,0,0,10" ToolTip="FM音源方式のシンセサイズに関する設定です。"/>
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    <Label Grid.Row="0" Grid.Column="0" Content="変調周波数 (Hz)" ToolTip="FM合成における変調波の周波数です。音色を複雑にします。"/>
-                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Synthesis.FmModulatorFrequency}" Margin="10,0,0,10"
-                                             ToolTip="FM合成における変調波の周波数です。音色を複雑にします。"/>
-                                    <Label Grid.Row="1" Grid.Column="0" Content="変調指数" ToolTip="FM合成における変調の深さです。値が大きいほど、より複雑で金属的な音色になります。"/>
-                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.FmModulationIndex}" Margin="10,0,0,0"
-                                             ToolTip="FM合成における変調の深さです。値が大きいほど、より複雑で金属的な音色になります。"/>
-                                </Grid>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="品質改善" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <CheckBox Grid.Row="1" IsChecked="{Binding Settings.Synthesis.EnableBandlimitedSynthesis}" Content="バンドリミテッド合成を有効にする (エイリアシングを削減)"
-                                          ToolTip="波形生成時にエイリアシング（折り返しノイズ）を低減する技術を有効にします。音質が向上しますが、CPU負荷がわずかに増加します。"/>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="スムージング" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Synthesis.EnableEnvelopeSmoothing}" Content="エンベロープスムージングを有効にする"
-                                              ToolTip="エンベロープの急な変化を滑らかにし、クリックノイズを低減します。"/>
-                                    <Grid IsEnabled="{Binding Settings.Synthesis.EnableEnvelopeSmoothing}" Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="アタック (s)"/>
-                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Synthesis.SmoothingAttackSeconds}" Margin="10,0,0,10"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="リリース (s)"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.SmoothingReleaseSeconds}" Margin="10,0,0,0"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="アンチポップ" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Synthesis.EnableAntiPop}" Content="アンチポップを有効にする"
-                                              ToolTip="ノートの開始時と終了時に短いフェードを適用し、「プツッ」というポップノイズを低減します。"/>
-                                    <Grid IsEnabled="{Binding Settings.Synthesis.EnableAntiPop}" Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="アタック (s)"/>
-                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Synthesis.AntiPopAttackSeconds}" Margin="10,0,0,10"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="リリース (s)"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.AntiPopReleaseSeconds}" Margin="10,0,0,0"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="エフェクト" ToolTip="音質を調整するための様々なエフェクトを設定します。">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Margin="0,10,2,10">
-                        <CheckBox IsChecked="{Binding Settings.Effects.EnableEffects}" Content="エフェクトを有効にする" ToolTip="すべてのオーディオエフェクトの有効/無効を切り替えます。"/>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,10,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="コンプレッサー" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音量のばらつきを抑え、音圧を上げるエフェクトです。"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Effects.EnableCompression}" Content="コンプレッサーを有効にする"/>
-                                    <Grid IsEnabled="{Binding Settings.Effects.EnableCompression}" Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="閾値" ToolTip="コンプレッサーが作動を開始する音量のしきい値。"/>
-                                        <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.CompressionThreshold}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
-                                                         ToolTip="コンプレッサーが作動を開始する音量のしきい値。"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="レシオ" ToolTip="しきい値を超えた音を圧縮する比率。4:1の場合、しきい値を4dB超えた音は1dB超えた音に圧縮されます。"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.CompressionRatio}" Margin="10,0,0,10"
-                                                 ToolTip="しきい値を超えた音を圧縮する比率。4:1の場合、しきい値を4dB超えた音は1dB超えた音に圧縮されます。"/>
-                                        <Label Grid.Row="2" Grid.Column="0" Content="アタック (s)" ToolTip="コンプレッサーが作動し始めるまでの時間（秒）。"/>
-                                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Effects.CompressionAttack}" Margin="10,0,0,10"
-                                                 ToolTip="コンプレッサーが作動し始めるまでの時間（秒）。"/>
-                                        <Label Grid.Row="3" Grid.Column="0" Content="リリース (s)" ToolTip="コンプレッサーが解除されるまでの時間（秒）。"/>
-                                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Effects.CompressionRelease}" Margin="10,0,0,0"
-                                                 ToolTip="コンプレッサーが解除されるまでの時間（秒）。"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="リバーブ" FontWeight="Bold" Margin="0,0,0,10" ToolTip="残響音を加えて、音に広がりや深みを与えます。"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Effects.EnableReverb}" Content="リバーブを有効にする"/>
-                                    <Grid IsEnabled="{Binding Settings.Effects.EnableReverb}" Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="ディレイ (ms)" ToolTip="初期反射音が返ってくるまでの時間（ミリ秒）。部屋の大きさをシミュレートします。"/>
-                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Effects.ReverbDelay}" Margin="10,0,0,10"
-                                                 ToolTip="初期反射音が返ってくるまでの時間（ミリ秒）。部屋の大きさをシミュレートします。"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="ディケイ" ToolTip="残響音が減衰していく速さ。"/>
-                                        <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.ReverbDecay}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
-                                                         ToolTip="残響音が減衰していく速さ。"/>
-                                        <Label Grid.Row="2" Grid.Column="0" Content="強度" ToolTip="原音に対するリバーブ音の強さ。"/>
-                                        <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.ReverbStrength}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
-                                                         ToolTip="原音に対するリバーブ音の強さ。"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="コーラス" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音をわずかに揺らして重ねることで、音に厚みと広がりを与えます。"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Effects.EnableChorus}" Content="コーラスを有効にする"/>
-                                    <Grid IsEnabled="{Binding Settings.Effects.EnableChorus}" Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="ディレイ (s)" ToolTip="原音と重ねる音の遅延時間（秒）。"/>
-                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Effects.ChorusDelay}" Margin="10,0,0,10"
-                                                 ToolTip="原音と重ねる音の遅延時間（秒）。"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="深さ" ToolTip="音の揺れの深さ。"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.ChorusDepth}" Margin="10,0,0,10"
-                                                 ToolTip="音の揺れの深さ。"/>
-                                        <Label Grid.Row="2" Grid.Column="0" Content="レート (Hz)" ToolTip="音を揺らす速さ（Hz）。"/>
-                                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Effects.ChorusRate}" Margin="10,0,0,10"
-                                                 ToolTip="音を揺らす速さ（Hz）。"/>
-                                        <Label Grid.Row="3" Grid.Column="0" Content="強度" ToolTip="原音に対するコーラス音の強さ。"/>
-                                        <c:TextBoxSlider Grid.Row="3" Grid.Column="1" Value="{Binding Settings.Effects.ChorusStrength}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
-                                                         ToolTip="原音に対するコーラス音の強さ。"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="フェイザー" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音の位相をずらして独特のうねりを生み出すエフェクトです。"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Effects.EnablePhaser}" Content="フェイザーを有効にする"/>
-                                    <Grid IsEnabled="{Binding Settings.Effects.EnablePhaser}" Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="レート (Hz)" ToolTip="位相を変化させる速さ（Hz）。"/>
-                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Effects.PhaserRate}" Margin="10,0,0,10"
-                                                 ToolTip="位相を変化させる速さ（Hz）。"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="ステージ数" ToolTip="フェイザーのフィルターの段数。多いほど複雑な効果になります。"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.PhaserStages}" Margin="10,0,0,10"
-                                                 ToolTip="フェイザーのフィルターの段数。多いほど複雑な効果になります。"/>
-                                        <Label Grid.Row="2" Grid.Column="0" Content="フィードバック" ToolTip="エフェクト音を再度入力に戻す量。効果を強調します。"/>
-                                        <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.PhaserFeedback}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
-                                                         ToolTip="エフェクト音を再度入力に戻す量。効果を強調します。"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="フランジャー" FontWeight="Bold" Margin="0,0,0,10" ToolTip="コーラスに似ていますが、より短く周期的な遅延を用いて金属的なうねりを生み出します。"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Effects.EnableFlanger}" Content="フランジャーを有効にする"/>
-                                    <Grid IsEnabled="{Binding Settings.Effects.EnableFlanger}" Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="ディレイ (s)" ToolTip="遅延時間（秒）。"/>
-                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Effects.FlangerDelay}" Margin="10,0,0,10"
-                                                 ToolTip="遅延時間（秒）。"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="レート (Hz)" ToolTip="うねりの速さ（Hz）。"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.FlangerRate}" Margin="10,0,0,10"
-                                                 ToolTip="うねりの速さ（Hz）。"/>
-                                        <Label Grid.Row="2" Grid.Column="0" Content="深さ" ToolTip="うねりの深さ。"/>
-                                        <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.FlangerDepth}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
-                                                         ToolTip="うねりの深さ。"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="リミッター" FontWeight="Bold" Margin="0,0,0,10" ToolTip="音量が一定のしきい値を超えないように制限し、音割れ（クリッピング）を防ぎます。"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Effects.EnableLimiter}" Content="リミッターを有効にする"/>
-                                    <Grid IsEnabled="{Binding Settings.Effects.EnableLimiter}" Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="閾値" ToolTip="音量を制限する上限値。"/>
-                                        <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.LimiterThreshold}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
-                                                         ToolTip="音量を制限する上限値。"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="イコライザー" FontWeight="Bold" Margin="0,0,0,10" ToolTip="特定の周波数帯域を強調したり、抑制したりして音質を調整します。"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Effects.EnableEqualizer}" Content="イコライザーを有効にする"/>
-                                    <Grid IsEnabled="{Binding Settings.Effects.EnableEqualizer}" Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="低音ゲイン" ToolTip="低音域のゲイン（音量）を調整します。"/>
-                                        <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.EQ.BassGain}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
-                                                         ToolTip="低音域のゲイン（音量）を調整します。"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="中音ゲイン" ToolTip="中音域のゲイン（音量）を調整します。"/>
-                                        <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.EQ.MidGain}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
-                                                         ToolTip="中音域のゲイン（音量）を調整します。"/>
-                                        <Label Grid.Row="2" Grid.Column="0" Content="高音ゲイン" ToolTip="高音域のゲイン（音量）を調整します。"/>
-                                        <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.EQ.TrebleGain}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
-                                                         ToolTip="高音域のゲイン（音量）を調整します。"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" IsEnabled="{Binding Settings.Effects.EnableEffects}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="その他" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Effects.EnableDCOffsetRemoval}" Content="DCオフセット除去を有効にする"
-                                              ToolTip="音声信号に含まれる直流成分（DCオフセット）を除去します。不要なノイズや歪みを防ぎます。"/>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="インストゥルメント" ToolTip="MIDIのプログラム番号に応じた音色の設定を行います。">
-                <TabControl Margin="0,10,0,0">
-                    <TabItem Header="プリセット" ToolTip="MIDIプログラム番号の範囲に対して、音色の設定（波形、エンベロープ、フィルター）を割り当てます。">
-                        <DockPanel Margin="0,10,0,10">
-                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                                <Button Content="追加" Command="{Binding AddInstrumentPresetCommand}" Margin="5" ToolTip="新しいインストゥルメントプリセットを追加します。" Style="{StaticResource RichButtonStyle}"/>
-                                <Button Content="削除" Command="{Binding RemoveInstrumentPresetCommand}" CommandParameter="{Binding ElementName=InstrumentPresetGrid, Path=SelectedItem}" Margin="5"
-                                        ToolTip="選択したプリセットを削除します。" Style="{StaticResource RichButtonStyle}"/>
-                            </StackPanel>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                                <DataGrid ItemsSource="{Binding Settings.InstrumentPresets}" x:Name="InstrumentPresetGrid" AutoGenerateColumns="False" CanUserAddRows="False">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="名前" Binding="{Binding Name}" Width="Auto" MinWidth="120"/>
-                                        <DataGridTextColumn Header="開始" Binding="{Binding StartProgram}" Width="Auto" MinWidth="40"/>
-                                        <DataGridTextColumn Header="終了" Binding="{Binding EndProgram}" Width="Auto" MinWidth="40"/>
-                                        <DataGridTextColumn Header="波形" Binding="{Binding Waveform}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="アタック" Binding="{Binding Attack}" Width="Auto" MinWidth="60"/>
-                                        <DataGridTextColumn Header="ディケイ" Binding="{Binding Decay}" Width="Auto" MinWidth="60"/>
-                                        <DataGridTextColumn Header="サステイン" Binding="{Binding Sustain}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="リリース" Binding="{Binding Release}" Width="Auto" MinWidth="60"/>
-                                        <DataGridTextColumn Header="音量" Binding="{Binding Volume}" Width="Auto" MinWidth="40"/>
-                                        <DataGridTextColumn Header="フィルター" Binding="{Binding Filter.Type}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="カットオフ" Binding="{Binding Filter.Cutoff}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="レゾナンス" Binding="{Binding Filter.Resonance}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="変調" Binding="{Binding Filter.Modulation}" Width="Auto" MinWidth="40"/>
-                                        <DataGridTextColumn Header="変調レート" Binding="{Binding Filter.ModulationRate}" Width="Auto" MinWidth="75"/>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </ScrollViewer>
-                        </DockPanel>
-                    </TabItem>
-                    <TabItem Header="カスタム" ToolTip="特定のMIDIプログラム番号に対して、個別の音色設定を割り当てます。パーカッションチャンネル（10）の場合は-1として設定します。">
-                        <DockPanel Margin="0,10,0,10">
-                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                                <Button Content="追加" Command="{Binding AddCustomInstrumentCommand}" Margin="5" ToolTip="新しいカスタムインストゥルメントを追加します。" Style="{StaticResource RichButtonStyle}"/>
-                                <Button Content="削除" Command="{Binding RemoveCustomInstrumentCommand}" CommandParameter="{Binding ElementName=CustomInstrumentGrid, Path=SelectedItem}" Margin="5"
-                                        ToolTip="選択したカスタムインストゥルメントを削除します。" Style="{StaticResource RichButtonStyle}"/>
-                            </StackPanel>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                                <DataGrid ItemsSource="{Binding Settings.CustomInstruments}" x:Name="CustomInstrumentGrid" AutoGenerateColumns="False" CanUserAddRows="False">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="プログラム" Binding="{Binding Program}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="波形" Binding="{Binding Waveform}" Width="*" MinWidth="75"/>
-                                        <DataGridTextColumn Header="アタック" Binding="{Binding Attack}" Width="Auto" MinWidth="60"/>
-                                        <DataGridTextColumn Header="ディケイ" Binding="{Binding Decay}" Width="Auto" MinWidth="60"/>
-                                        <DataGridTextColumn Header="サステイン" Binding="{Binding Sustain}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="リリース" Binding="{Binding Release}" Width="Auto" MinWidth="60"/>
-                                        <DataGridTextColumn Header="音量" Binding="{Binding Volume}" Width="Auto" MinWidth="40"/>
-                                        <DataGridTextColumn Header="フィルター" Binding="{Binding Filter.Type}" Width="*" MinWidth="75"/>
-                                        <DataGridTextColumn Header="カットオフ" Binding="{Binding Filter.Cutoff}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="レゾナンス" Binding="{Binding Filter.Resonance}" Width="Auto" MinWidth="75"/>
-                                        <DataGridTextColumn Header="変調" Binding="{Binding Filter.Modulation}" Width="Auto" MinWidth="40"/>
-                                        <DataGridTextColumn Header="変調レート" Binding="{Binding Filter.ModulationRate}" Width="Auto" MinWidth="75"/>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </ScrollViewer>
-                        </DockPanel>
-                    </TabItem>
-                </TabControl>
-            </TabItem>
-            <TabItem Header="デバッグ" ToolTip="問題が発生した際の調査に役立つデバッグ用の設定です。">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel Margin="0,10,2,10">
-                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="ロギング" FontWeight="Bold" Margin="0,0,0,10"/>
-                                <StackPanel Grid.Row="1">
-                                    <CheckBox IsChecked="{Binding Settings.Debug.EnableLogging}" Content="ログを有効にする"
-                                              ToolTip="プラグインの動作ログをファイルに出力します。問題が発生した際の原因調査に役立ちます。"/>
-                                    <CheckBox IsChecked="{Binding Settings.Debug.VerboseLogging}" Content="詳細ログを有効にする" IsEnabled="{Binding Settings.Debug.EnableLogging}"
-                                              ToolTip="より詳細なログを出力します。"/>
-                                    <Grid IsEnabled="{Binding Settings.Debug.EnableLogging}" Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="ログファイルパス" ToolTip="ログファイルの出力先パスを指定します。"/>
-                                        <TextBox Grid.Column="1" Text="{Binding Settings.Debug.LogFilePath}" Margin="10,0,0,0"
-                                                 ToolTip="ログファイルの出力先パスを指定します。"/>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-        </TabControl>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
     </Grid>
 </UserControl>

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using ComputeSharp;
+using System.IO;
+using System.Reflection;
+using System.Collections.Concurrent;
 
 namespace MIDI
 {
@@ -31,21 +34,71 @@ namespace MIDI
         private readonly MidiConfiguration config;
         private readonly int sampleRate;
         private readonly Dictionary<int, Queue<float>> karplusStrongBuffers = new Dictionary<int, Queue<float>>();
+        private static readonly ConcurrentDictionary<string, float[]> wavetableCache = new ConcurrentDictionary<string, float[]>();
 
         public SynthesisEngine(MidiConfiguration config, int sampleRate)
         {
             this.config = config;
             this.sampleRate = sampleRate;
+            LoadAllWavetables();
         }
 
-        public double GetFrequency(int noteNumber, double pitchBend)
+        private void LoadAllWavetables()
         {
-            var semitoneOffset = pitchBend;
+            try
+            {
+                var baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+                var wavetableDir = Path.Combine(baseDir, config.Synthesis.WavetableDirectory);
+                if (!Directory.Exists(wavetableDir))
+                {
+                    Directory.CreateDirectory(wavetableDir);
+                    return;
+                }
+
+                foreach (var file in Directory.GetFiles(wavetableDir, "*.wav"))
+                {
+                    LoadWavetable(file);
+                }
+            }
+            catch { }
+        }
+
+        private static float[] LoadWavetable(string path)
+        {
+            if (wavetableCache.TryGetValue(path, out var cachedTable))
+            {
+                return cachedTable;
+            }
+
+            try
+            {
+                using (var reader = new BinaryReader(new FileStream(path, FileMode.Open)))
+                {
+                    reader.BaseStream.Seek(44, SeekOrigin.Begin);
+                    var data = new List<float>();
+                    while (reader.BaseStream.Position < reader.BaseStream.Length)
+                    {
+                        data.Add(reader.ReadInt16() / 32768.0f);
+                    }
+                    var table = data.ToArray();
+                    wavetableCache.TryAdd(path, table);
+                    return table;
+                }
+            }
+            catch
+            {
+                return new float[0];
+            }
+        }
+
+        public double GetFrequency(int noteNumber, double pitchBend, double pitchLfo = 0.0)
+        {
+            var semitoneOffset = pitchBend + pitchLfo;
             var baseFreq = config.Synthesis.A4Frequency * Math.Pow(2.0, (noteNumber - 69.0 + semitoneOffset) / 12.0);
             return Math.Max(config.Synthesis.MinFrequency, Math.Min(config.Synthesis.MaxFrequency, baseFreq));
         }
 
-        public float GenerateWaveform(WaveformType type, double frequency, double time, float amplitude, double envelope, int noteNumber)
+        public float GenerateWaveform(WaveformType type, double frequency, double time, float amplitude, double envelope, int noteNumber, string? wavetableFile = null)
         {
             var phase = frequency * time;
             var phaseIncrement = frequency / sampleRate;
@@ -62,6 +115,7 @@ namespace MIDI
                     WaveformType.Organ => (Math.Sin(2 * Math.PI * phase) + 0.5 * Math.Sin(4 * Math.PI * phase) + 0.25 * Math.Sin(6 * Math.PI * phase)) / 1.75,
                     WaveformType.Noise => (Random.Shared.NextDouble() * 2 - 1),
                     WaveformType.Wavetable => GenerateWavetable(2 * Math.PI * phase),
+                    WaveformType.UserWavetable => GenerateUserWavetable(2 * Math.PI * phase, wavetableFile),
                     WaveformType.Fm => GenerateFm(2 * Math.PI * phase, time),
                     WaveformType.KarplusStrong => GenerateKarplusStrong(noteNumber, frequency, time),
                     _ => Math.Sin(2 * Math.PI * phase)
@@ -79,6 +133,7 @@ namespace MIDI
                     WaveformType.Organ => Math.Sin(fullPhase) + 0.5 * Math.Sin(2 * fullPhase) + 0.25 * Math.Sin(3 * fullPhase),
                     WaveformType.Noise => (Random.Shared.NextDouble() * 2 - 1),
                     WaveformType.Wavetable => GenerateWavetable(fullPhase),
+                    WaveformType.UserWavetable => GenerateUserWavetable(fullPhase, wavetableFile),
                     WaveformType.Fm => GenerateFm(fullPhase, time),
                     WaveformType.KarplusStrong => GenerateKarplusStrong(noteNumber, frequency, time),
                     _ => Math.Sin(fullPhase)
@@ -136,6 +191,25 @@ namespace MIDI
             return (1 - mix) * wave1 + mix * wave2;
         }
 
+        private double GenerateUserWavetable(double phase, string? wavetableFile)
+        {
+            if (string.IsNullOrEmpty(wavetableFile)) return 0;
+
+            var baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+            var wavetableDir = Path.Combine(baseDir, config.Synthesis.WavetableDirectory);
+            var fullPath = Path.Combine(wavetableDir, wavetableFile);
+
+            var table = LoadWavetable(fullPath);
+            if (table.Length == 0) return 0;
+
+            var index = (phase / (2 * Math.PI)) * (table.Length - 1);
+            var i1 = (int)index % table.Length;
+            var i2 = (i1 + 1) % table.Length;
+            var frac = index - Math.Floor(index);
+
+            return table[i1] * (1.0 - frac) + table[i2] * frac;
+        }
+
         private double GenerateFm(double phase, double time)
         {
             double modulatorFrequency = config.Synthesis.FmModulatorFrequency;
@@ -167,6 +241,21 @@ namespace MIDI
             var nextValue = (currentValue + currentBuffer.Peek()) * 0.5f * 0.996f;
             currentBuffer.Enqueue(nextValue);
             return nextValue;
+        }
+
+        public double GetLfoValue(LfoSettings lfo, double time)
+        {
+            var phase = lfo.Rate * time;
+            return lfo.Waveform switch
+            {
+                LfoWaveformType.Sine => Math.Sin(2 * Math.PI * phase),
+                LfoWaveformType.Square => Math.Sign(Math.Sin(2 * Math.PI * phase)),
+                LfoWaveformType.Sawtooth => (2 * (phase - Math.Floor(phase + 0.5))),
+                LfoWaveformType.Triangle => (4 * Math.Abs((phase - Math.Floor(phase + 0.75) + 0.25) % 1 - 0.5) - 1),
+                LfoWaveformType.Noise => (Random.Shared.NextDouble() * 2 - 1),
+                LfoWaveformType.RandomHold => (int)(2 * phase) % 2 == 0 ? 1 : -1,
+                _ => 0
+            };
         }
 
         public double GenerateBasicWaveform(string waveType, double frequency, double time)
@@ -216,8 +305,7 @@ namespace MIDI
                         FilterType = Enum.Parse<FilterType>(preset.Filter.Type, true),
                         FilterCutoff = preset.Filter.Cutoff,
                         FilterResonance = preset.Filter.Resonance,
-                        FilterModulation = preset.Filter.Modulation,
-                        FilterModulationRate = preset.Filter.ModulationRate
+                        FilterLfo = preset.Filter.Lfo,
                     };
                 }
             }
@@ -240,16 +328,16 @@ namespace MIDI
             return new InstrumentSettings
             {
                 WaveType = Enum.Parse<WaveformType>(customInst.Waveform, true),
-                Attack = customInst.Attack,
-                Decay = customInst.Decay,
-                Sustain = customInst.Sustain,
+                UserWavetableFile = customInst.UserWavetableFile,
+                AmplitudeEnvelope = customInst.AmplitudeEnvelope.Select(p => new EnvelopePoint(p.Time, p.Value)).ToList(),
                 Release = customInst.Release,
                 VolumeMultiplier = customInst.Volume,
                 FilterType = Enum.Parse<FilterType>(customInst.Filter.Type, true),
                 FilterCutoff = customInst.Filter.Cutoff,
                 FilterResonance = customInst.Filter.Resonance,
-                FilterModulation = customInst.Filter.Modulation,
-                FilterModulationRate = customInst.Filter.ModulationRate
+                FilterLfo = customInst.Filter.Lfo,
+                PitchLfo = customInst.PitchLfo,
+                AmplitudeLfo = customInst.AmplitudeLfo
             };
         }
     }

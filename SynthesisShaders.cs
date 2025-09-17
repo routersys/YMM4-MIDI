@@ -150,8 +150,8 @@ namespace MIDI
             int leftIndex = sampleIndex * 2;
             int rightIndex = leftIndex + 1;
 
-            if (leftIndex < buffer.Length) buffer[leftIndex] = leftValue;
-            if (rightIndex < buffer.Length) buffer[rightIndex] = rightValue;
+            if (leftIndex < buffer.Length) buffer[leftIndex] += leftValue;
+            if (rightIndex < buffer.Length) buffer[rightIndex] += rightValue;
         }
     }
 }

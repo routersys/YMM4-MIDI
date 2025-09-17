@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,15 +19,23 @@ namespace MIDI
 
         public ICommand ReloadConfigCommand { get; }
         public ICommand RefreshFilesCommand { get; }
+        public ICommand OpenPluginDirectoryCommand { get; }
         public ICommand EditSfzMapCommand { get; }
         public ICommand EditSoundFontRuleCommand { get; }
+        public ICommand AddSoundFontLayerCommand { get; }
+        public ICommand RemoveSoundFontLayerCommand { get; }
+        public ICommand MoveSoundFontLayerUpCommand { get; }
+        public ICommand MoveSoundFontLayerDownCommand { get; }
         public ICommand AddInstrumentPresetCommand { get; }
         public ICommand RemoveInstrumentPresetCommand { get; }
         public ICommand AddCustomInstrumentCommand { get; }
         public ICommand RemoveCustomInstrumentCommand { get; }
+        public ICommand SelectImpulseResponseFileCommand { get; }
 
         public ObservableCollection<SfzFileViewModel> SfzFiles { get; } = new();
         public ObservableCollection<SoundFontFileViewModel> SoundFontFiles { get; } = new();
+        public ObservableCollection<SoundFontLayer> SoundFontLayers => Settings.SoundFont.Layers;
+        public ObservableCollection<string> WavetableFiles { get; } = new();
 
         private string _currentVersionText = "バージョン情報を取得中...";
         public string CurrentVersionText
@@ -66,9 +76,19 @@ namespace MIDI
             {
                 Settings.Reload();
                 RefreshAllFiles();
+                OnPropertyChanged(nameof(SoundFontLayers));
             });
 
             RefreshFilesCommand = new RelayCommand(_ => RefreshAllFiles());
+
+            OpenPluginDirectoryCommand = new RelayCommand(_ =>
+            {
+                var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                if (assemblyLocation != null && Directory.Exists(assemblyLocation))
+                {
+                    Process.Start("explorer.exe", assemblyLocation);
+                }
+            });
 
             EditSfzMapCommand = new RelayCommand(p =>
             {
@@ -86,6 +106,58 @@ namespace MIDI
                 }
             });
 
+            AddSoundFontLayerCommand = new RelayCommand(p => {
+                if (p is SoundFontFileViewModel sfFile)
+                {
+                    if (!SoundFontLayers.Any(l => l.SoundFontFile == sfFile.FileName))
+                    {
+                        SoundFontLayers.Add(new SoundFontLayer { SoundFontFile = sfFile.FileName });
+                    }
+                }
+            });
+
+            RemoveSoundFontLayerCommand = new RelayCommand(p => {
+                if (p is SoundFontLayer layer)
+                {
+                    SoundFontLayers.Remove(layer);
+                }
+            });
+
+            MoveSoundFontLayerUpCommand = new RelayCommand(p => {
+                if (p is SoundFontLayer layer)
+                {
+                    var index = SoundFontLayers.IndexOf(layer);
+                    if (index > 0)
+                    {
+                        SoundFontLayers.Move(index, index - 1);
+                    }
+                }
+            });
+
+            MoveSoundFontLayerDownCommand = new RelayCommand(p => {
+                if (p is SoundFontLayer layer)
+                {
+                    var index = SoundFontLayers.IndexOf(layer);
+                    if (index < SoundFontLayers.Count - 1)
+                    {
+                        SoundFontLayers.Move(index, index + 1);
+                    }
+                }
+            });
+
+            SelectImpulseResponseFileCommand = new RelayCommand(_ =>
+            {
+                var openFileDialog = new OpenFileDialog
+                {
+                    Filter = "WAV Files (*.wav)|*.wav|All files (*.*)|*.*",
+                    Title = "インパルス応答ファイルを選択"
+                };
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    Settings.Effects.ImpulseResponseFilePath = openFileDialog.FileName;
+                }
+            });
+
             AddInstrumentPresetCommand = new RelayCommand(_ => Settings.InstrumentPresets.Add(new InstrumentPreset()));
             RemoveInstrumentPresetCommand = new RelayCommand(p => { if (p is InstrumentPreset preset) Settings.InstrumentPresets.Remove(preset); });
             AddCustomInstrumentCommand = new RelayCommand(_ => Settings.CustomInstruments.Add(new CustomInstrument()));
@@ -96,6 +168,14 @@ namespace MIDI
             Settings.SFZ.ProgramMaps.CollectionChanged += (s, e) => RefreshAllFiles();
             Settings.SoundFont.Rules.CollectionChanged += (s, e) => RefreshAllFiles();
             Settings.Performance.GPU.PropertyChanged += OnGpuSettingsChanged;
+            Settings.SoundFont.Layers.CollectionChanged += (s, e) => Settings.Save();
+            Settings.Synthesis.PropertyChanged += (s, e) => {
+                if (e.PropertyName == nameof(Settings.Synthesis.WavetableDirectory))
+                {
+                    LoadWavetableFilesAsync();
+                }
+            };
+
 
             _ = CheckForUpdates();
         }
@@ -246,6 +326,7 @@ namespace MIDI
         {
             LoadSfzFilesAsync();
             LoadSoundFontFilesAsync();
+            LoadWavetableFilesAsync();
         }
 
         private async void LoadSfzFilesAsync()
@@ -306,6 +387,8 @@ namespace MIDI
                 }
                 return Directory.GetFiles(sfDir, "*.sf2", SearchOption.AllDirectories)
                                 .Select(Path.GetFileName)
+                                .Where(f => f != null)
+                                .Select(f => f!)
                                 .ToList();
             });
 
@@ -316,8 +399,8 @@ namespace MIDI
 
                 foreach (var file in files)
                 {
-                    var vm = new SoundFontFileViewModel(file!);
-                    if (mappedFiles.TryGetValue(file!, out var rule))
+                    var vm = new SoundFontFileViewModel(file);
+                    if (mappedFiles.TryGetValue(file, out var rule))
                     {
                         vm.Rule = rule;
                     }
@@ -334,6 +417,34 @@ namespace MIDI
                         };
                         SoundFontFiles.Add(vm);
                     }
+                }
+            });
+        }
+
+        private async void LoadWavetableFilesAsync()
+        {
+            var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+            var wavetableDir = Path.Combine(assemblyLocation, Settings.Synthesis.WavetableDirectory);
+
+            var files = await Task.Run(() =>
+            {
+                if (!Directory.Exists(wavetableDir))
+                {
+                    try { Directory.CreateDirectory(wavetableDir); } catch { return new List<string>(); }
+                }
+                return Directory.GetFiles(wavetableDir, "*.wav", SearchOption.AllDirectories)
+                                .Select(Path.GetFileName)
+                                .Where(f => f != null)
+                                .Select(f => f!)
+                                .ToList();
+            });
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                WavetableFiles.Clear();
+                foreach (var file in files)
+                {
+                    WavetableFiles.Add(file);
                 }
             });
         }
