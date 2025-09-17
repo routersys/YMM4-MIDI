@@ -644,7 +644,6 @@ namespace MIDI
 
         public void Dispose()
         {
-            loadingTask.Wait();
             (gpuDevice as IDisposable)?.Dispose();
             _sfzState?.Dispose();
             effectsProcessor?.Dispose();
