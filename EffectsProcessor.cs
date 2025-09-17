@@ -9,15 +9,17 @@ namespace MIDI
     {
         private readonly MidiConfiguration config;
         private readonly int sampleRate;
+        private readonly GraphicsDevice? device;
         private float[]? impulseResponse;
         private bool disposedValue;
         private const int GpuChunkSize = 1 << 18;
         private const float DcOffsetAlpha = 0.995f;
 
-        public EffectsProcessor(MidiConfiguration config, int sampleRate)
+        public EffectsProcessor(MidiConfiguration config, int sampleRate, GraphicsDevice? device = null)
         {
             this.config = config;
             this.sampleRate = sampleRate;
+            this.device = device;
             LoadImpulseResponse();
         }
 
@@ -60,7 +62,7 @@ namespace MIDI
             return output;
         }
 
-        public bool ApplyAudioEnhancements(Span<float> buffer, GraphicsDevice? device)
+        public bool ApplyAudioEnhancements(Span<float> buffer)
         {
             if (!config.Effects.EnableEffects) return true;
 

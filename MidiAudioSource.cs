@@ -56,8 +56,7 @@ namespace MIDI
             config = configuration ?? MidiConfiguration.Default;
             sampleRate = config.Audio.SampleRate;
             synthesisEngine = new SynthesisEngine(config, sampleRate);
-            effectsProcessor = new EffectsProcessor(config, sampleRate);
-            audioRenderer = new AudioRenderer(config, sampleRate);
+
             sfzProcessor = new SfzProcessor(config, sampleRate);
 
             if (audioCache.TryGetValue(filePath, out var cachedData) && cachedData.sampleRate == this.sampleRate)
@@ -65,6 +64,8 @@ namespace MIDI
                 this.audioBuffer = cachedData.audioBuffer;
                 this.Duration = cachedData.duration;
                 this.loadingTask = Task.CompletedTask;
+                effectsProcessor = new EffectsProcessor(config, sampleRate);
+                audioRenderer = new AudioRenderer(config, sampleRate);
                 return;
             }
 
@@ -78,6 +79,8 @@ namespace MIDI
                 LogError($"MIDIのDuration読み込み中にエラーが発生しました: {ex.Message}", ex);
                 this.Duration = TimeSpan.Zero;
                 this.loadingTask = Task.FromException(ex);
+                effectsProcessor = new EffectsProcessor(config, sampleRate);
+                audioRenderer = new AudioRenderer(config, sampleRate);
                 return;
             }
 
@@ -94,6 +97,9 @@ namespace MIDI
                     LogError($"GPUデバイスの取得に失敗しました: {ex.Message}", ex);
                 }
             }
+
+            effectsProcessor = new EffectsProcessor(config, sampleRate, gpuDevice);
+            audioRenderer = new AudioRenderer(config, sampleRate);
 
             bool isRealtime = config.Performance.RenderingMode == RenderingMode.RealtimeCPU || config.Performance.RenderingMode == RenderingMode.RealtimeGPU;
 
@@ -344,7 +350,7 @@ namespace MIDI
 
                 if (config.Effects.EnableEffects)
                 {
-                    if (!effectsProcessor.ApplyAudioEnhancements(audioDataSpan, gpuDevice))
+                    if (!effectsProcessor.ApplyAudioEnhancements(audioDataSpan))
                     {
                         NotifyGpuFallbackToCpu();
                     }
@@ -412,7 +418,7 @@ namespace MIDI
 
             if (config.Effects.EnableEffects)
             {
-                if (!effectsProcessor.ApplyAudioEnhancements(bufferSpan, gpuDevice))
+                if (!effectsProcessor.ApplyAudioEnhancements(bufferSpan))
                 {
                     NotifyGpuFallbackToCpu();
                 }
@@ -531,7 +537,7 @@ namespace MIDI
 
             if (config.Effects.EnableEffects)
             {
-                if (!effectsProcessor.ApplyAudioEnhancements(destBuffer, gpuDevice))
+                if (!effectsProcessor.ApplyAudioEnhancements(destBuffer))
                 {
                     NotifyGpuFallbackToCpu();
                 }
@@ -638,6 +644,7 @@ namespace MIDI
 
         public void Dispose()
         {
+            loadingTask.Wait();
             (gpuDevice as IDisposable)?.Dispose();
             _sfzState?.Dispose();
             effectsProcessor?.Dispose();

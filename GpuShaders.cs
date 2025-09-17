@@ -234,7 +234,7 @@ namespace MIDI
 
             if (enableDcOffsetRemoval && i > 0)
             {
-                sample = sample - buffer[i - 1] + 0.995f * sample;
+                sample = sample - buffer[i - 1];
             }
 
             if (enableCompression)

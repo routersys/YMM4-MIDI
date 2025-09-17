@@ -63,7 +63,7 @@ namespace MIDI
                     WaveformType.Noise => (Random.Shared.NextDouble() * 2 - 1),
                     WaveformType.Wavetable => GenerateWavetable(2 * Math.PI * phase),
                     WaveformType.Fm => GenerateFm(2 * Math.PI * phase, time),
-                    WaveformType.KarplusStrong => GenerateKarplusStrong(noteNumber, frequency),
+                    WaveformType.KarplusStrong => GenerateKarplusStrong(noteNumber, frequency, time),
                     _ => Math.Sin(2 * Math.PI * phase)
                 };
             }
@@ -80,7 +80,7 @@ namespace MIDI
                     WaveformType.Noise => (Random.Shared.NextDouble() * 2 - 1),
                     WaveformType.Wavetable => GenerateWavetable(fullPhase),
                     WaveformType.Fm => GenerateFm(fullPhase, time),
-                    WaveformType.KarplusStrong => GenerateKarplusStrong(noteNumber, frequency),
+                    WaveformType.KarplusStrong => GenerateKarplusStrong(noteNumber, frequency, time),
                     _ => Math.Sin(fullPhase)
                 };
             }
@@ -144,21 +144,25 @@ namespace MIDI
             return Math.Sin(phase + modulationIndex * modulator);
         }
 
-        private float GenerateKarplusStrong(int noteNumber, double frequency)
+        private float GenerateKarplusStrong(int noteNumber, double frequency, double time)
         {
             int bufferSize = (int)(sampleRate / frequency);
-            if (!karplusStrongBuffers.ContainsKey(noteNumber))
+            if (bufferSize <= 1) return 0;
+
+            bool isNoteStart = time < (1.0 / sampleRate);
+
+            if (!karplusStrongBuffers.ContainsKey(noteNumber) || isNoteStart)
             {
-                var buffer = new Queue<float>(Enumerable.Repeat(0f, bufferSize));
-                var random = new Random();
+                var buffer = new Queue<float>(bufferSize);
                 for (int i = 0; i < bufferSize; i++)
                 {
-                    buffer.Enqueue((float)(random.NextDouble() * 2 - 1));
+                    buffer.Enqueue((float)(Random.Shared.NextDouble() * 2 - 1));
                 }
                 karplusStrongBuffers[noteNumber] = buffer;
             }
 
             var currentBuffer = karplusStrongBuffers[noteNumber];
+
             var currentValue = currentBuffer.Dequeue();
             var nextValue = (currentValue + currentBuffer.Peek()) * 0.5f * 0.996f;
             currentBuffer.Enqueue(nextValue);

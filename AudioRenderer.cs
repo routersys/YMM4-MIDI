@@ -95,6 +95,15 @@ namespace MIDI
                     var baseAmplitude = (note.Velocity / 127.0f) * channelState.Volume * channelState.Expression * instrument.VolumeMultiplier * config.Audio.MasterVolume;
                     var panAngle = (channelState.Pan + 1) * Math.PI / 4;
 
+                    var attack = instrument.Attack * config.Synthesis.EnvelopeScale * channelState.AttackMultiplier;
+                    var release = instrument.Release * config.Synthesis.EnvelopeScale * channelState.ReleaseMultiplier;
+
+                    if (config.Synthesis.EnableAntiPop)
+                    {
+                        attack = Math.Max(attack, config.Synthesis.AntiPopAttackSeconds);
+                        release = Math.Max(release, config.Synthesis.AntiPopReleaseSeconds);
+                    }
+
                     noteDataList.Add(new GpuNoteData
                     {
                         NoteNumber = note.NoteNumber,
@@ -105,10 +114,10 @@ namespace MIDI
                         Frequency = frequency,
                         BaseAmplitude = baseAmplitude,
                         WaveType = (int)instrument.WaveType,
-                        Attack = (float)(instrument.Attack * config.Synthesis.EnvelopeScale * channelState.AttackMultiplier),
+                        Attack = (float)attack,
                         Decay = (float)(instrument.Decay * config.Synthesis.EnvelopeScale * channelState.DecayMultiplier),
                         Sustain = (float)instrument.Sustain,
-                        Release = (float)(instrument.Release * config.Synthesis.EnvelopeScale * channelState.ReleaseMultiplier),
+                        Release = (float)release,
                         FilterType = (int)instrument.FilterType,
                         FilterCutoff = (float)instrument.FilterCutoff,
                         FilterResonance = (float)instrument.FilterResonance,
@@ -161,6 +170,13 @@ namespace MIDI
 
                 var attackTime = config.Synthesis.DefaultAttack;
                 var releaseTime = config.Synthesis.DefaultRelease;
+
+                if (config.Synthesis.EnableAntiPop)
+                {
+                    attackTime = Math.Max(attackTime, config.Synthesis.AntiPopAttackSeconds);
+                    releaseTime = Math.Max(releaseTime, config.Synthesis.AntiPopReleaseSeconds);
+                }
+
                 var attackSamples = (long)(attackTime * sampleRate);
                 var releaseSamples = (long)(releaseTime * sampleRate);
 
@@ -174,9 +190,9 @@ namespace MIDI
                     var time = (i + startSampleOffset - startSample) / (double)sampleRate;
                     double envelope = 1.0;
 
-                    if (i + startSampleOffset - startSample < attackSamples)
+                    if (i + startSampleOffset - startSample < attackSamples && attackSamples > 0)
                         envelope = (double)(i + startSampleOffset - startSample) / attackSamples;
-                    else if (endSample - (i + startSampleOffset) < releaseSamples)
+                    else if (endSample - (i + startSampleOffset) < releaseSamples && releaseSamples > 0)
                         envelope = (double)(endSample - (i + startSampleOffset)) / releaseSamples;
 
                     var waveType = config.Synthesis.DefaultWaveform;
@@ -203,6 +219,15 @@ namespace MIDI
                     var baseAmplitude = (note.Velocity / 127.0f) * channelState.Volume * channelState.Expression * instrument.VolumeMultiplier * config.Audio.MasterVolume;
                     var panAngle = (channelState.Pan + 1) * Math.PI / 4;
 
+                    var attack = instrument.Attack * config.Synthesis.EnvelopeScale * channelState.AttackMultiplier;
+                    var release = instrument.Release * config.Synthesis.EnvelopeScale * channelState.ReleaseMultiplier;
+
+                    if (config.Synthesis.EnableAntiPop)
+                    {
+                        attack = Math.Max(attack, config.Synthesis.AntiPopAttackSeconds);
+                        release = Math.Max(release, config.Synthesis.AntiPopReleaseSeconds);
+                    }
+
                     noteDataList.Add(new GpuNoteData
                     {
                         NoteNumber = note.NoteNumber,
@@ -213,10 +238,10 @@ namespace MIDI
                         Frequency = frequency,
                         BaseAmplitude = baseAmplitude,
                         WaveType = (int)instrument.WaveType,
-                        Attack = (float)(instrument.Attack * config.Synthesis.EnvelopeScale * channelState.AttackMultiplier),
+                        Attack = (float)attack,
                         Decay = (float)(instrument.Decay * config.Synthesis.EnvelopeScale * channelState.DecayMultiplier),
                         Sustain = (float)instrument.Sustain,
-                        Release = (float)(instrument.Release * config.Synthesis.EnvelopeScale * channelState.ReleaseMultiplier),
+                        Release = (float)release,
                         FilterType = (int)instrument.FilterType,
                         FilterCutoff = (float)instrument.FilterCutoff,
                         FilterResonance = (float)instrument.FilterResonance,
@@ -269,7 +294,8 @@ namespace MIDI
                 instrument.Sustain,
                 instrument.Release * config.Synthesis.EnvelopeScale * channelState.ReleaseMultiplier,
                 noteDuration,
-                sampleRate
+                sampleRate,
+                config
             );
 
             for (long i = startSample; i < endSample && i < buffer.Length / 2; i++)

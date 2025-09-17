@@ -172,8 +172,14 @@ namespace MIDI
         private readonly long attackSamples, decaySamples, releaseSamples;
         private readonly long totalSamples;
 
-        public ADSREnvelope(double attack, double decay, double sustain, double release, long totalSamples, int sampleRate)
+        public ADSREnvelope(double attack, double decay, double sustain, double release, long totalSamples, int sampleRate, MidiConfiguration config)
         {
+            if (config != null && config.Synthesis.EnableAntiPop)
+            {
+                attack = Math.Max(attack, config.Synthesis.AntiPopAttackSeconds);
+                release = Math.Max(release, config.Synthesis.AntiPopReleaseSeconds);
+            }
+
             this.attack = attack;
             this.decay = decay;
             this.sustain = sustain;
@@ -190,10 +196,12 @@ namespace MIDI
 
             if (sample < attackSamples)
             {
+                if (attackSamples == 0) return 1.0;
                 return sample / (double)attackSamples;
             }
             else if (sample < attackSamples + decaySamples)
             {
+                if (decaySamples == 0) return sustain;
                 var decayProgress = (sample - attackSamples) / (double)decaySamples;
                 return 1.0 - (1.0 - sustain) * decayProgress;
             }
@@ -203,6 +211,7 @@ namespace MIDI
             }
             else if (sample < totalSamples)
             {
+                if (releaseSamples == 0) return 0.0;
                 var releaseProgress = (sample - (totalSamples - releaseSamples)) / (double)releaseSamples;
                 return sustain * (1.0 - releaseProgress);
             }
