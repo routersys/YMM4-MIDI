@@ -1,0 +1,809 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="metadata">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" />
+							</xsd:sequence>
+							<xsd:attribute name="name" use="required" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="assembly">
+						<xsd:complexType>
+							<xsd:attribute name="alias" type="xsd:string" />
+							<xsd:attribute name="name" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+
+	<data name="Category_Audio" xml:space="preserve">
+    <value>音声</value>
+  </data>
+	<data name="Category_Performance" xml:space="preserve">
+    <value>パフォーマンス</value>
+  </data>
+	<data name="Category_MIDI" xml:space="preserve">
+    <value>MIDI</value>
+  </data>
+	<data name="Category_SoundFont" xml:space="preserve">
+    <value>SoundFont</value>
+  </data>
+	<data name="Category_SFZ" xml:space="preserve">
+    <value>SFZ</value>
+  </data>
+	<data name="Category_Synthesis" xml:space="preserve">
+    <value>シンセシス</value>
+  </data>
+	<data name="Category_Effects" xml:space="preserve">
+    <value>エフェクト</value>
+  </data>
+	<data name="Category_InstrumentPresets" xml:space="preserve">
+    <value>楽器プリセット</value>
+  </data>
+	<data name="Category_CustomInstruments" xml:space="preserve">
+    <value>カスタム楽器</value>
+  </data>
+	<data name="Category_Debug" xml:space="preserve">
+    <value>デバッグ</value>
+  </data>
+
+	<data name="Setting_SampleRate" xml:space="preserve">
+    <value>サンプルレート (Hz)</value>
+  </data>
+	<data name="Description_SampleRate" xml:space="preserve">
+    <value>1秒間に音声をサンプリングする回数。高いほど高音質ですがCPU負荷が増加します。(CD音質: 44100)</value>
+  </data>
+	<data name="Setting_MasterVolume" xml:space="preserve">
+    <value>マスターボリューム</value>
+  </data>
+	<data name="Description_MasterVolume" xml:space="preserve">
+    <value>全体の音量を調整します。(0.0 - 1.0)</value>
+  </data>
+	<data name="Setting_EnableNormalization" xml:space="preserve">
+    <value>正規化を有効にする</value>
+  </data>
+	<data name="Description_EnableNormalization" xml:space="preserve">
+    <value>音量を自動調整し、音割れを防ぎ均一化します。</value>
+  </data>
+	<data name="Setting_NormalizationThreshold" xml:space="preserve">
+    <value>正規化 閾値</value>
+  </data>
+	<data name="Description_NormalizationThreshold" xml:space="preserve">
+    <value>正規化が作動する音量のしきい値 (0.0 - 1.0)。</value>
+  </data>
+	<data name="Setting_NormalizationLevel" xml:space="preserve">
+    <value>正規化 レベル</value>
+  </data>
+	<data name="Description_NormalizationLevel" xml:space="preserve">
+    <value>正規化後の目標音量レベル (0.0 - 1.0)。</value>
+  </data>
+	<data name="Setting_EnableGlobalFadeOut" xml:space="preserve">
+    <value>グローバルフェードアウトを有効にする</value>
+  </data>
+	<data name="Description_EnableGlobalFadeOut" xml:space="preserve">
+    <value>再生終了時に音を滑らかに消し、突然の音切れを防ぎます。</value>
+  </data>
+	<data name="Setting_GlobalFadeOutSeconds" xml:space="preserve">
+    <value>フェードアウト時間 (秒)</value>
+  </data>
+	<data name="Description_GlobalFadeOutSeconds" xml:space="preserve">
+    <value>フェードアウトにかける時間（秒）。</value>
+  </data>
+
+	<data name="Setting_InitializeGpuOnStartup" xml:space="preserve">
+    <value>起動時にGPUを初期化</value>
+  </data>
+	<data name="Description_InitializeGpuOnStartup" xml:space="preserve">
+    <value>YMM4起動時にGPUデバイスを初期化します。無効の場合、初回MIDI読み込み時に時間がかかることがあります。</value>
+  </data>
+	<data name="Setting_BufferSize" xml:space="preserve">
+    <value>バッファサイズ</value>
+  </data>
+	<data name="Description_BufferSize" xml:space="preserve">
+    <value>一度に処理するサンプル数。小さいほど低遅延ですがCPU負荷が高く音飛びしやすくなります。</value>
+  </data>
+	<data name="Setting_EnableParallelProcessing" xml:space="preserve">
+    <value>並列処理を有効にする (CPU)</value>
+  </data>
+	<data name="Description_EnableParallelProcessing" xml:space="preserve">
+    <value>マルチコアCPUを活用してレンダリングを高速化します。</value>
+  </data>
+	<data name="Setting_MaxThreads" xml:space="preserve">
+    <value>最大スレッド数</value>
+  </data>
+	<data name="Description_MaxThreads" xml:space="preserve">
+    <value>並列処理に使用する最大スレッド数。通常はCPUコア数に合わせます。</value>
+  </data>
+	<data name="Setting_MaxPolyphony" xml:space="preserve">
+    <value>最大同時発音数</value>
+  </data>
+	<data name="Description_MaxPolyphony" xml:space="preserve">
+    <value>同時に再生できる最大ノート数。超えると古い音が消えることがあります。</value>
+  </data>
+	<data name="Setting_InitialSyncDurationSeconds" xml:space="preserve">
+    <value>初期読み込み時間 (秒)</value>
+  </data>
+	<data name="Description_InitialSyncDurationSeconds" xml:space="preserve">
+    <value>ファイル読み込み時に最初に読み込む時間(秒)。長いほど開始は遅いが再生中の負荷が減ります。</value>
+  </data>
+	<data name="Setting_RenderingMode" xml:space="preserve">
+    <value>レンダリングモード</value>
+  </data>
+	<data name="Description_RenderingMode" xml:space="preserve">
+    <value>音声レンダリング方法を選択。リアルタイムは低遅延だが品質が若干低下、GPUは対応ボードが必要。</value>
+  </data>
+	<data name="Setting_EnableGpuSynthesis" xml:space="preserve">
+    <value>シンセシス</value>
+  </data>
+	<data name="Description_EnableGpuSynthesis" xml:space="preserve">
+    <value>GPUを使用して波形合成処理を行います。</value>
+  </data>
+	<data name="Setting_EnableGpuEqualizer" xml:space="preserve">
+    <value>イコライザー</value>
+  </data>
+	<data name="Description_EnableGpuEqualizer" xml:space="preserve">
+    <value>GPUを使用してイコライザー処理を行います。</value>
+  </data>
+	<data name="Setting_EnableGpuEffectsChain" xml:space="preserve">
+    <value>エフェクトチェーン</value>
+  </data>
+	<data name="Description_EnableGpuEffectsChain" xml:space="preserve">
+    <value>GPUを使用して複数のエフェクト（リバーブ、コンプなど）をまとめて処理します。</value>
+  </data>
+	<data name="Setting_EnableGpuConvolutionReverb" xml:space="preserve">
+    <value>畳み込みリバーブ</value>
+  </data>
+	<data name="Description_EnableGpuConvolutionReverb" xml:space="preserve">
+    <value>GPUを使用して高品質な畳み込みリバーブを処理します。</value>
+  </data>
+
+	<data name="Setting_DefaultTempo" xml:space="preserve">
+    <value>デフォルトテンポ (μs/拍)</value>
+  </data>
+	<data name="Description_DefaultTempo" xml:space="preserve">
+    <value>MIDIファイルにテンポ情報がない場合のテンポ (120BPM = 500000)。</value>
+  </data>
+	<data name="Setting_PitchBendRange" xml:space="preserve">
+    <value>ピッチベンド範囲 (半音)</value>
+  </data>
+	<data name="Description_PitchBendRange" xml:space="preserve">
+    <value>ピッチベンドの変化範囲 (半音単位)。</value>
+  </data>
+	<data name="Setting_MinVelocity" xml:space="preserve">
+    <value>最小ベロシティ</value>
+  </data>
+	<data name="Description_MinVelocity" xml:space="preserve">
+    <value>これより小さいベロシティのノートは無視されます。</value>
+  </data>
+	<data name="Setting_ProcessControlChanges" xml:space="preserve">
+    <value>コントロールチェンジを処理</value>
+  </data>
+	<data name="Description_ProcessControlChanges" xml:space="preserve">
+    <value>ボリュームやパンなどのコントロールチェンジを処理します。</value>
+  </data>
+	<data name="Setting_ProcessPitchBend" xml:space="preserve">
+    <value>ピッチベンドを処理</value>
+  </data>
+	<data name="Description_ProcessPitchBend" xml:space="preserve">
+    <value>ピッチベンドメッセージを処理します。</value>
+  </data>
+	<data name="Setting_ProcessProgramChanges" xml:space="preserve">
+    <value>プログラムチェンジを処理</value>
+  </data>
+	<data name="Description_ProcessProgramChanges" xml:space="preserve">
+    <value>音色切り替えメッセージを処理します。</value>
+  </data>
+	<data name="Setting_ExcludedChannels" xml:space="preserve">
+    <value>除外チャンネル</value>
+  </data>
+	<data name="Description_ExcludedChannels" xml:space="preserve">
+    <value>再生時に無視するMIDIチャンネル (カンマ区切り)。</value>
+  </data>
+	<data name="Setting_ExcludedTracks" xml:space="preserve">
+    <value>除外トラック</value>
+  </data>
+	<data name="Description_ExcludedTracks" xml:space="preserve">
+    <value>再生時に無視するトラック番号 (カンマ区切り)。</value>
+  </data>
+
+	<data name="Setting_EnableSoundFont" xml:space="preserve">
+    <value>SoundFontを有効にする</value>
+  </data>
+	<data name="Description_EnableSoundFont" xml:space="preserve">
+    <value>SoundFont (.sf2) ファイルを使用して再生します。</value>
+  </data>
+	<data name="Setting_UseDefaultSoundFont" xml:space="preserve">
+    <value>デフォルトSoundFontを使用</value>
+  </data>
+	<data name="Description_UseDefaultSoundFont" xml:space="preserve">
+    <value>プラグイン同梱のデフォルトSoundFont (GeneralUser-GS.sf2) を使用します。</value>
+  </data>
+	<data name="Setting_DefaultSoundFontDirectory" xml:space="preserve">
+    <value>SoundFontディレクトリ</value>
+  </data>
+	<data name="Description_DefaultSoundFontDirectory" xml:space="preserve">
+    <value>ユーザーが追加したSoundFontファイルを格納するディレクトリ。</value>
+  </data>
+	<data name="Setting_PreferredSoundFont" xml:space="preserve">
+    <value>優先SoundFontファイル名</value>
+  </data>
+	<data name="Description_PreferredSoundFont" xml:space="preserve">
+    <value>ルールに一致しない場合に優先的に使用するSoundFontファイル名。</value>
+  </data>
+	<data name="Setting_FallbackToSynthesis" xml:space="preserve">
+    <value>シンセシスへフォールバック</value>
+  </data>
+	<data name="Description_FallbackToSynthesis" xml:space="preserve">
+    <value>適切なSoundFontが見つからない場合、内蔵シンセサイザーで再生します。</value>
+  </data>
+	<data name="Setting_Layers" xml:space="preserve">
+    <value>SoundFontレイヤー</value>
+  </data>
+	<data name="Description_Layers" xml:space="preserve">
+    <value>重ねて使用するSoundFontファイル (上から順に優先)。</value>
+  </data>
+	<data name="Setting_Rules" xml:space="preserve">
+    <value>SoundFontルール</value>
+  </data>
+	<data name="Description_Rules" xml:space="preserve">
+    <value>MIDIファイルの特性に応じて使用するSoundFontを決定するルール。</value>
+  </data>
+
+
+	<data name="Setting_EnableSfz" xml:space="preserve">
+    <value>SFZを有効にする (SoundFontより優先)</value>
+  </data>
+	<data name="Description_EnableSfz" xml:space="preserve">
+    <value>SFZ形式のサンプラー音源を使用して再生します (有効な場合SoundFontより優先)。</value>
+  </data>
+	<data name="Setting_SfzSearchPath" xml:space="preserve">
+    <value>SFZ 検索フォルダ</value>
+  </data>
+	<data name="Description_SfzSearchPath" xml:space="preserve">
+    <value>SFZファイルを検索するフォルダのパス。</value>
+  </data>
+	<data name="Setting_ProgramMaps" xml:space="preserve">
+    <value>SFZ プログラムマップ</value>
+  </data>
+	<data name="Description_ProgramMaps" xml:space="preserve">
+    <value>MIDIプログラム番号とSFZファイルの関連付け。</value>
+  </data>
+
+	<data name="Setting_DefaultWaveform" xml:space="preserve">
+    <value>デフォルト波形</value>
+  </data>
+	<data name="Description_DefaultWaveform" xml:space="preserve">
+    <value>音色の基本となる波形の種類。</value>
+  </data>
+	<data name="Setting_WavetableDirectory" xml:space="preserve">
+    <value>Wavetableフォルダ</value>
+  </data>
+	<data name="Description_WavetableDirectory" xml:space="preserve">
+    <value>ユーザー定義のWAVファイルを配置するフォルダ。</value>
+  </data>
+	<data name="Setting_A4Frequency" xml:space="preserve">
+    <value>A4周波数 (Hz)</value>
+  </data>
+	<data name="Description_A4Frequency" xml:space="preserve">
+    <value>基準音A4（ラ）の周波数 (現代標準: 440Hz)。</value>
+  </data>
+	<data name="Setting_MinFrequency" xml:space="preserve">
+    <value>最小周波数 (Hz)</value>
+  </data>
+	<data name="Description_MinFrequency" xml:space="preserve">
+    <value>生成する音声の周波数の下限。これより低い周波数はクリップされます。</value>
+  </data>
+	<data name="Setting_MaxFrequency" xml:space="preserve">
+    <value>最大周波数 (Hz)</value>
+  </data>
+	<data name="Description_MaxFrequency" xml:space="preserve">
+    <value>生成する音声の周波数の上限。これより高い周波数はクリップされます。</value>
+  </data>
+	<data name="Setting_EnvelopeScale" xml:space="preserve">
+    <value>エンベロープスケール</value>
+  </data>
+	<data name="Description_EnvelopeScale" xml:space="preserve">
+    <value>ADSRエンベロープの時間スケール。1より大きいと長く、小さいと短くなります。</value>
+  </data>
+	<data name="Setting_DefaultAttack" xml:space="preserve">
+    <value>デフォルト アタック (s)</value>
+  </data>
+	<data name="Description_DefaultAttack" xml:space="preserve">
+    <value>音が鳴り始めてから最大音量に達するまでの時間（秒）。</value>
+  </data>
+	<data name="Setting_DefaultDecay" xml:space="preserve">
+    <value>デフォルト ディケイ (s)</value>
+  </data>
+	<data name="Description_DefaultDecay" xml:space="preserve">
+    <value>最大音量からサステインレベルまで減衰する時間（秒）。</value>
+  </data>
+	<data name="Setting_DefaultSustain" xml:space="preserve">
+    <value>デフォルト サステイン</value>
+  </data>
+	<data name="Description_DefaultSustain" xml:space="preserve">
+    <value>ノートが押されている間の音量レベル (0-1)。</value>
+  </data>
+	<data name="Setting_DefaultRelease" xml:space="preserve">
+    <value>デフォルト リリース (s)</value>
+  </data>
+	<data name="Description_DefaultRelease" xml:space="preserve">
+    <value>ノートが離されてから音が消えるまでの時間（秒）。</value>
+  </data>
+	<data name="Setting_FmModulatorFrequency" xml:space="preserve">
+    <value>FM 変調周波数 (Hz)</value>
+  </data>
+	<data name="Description_FmModulatorFrequency" xml:space="preserve">
+    <value>FM合成における変調波の周波数。</value>
+  </data>
+	<data name="Setting_FmModulationIndex" xml:space="preserve">
+    <value>FM 変調指数</value>
+  </data>
+	<data name="Description_FmModulationIndex" xml:space="preserve">
+    <value>FM合成における変調の深さ。大きいほど複雑な音色になります。</value>
+  </data>
+	<data name="Setting_EnableAntiPop" xml:space="preserve">
+    <value>アンチポップを有効にする</value>
+  </data>
+	<data name="Description_EnableAntiPop" xml:space="preserve">
+    <value>ノート開始/終了時に短いフェードを適用し、「プツッ」というノイズを低減します。</value>
+  </data>
+	<data name="Setting_AntiPopAttackSeconds" xml:space="preserve">
+    <value>アンチポップ アタック (s)</value>
+  </data>
+	<data name="Description_AntiPopAttackSeconds" xml:space="preserve">
+    <value>アンチポップ適用時の最短アタック時間（秒）。</value>
+  </data>
+	<data name="Setting_AntiPopReleaseSeconds" xml:space="preserve">
+    <value>アンチポップ リリース (s)</value>
+  </data>
+	<data name="Description_AntiPopReleaseSeconds" xml:space="preserve">
+    <value>アンチポップ適用時の最短リリース時間（秒）。</value>
+  </data>
+	<data name="Setting_EnableNoteCrossfade" xml:space="preserve">
+    <value>ノートクロスフェードを有効にする</value>
+  </data>
+	<data name="Description_EnableNoteCrossfade" xml:space="preserve">
+    <value>ノートの切り替わりをスムーズにし、ノイズを低減します。</value>
+  </data>
+	<data name="Setting_NoteCrossfadeDuration" xml:space="preserve">
+    <value>クロスフェード時間 (s)</value>
+  </data>
+	<data name="Description_NoteCrossfadeDuration" xml:space="preserve">
+    <value>ノートクロスフェードの時間（秒）。</value>
+  </data>
+	<data name="Setting_EnableBandlimitedSynthesis" xml:space="preserve">
+    <value>バンドリミテッド合成を有効にする</value>
+  </data>
+	<data name="Description_EnableBandlimitedSynthesis" xml:space="preserve">
+    <value>エイリアシング（折り返しノイズ）を低減します。音質が向上しますがCPU負荷がわずかに増加します。</value>
+  </data>
+
+
+	<data name="Setting_EnableEffects" xml:space="preserve">
+    <value>エフェクトを有効にする</value>
+  </data>
+	<data name="Description_EnableEffects" xml:space="preserve">
+    <value>すべてのオーディオエフェクトの有効/無効を切り替えます。</value>
+  </data>
+	<data name="Setting_EnableCompression" xml:space="preserve">
+    <value>コンプレッサーを有効にする</value>
+  </data>
+	<data name="Description_EnableCompression" xml:space="preserve">
+    <value>音量のばらつきを抑え、音圧を上げるエフェクトです。</value>
+  </data>
+	<data name="Setting_CompressionThreshold" xml:space="preserve">
+    <value>コンプ 閾値</value>
+  </data>
+	<data name="Description_CompressionThreshold" xml:space="preserve">
+    <value>コンプレッサーが作動を開始する音量のしきい値 (0-1)。</value>
+  </data>
+	<data name="Setting_CompressionRatio" xml:space="preserve">
+    <value>コンプ レシオ</value>
+  </data>
+	<data name="Description_CompressionRatio" xml:space="preserve">
+    <value>しきい値を超えた音を圧縮する比率 (例: 4)。</value>
+  </data>
+	<data name="Setting_CompressionAttack" xml:space="preserve">
+    <value>コンプ アタック (s)</value>
+  </data>
+	<data name="Description_CompressionAttack" xml:space="preserve">
+    <value>コンプレッサーが作動し始めるまでの時間（秒）。</value>
+  </data>
+	<data name="Setting_CompressionRelease" xml:space="preserve">
+    <value>コンプ リリース (s)</value>
+  </data>
+	<data name="Description_CompressionRelease" xml:space="preserve">
+    <value>コンプレッサーが解除されるまでの時間（秒）。</value>
+  </data>
+	<data name="Setting_AlgorithmicReverb" xml:space="preserve">
+    <value>アルゴリズミックリバーブ</value>
+  </data>
+	<data name="Description_AlgorithmicReverb" xml:space="preserve">
+    <value>計算によって残響を生成するリバーブの設定。</value>
+  </data>
+	<data name="Setting_Enable" xml:space="preserve">
+    <value>有効にする</value>
+  </data>
+	<data name="Setting_RoomSize" xml:space="preserve">
+    <value>部屋の広さ</value>
+  </data>
+	<data name="Setting_Damping" xml:space="preserve">
+    <value>減衰</value>
+  </data>
+	<data name="Setting_WetLevel" xml:space="preserve">
+    <value>ウェットレベル</value>
+  </data>
+	<data name="Setting_DryLevel" xml:space="preserve">
+    <value>ドライレベル</value>
+  </data>
+	<data name="Setting_Width" xml:space="preserve">
+    <value>広がり</value>
+  </data>
+	<data name="Setting_EnableChorus" xml:space="preserve">
+    <value>コーラスを有効にする</value>
+  </data>
+	<data name="Description_EnableChorus" xml:space="preserve">
+    <value>音をわずかに揺らして重ね、厚みと広がりを与えます。</value>
+  </data>
+	<data name="Setting_ChorusDelay" xml:space="preserve">
+    <value>コーラス ディレイ (s)</value>
+  </data>
+	<data name="Description_ChorusDelay" xml:space="preserve">
+    <value>原音と重ねる音の遅延時間（秒）。</value>
+  </data>
+	<data name="Setting_ChorusDepth" xml:space="preserve">
+    <value>コーラス 深さ</value>
+  </data>
+	<data name="Description_ChorusDepth" xml:space="preserve">
+    <value>音の揺れの深さ。</value>
+  </data>
+	<data name="Setting_ChorusRate" xml:space="preserve">
+    <value>コーラス レート (Hz)</value>
+  </data>
+	<data name="Description_ChorusRate" xml:space="preserve">
+    <value>音を揺らす速さ（Hz）。</value>
+  </data>
+	<data name="Setting_ChorusStrength" xml:space="preserve">
+    <value>コーラス 強度</value>
+  </data>
+	<data name="Description_ChorusStrength" xml:space="preserve">
+    <value>原音に対するコーラス音の強さ (0-1)。</value>
+  </data>
+	<data name="Setting_EnableEqualizer" xml:space="preserve">
+    <value>イコライザーを有効にする</value>
+  </data>
+	<data name="Description_EnableEqualizer" xml:space="preserve">
+    <value>特定の周波数帯域を調整して音質を変えます。</value>
+  </data>
+	<data name="Setting_EQ" xml:space="preserve">
+    <value>イコライザー設定</value>
+  </data>
+	<data name="Setting_BassGain" xml:space="preserve">
+    <value>低音ゲイン</value>
+  </data>
+	<data name="Description_BassGain" xml:space="preserve">
+    <value>低音域の音量を調整します (倍率)。</value>
+  </data>
+	<data name="Setting_MidGain" xml:space="preserve">
+    <value>中音ゲイン</value>
+  </data>
+	<data name="Description_MidGain" xml:space="preserve">
+    <value>中音域の音量を調整します (倍率)。</value>
+  </data>
+	<data name="Setting_TrebleGain" xml:space="preserve">
+    <value>高音ゲイン</value>
+  </data>
+	<data name="Description_TrebleGain" xml:space="preserve">
+    <value>高音域の音量を調整します (倍率)。</value>
+  </data>
+	<data name="Setting_EnableConvolutionReverb" xml:space="preserve">
+    <value>畳み込みリバーブを有効にする</value>
+  </data>
+	<data name="Description_EnableConvolutionReverb" xml:space="preserve">
+    <value>インパルス応答(IR)ファイルを使用し、リアルな残響を再現します。</value>
+  </data>
+	<data name="Setting_ImpulseResponseFilePath" xml:space="preserve">
+    <value>IRファイルパス</value>
+  </data>
+	<data name="Description_ImpulseResponseFilePath" xml:space="preserve">
+    <value>使用するインパルス応答ファイル (.wav) のパス。</value>
+  </data>
+	<data name="Setting_MaxImpulseResponseDurationSeconds" xml:space="preserve">
+    <value>IR最大読み込み時間 (s)</value>
+  </data>
+	<data name="Description_MaxImpulseResponseDurationSeconds" xml:space="preserve">
+    <value>インパルス応答ファイルの最大読み込み時間（秒）。長いファイルはこの時間に切り詰められます。</value>
+  </data>
+	<data name="Setting_EnablePhaser" xml:space="preserve">
+    <value>フェイザーを有効にする</value>
+  </data>
+	<data name="Description_EnablePhaser" xml:space="preserve">
+    <value>音の位相をずらして独特のうねりを生み出します。</value>
+  </data>
+	<data name="Setting_PhaserRate" xml:space="preserve">
+    <value>フェイザー レート (Hz)</value>
+  </data>
+	<data name="Description_PhaserRate" xml:space="preserve">
+    <value>位相を変化させる速さ（Hz）。</value>
+  </data>
+	<data name="Setting_PhaserStages" xml:space="preserve">
+    <value>フェイザー ステージ数</value>
+  </data>
+	<data name="Description_PhaserStages" xml:space="preserve">
+    <value>フェイザーのフィルター段数。多いほど複雑な効果になります。</value>
+  </data>
+	<data name="Setting_PhaserFeedback" xml:space="preserve">
+    <value>フェイザー フィードバック</value>
+  </data>
+	<data name="Description_PhaserFeedback" xml:space="preserve">
+    <value>エフェクト音を再度入力に戻す量 (0-1)。効果を強調します。</value>
+  </data>
+	<data name="Setting_EnableFlanger" xml:space="preserve">
+    <value>フランジャーを有効にする</value>
+  </data>
+	<data name="Description_EnableFlanger" xml:space="preserve">
+    <value>短く周期的な遅延を用いて金属的なうねりを生み出します。</value>
+  </data>
+	<data name="Setting_FlangerDelay" xml:space="preserve">
+    <value>フランジャー ディレイ (s)</value>
+  </data>
+	<data name="Description_FlangerDelay" xml:space="preserve">
+    <value>遅延時間（秒）。</value>
+  </data>
+	<data name="Setting_FlangerRate" xml:space="preserve">
+    <value>フランジャー レート (Hz)</value>
+  </data>
+	<data name="Description_FlangerRate" xml:space="preserve">
+    <value>うねりの速さ（Hz）。</value>
+  </data>
+	<data name="Setting_FlangerDepth" xml:space="preserve">
+    <value>フランジャー 深さ</value>
+  </data>
+	<data name="Description_FlangerDepth" xml:space="preserve">
+    <value>うねりの深さ (0-1)。</value>
+  </data>
+	<data name="Setting_EnableLimiter" xml:space="preserve">
+    <value>リミッターを有効にする</value>
+  </data>
+	<data name="Description_EnableLimiter" xml:space="preserve">
+    <value>音量が一定値を超えないように制限し、音割れを防ぎます。</value>
+  </data>
+	<data name="Setting_LimiterThreshold" xml:space="preserve">
+    <value>リミッター 閾値</value>
+  </data>
+	<data name="Description_LimiterThreshold" xml:space="preserve">
+    <value>音量を制限する上限値 (0-1)。</value>
+  </data>
+	<data name="Setting_EnableDCOffsetRemoval" xml:space="preserve">
+    <value>DCオフセット除去を有効にする</value>
+  </data>
+	<data name="Description_EnableDCOffsetRemoval" xml:space="preserve">
+    <value>音声信号の直流成分を除去し、ノイズや歪みを防ぎます。</value>
+  </data>
+	<data name="Setting_EnablePingPongDelay" xml:space="preserve">
+    <value>ピンポンディレイを有効にする</value>
+  </data>
+	<data name="Description_EnablePingPongDelay" xml:space="preserve">
+    <value>左右チャンネルで交互にやまびこ効果を生み出します。</value>
+  </data>
+	<data name="Setting_DelayTime" xml:space="preserve">
+    <value>ディレイタイム (s)</value>
+  </data>
+	<data name="Description_DelayTime" xml:space="preserve">
+    <value>やまびこの間隔（秒）。</value>
+  </data>
+	<data name="Setting_Feedback" xml:space="preserve">
+    <value>フィードバック</value>
+  </data>
+	<data name="Description_Feedback" xml:space="preserve">
+    <value>やまびこが繰り返される強さ (0-1)。</value>
+  </data>
+	<data name="Setting_WetDryMix" xml:space="preserve">
+    <value>Mix</value>
+  </data>
+	<data name="Description_WetDryMix" xml:space="preserve">
+    <value>原音(Dry)とエフェクト音(Wet)のバランス (0-1)。</value>
+  </data>
+	<data name="Setting_Distortion" xml:space="preserve">
+    <value>ディストーション設定</value>
+  </data>
+	<data name="Description_Distortion" xml:space="preserve">
+    <value>音を歪ませるエフェクトの設定。</value>
+  </data>
+	<data name="Setting_Type" xml:space="preserve">
+    <value>種類</value>
+  </data>
+	<data name="Setting_Drive" xml:space="preserve">
+    <value>ドライブ</value>
+  </data>
+	<data name="Setting_Mix" xml:space="preserve">
+    <value>ミックス</value>
+  </data>
+	<data name="Setting_BitCrusher" xml:space="preserve">
+    <value>ビットクラッシャー設定</value>
+  </data>
+	<data name="Description_BitCrusher" xml:space="preserve">
+    <value>音質を意図的に劣化させるエフェクトの設定。</value>
+  </data>
+	<data name="Setting_BitDepth" xml:space="preserve">
+    <value>ビット深度</value>
+  </data>
+	<data name="Setting_RateReduction" xml:space="preserve">
+    <value>レート削減</value>
+  </data>
+
+	<data name="Setting_ShowMidiInfoWindowOnLoad" xml:space="preserve">
+    <value>MIDI情報ウィンドウを表示</value>
+  </data>
+	<data name="Description_ShowMidiInfoWindowOnLoad" xml:space="preserve">
+    <value>MIDIファイル追加時に内部情報ウィンドウを自動表示します。</value>
+  </data>
+	<data name="Setting_EnableMidiEditor" xml:space="preserve">
+    <value>MIDIエディターを開く</value>
+  </data>
+	<data name="Description_EnableMidiEditor" xml:space="preserve">
+    <value>MIDIファイル追加時にMIDIエディターを自動で開きます。</value>
+  </data>
+	<data name="Setting_EnableMidiInput" xml:space="preserve">
+    <value>MIDI入力を有効にする</value>
+  </data>
+	<data name="Description_EnableMidiInput" xml:space="preserve">
+    <value>MIDIキーボードからの入力を有効にします。</value>
+  </data>
+	<data name="Setting_MidiInputDevice" xml:space="preserve">
+    <value>MIDI入力デバイス</value>
+  </data>
+	<data name="Description_MidiInputDevice" xml:space="preserve">
+    <value>使用するMIDI入力デバイス名。</value>
+  </data>
+	<data name="Setting_EnableLogging" xml:space="preserve">
+    <value>ログを有効にする</value>
+  </data>
+	<data name="Description_EnableLogging" xml:space="preserve">
+    <value>プラグインの動作ログをファイルに出力します。</value>
+  </data>
+	<data name="Setting_VerboseLogging" xml:space="preserve">
+    <value>詳細ログを有効にする</value>
+  </data>
+	<data name="Description_VerboseLogging" xml:space="preserve">
+    <value>より詳細なログ（例外スタックトレースなど）を出力します。</value>
+  </data>
+	<data name="Setting_LogFilePath" xml:space="preserve">
+    <value>ログファイルパス</value>
+  </data>
+	<data name="Description_LogFilePath" xml:space="preserve">
+    <value>ログファイルの出力先パス。</value>
+  </data>
+	<data name="Setting_MaxLogSizeKB" xml:space="preserve">
+    <value>最大ログサイズ (KB)</value>
+  </data>
+	<data name="Description_MaxLogSizeKB" xml:space="preserve">
+    <value>ログファイルの最大サイズ(KB)。超えると古いログから削除されます。</value>
+  </data>
+	<data name="Setting_EnableNamedPipeApi" xml:space="preserve">
+    <value>名前付きパイプAPIを有効にする</value>
+  </data>
+	<data name="Description_EnableNamedPipeApi" xml:space="preserve">
+    <value>外部連携用APIを有効にします。変更後はYMM4の再起動が必要です。</value>
+  </data>
+	<data name="Setting_LogLevel" xml:space="preserve">
+    <value>ログレベル</value>
+  </data>
+	<data name="Description_LogLevel" xml:space="preserve">
+    <value>出力するログの詳細度 (1:エラーのみ - 5:全て)。</value>
+  </data>
+
+	<data name="Setting_InstrumentPresets" xml:space="preserve">
+      <value>楽器プリセット</value>
+  </data>
+	<data name="Setting_CustomInstruments" xml:space="preserve">
+      <value>カスタム楽器</value>
+  </data>
+	<data name="Setting_Name" xml:space="preserve">
+      <value>名前</value>
+  </data>
+	<data name="Setting_StartProgram" xml:space="preserve">
+      <value>開始プログラム</value>
+  </data>
+	<data name="Setting_EndProgram" xml:space="preserve">
+      <value>終了プログラム</value>
+  </data>
+	<data name="Setting_Waveform" xml:space="preserve">
+      <value>波形</value>
+  </data>
+	<data name="Setting_Attack" xml:space="preserve">
+      <value>アタック (s)</value>
+  </data>
+	<data name="Setting_Decay" xml:space="preserve">
+      <value>ディケイ (s)</value>
+  </data>
+	<data name="Setting_Sustain" xml:space="preserve">
+      <value>サステイン</value>
+  </data>
+	<data name="Setting_Release" xml:space="preserve">
+      <value>リリース (s)</value>
+  </data>
+	<data name="Setting_Volume" xml:space="preserve">
+      <value>音量</value>
+  </data>
+	<data name="Setting_Filter" xml:space="preserve">
+      <value>フィルター</value>
+  </data>
+	<data name="Setting_Cutoff" xml:space="preserve">
+      <value>カットオフ (Hz)</value>
+  </data>
+	<data name="Setting_Resonance" xml:space="preserve">
+      <value>レゾナンス</value>
+  </data>
+	<data name="Setting_Lfo" xml:space="preserve">
+      <value>LFO</value>
+  </data>
+	<data name="Setting_Rate" xml:space="preserve">
+      <value>レート (Hz)</value>
+  </data>
+	<data name="Setting_Depth" xml:space="preserve">
+      <value>深さ</value>
+  </data>
+	<data name="Setting_Program" xml:space="preserve">
+      <value>プログラム番号</value>
+  </data>
+	<data name="Setting_UserWavetableFile" xml:space="preserve">
+      <value>Wavetableファイル</value>
+  </data>
+	<data name="Setting_AmplitudeEnvelope" xml:space="preserve">
+      <value>振幅エンベロープ</value>
+  </data>
+	<data name="Setting_PitchLfo" xml:space="preserve">
+      <value>ピッチLFO</value>
+  </data>
+	<data name="Setting_AmplitudeLfo" xml:space="preserve">
+      <value>振幅LFO</value>
+  </data>
+	<data name="Setting_FilterLfo" xml:space="preserve">
+      <value>フィルターLFO</value>
+  </data>
+
+</root>

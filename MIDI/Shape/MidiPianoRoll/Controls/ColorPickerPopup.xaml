@@ -1,0 +1,81 @@
+﻿<UserControl x:Class="MIDI.Shape.MidiPianoRoll.Controls.ColorPickerPopup"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="180" d:DesignWidth="250"
+             Width="250">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Margin" Value="5,0"/>
+        </Style>
+        <Style TargetType="Slider">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="35"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="2,0"/>
+        </Style>
+    </UserControl.Resources>
+    <Border Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+            BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+            BorderThickness="1"
+            Padding="10">
+        <StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0">R</TextBlock>
+                <Slider Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding R, Mode=TwoWay}"/>
+                <TextBox Grid.Column="2" Text="{Binding R, Mode=TwoWay}"/>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0">G</TextBlock>
+                <Slider Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding G, Mode=TwoWay}"/>
+                <TextBox Grid.Column="2" Text="{Binding G, Mode=TwoWay}"/>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0">B</TextBlock>
+                <Slider Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding B, Mode=TwoWay}"/>
+                <TextBox Grid.Column="2" Text="{Binding B, Mode=TwoWay}"/>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0">A</TextBlock>
+                <Slider Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding A, Mode=TwoWay}"/>
+                <TextBox Grid.Column="2" Text="{Binding A, Mode=TwoWay}"/>
+            </Grid>
+            <Grid Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0">Hex</TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding Hex, Mode=TwoWay}" Width="Auto" TextAlignment="Left" Margin="0" />
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>

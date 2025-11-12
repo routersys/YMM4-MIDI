@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="MIDI.Voice.Views.NoteNotationHelpControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:MIDI.Voice.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=vm:NoteNotationHelpViewModel}"
+             d:DesignHeight="50" d:DesignWidth="400">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MIDI;component/UI/Views/MidiEditor/Resources/MidiEditorResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+        <Button Content="EMEL 記法ヘルプ" Command="{Binding ShowEmelHelpCommand}" Margin="5,0,0,0" Style="{StaticResource RichButtonStyle}"/>
+        <Button Content="SUSL 記法ヘルプ" Command="{Binding ShowSuslHelpCommand}" Margin="5,0,0,0" Style="{StaticResource RichButtonStyle}"/>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,449 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
+<data name="PluginName" xml:space="preserve"><value>MIDI Import/Edit</value></data>
+<data name="PluginWriterName" xml:space="preserve"><value>MIDI Export</value></data>
+<data name="PluginToolName" xml:space="preserve"><value>MIDI Editor</value></data>
+<data name="NoteVoicePluginName" xml:space="preserve"><value>تركيب تدوين الملاحظات</value></data>
+<data name="NoteVoiceSettingsName" xml:space="preserve"><value>إعدادات تركيب تدوين الملاحظات</value></data>
+<data name="NoteVoiceSpeakerEngineName" xml:space="preserve"><value>مركب تدوين الملاحظات</value></data>
+<data name="KanjiToYomiNotSupported" xml:space="preserve"><value>تحويل كانجي إلى يومي غير مدعوم.</value></data>
+<data name="DefaultSynthModelName" xml:space="preserve"><value>DefaultSynth</value></data>
+<data name="DefaultSoundFontModelName" xml:space="preserve"><value>DefaultSoundFont</value></data>
+<data name="CreateNewModelWindowTitle" xml:space="preserve"><value>إنشاء نموذج جديد</value></data>
+<data name="ModelNameLabel" xml:space="preserve"><value>اسم النموذج:</value></data>
+<data name="ModelTypeLabel" xml:space="preserve"><value>نوع النموذج:</value></data>
+<data name="InternalSynthRadioButton" xml:space="preserve"><value>مركب داخلي</value></data>
+<data name="SoundFontRadioButton" xml:space="preserve"><value>SoundFont</value></data>
+<data name="CreateButton" xml:space="preserve"><value>إنشاء</value></data>
+<data name="CancelButton" xml:space="preserve"><value>إلغاء</value></data>
+<data name="OkButton" xml:space="preserve"><value>موافق</value></data>
+<data name="NoteVoiceSettingsSampleRateLabel" xml:space="preserve"><value>معدل العينة (هرتز)</value></data>
+<data name="NoteVoiceSettingsModelSelectionHeader" xml:space="preserve"><value>اختيار نموذج الصوت</value></data>
+<data name="NoteVoiceSettingsNewButton" xml:space="preserve"><value>جديد</value></data>
+<data name="NoteVoiceSettingsSaveButton" xml:space="preserve"><value>حفظ</value></data>
+<data name="NoteVoiceSettingsSoundFontLayerSettingsHeader" xml:space="preserve"><value>إعدادات طبقة SoundFont</value></data>
+<data name="NoteVoiceSettingsAddLayerButton" xml:space="preserve"><value>إضافة طبقة</value></data>
+<data name="NoteVoiceSettingsBrowseAddButton" xml:space="preserve"><value>استعراض وإضافة...</value></data>
+<data name="NoteVoiceSettingsUpdateFileListTooltip" xml:space="preserve"><value>تحديث قائمة الملفات</value></data>
+<data name="NoteVoiceSettingsMoveLayerUpTooltip" xml:space="preserve"><value>تحريك لأعلى</value></data>
+<data name="NoteVoiceSettingsMoveLayerDownTooltip" xml:space="preserve"><value>تحريك لأسفل</value></data>
+<data name="NoteVoiceSettingsDeleteLayerTooltip" xml:space="preserve"><value>حذف</value></data>
+<data name="NoteVoiceSettingsInternalSynthSettingsHeader" xml:space="preserve"><value>إعدادات المركب الداخلي</value></data>
+<data name="NoteVoiceSettingsDefaultWaveformLabel" xml:space="preserve"><value>الشكل الموجي الافتراضي</value></data>
+<data name="NoteVoiceSettingsDefaultWaveformTooltip" xml:space="preserve"><value>هذا هو الشكل الموجي الأساسي للجرس.</value></data>
+<data name="NoteVoiceSettingsAttackLabel" xml:space="preserve"><value>الهجوم (ث)</value></data>
+<data name="NoteVoiceSettingsAttackTooltip" xml:space="preserve"><value>الوقت بالثواني لوصول الصوت إلى أقصى مستوى صوت.</value></data>
+<data name="NoteVoiceSettingsDecayLabel" xml:space="preserve"><value>الاضمحلال (ث)</value></data>
+<data name="NoteVoiceSettingsDecayTooltip" xml:space="preserve"><value>الوقت بالثواني للانحلال من الحجم الأقصى إلى مستوى الاستدامة.</value></data>
+<data name="NoteVoiceSettingsSustainLabel" xml:space="preserve"><value>مستوى الاستدامة</value></data>
+<data name="NoteVoiceSettingsSustainTooltip" xml:space="preserve"><value>مستوى الصوت أثناء استمرار الصوت (0-1).</value></data>
+<data name="NoteVoiceSettingsReleaseLabel" xml:space="preserve"><value>التحرير (ث)</value></data>
+<data name="NoteVoiceSettingsReleaseTooltip" xml:space="preserve"><value>الوقت بالثواني حتى يتلاشى الصوت بعد تحرير النوتة.</value></data>
+<data name="NoteVoiceSettingsBandlimitedSynthCheckbox" xml:space="preserve"><value>تركيب محدود النطاق (تقليل ضوضاء التردد العالي)</value></data>
+<data name="NoteVoiceSettingsBandlimitedSynthTooltip" xml:space="preserve"><value>يؤدي التمكين إلى تقليل ضوضاء التعرج ولكنه يزيد قليلاً من حمل وحدة المعالجة المركزية.</value></data>
+<data name="NoteVoiceSettingsModelManagementTab" xml:space="preserve"><value>إدارة النماذج</value></data>
+<data name="NoteVoiceSettingsModelManagementHeader" xml:space="preserve"><value>إدارة نماذج الصوت</value></data>
+<data name="NoteVoiceSettingsRenameButton" xml:space="preserve"><value>إعادة تسمية</value></data>
+<data name="NoteVoiceSettingsDeleteButton" xml:space="preserve"><value>حذف</value></data>
+<data name="RenameModelWindowTitle" xml:space="preserve"><value>إعادة تسمية النموذج</value></data>
+<data name="NewModelNamePrompt" xml:space="preserve"><value>أدخل اسم النموذج الجديد:</value></data>
+<data name="ConfirmDeleteModelMessage" xml:space="preserve"><value>هل تريد حذف النموذج '{0}'؟</value></data>
+<data name="DeleteConfirmationTitle" xml:space="preserve"><value>تأكيد الحذف</value></data>
+<data name="InvalidOrExistingModelNameError" xml:space="preserve"><value>اسم النموذج غير صالح أو موجود بالفعل.</value></data>
+<data name="ErrorTitle" xml:space="preserve"><value>خطأ</value></data>
+<data name="AudioTabHeader" xml:space="preserve"><value>الصوت</value></data>
+<data name="PresetGroupHeader" xml:space="preserve"><value>الإعدادات المسبقة</value></data>
+<data name="BasicSettingsGroupHeader" xml:space="preserve"><value>الإعدادات الأساسية</value></data>
+<data name="SampleRateLabel" xml:space="preserve"><value>معدل العينة (هرتز)</value></data>
+<data name="SampleRateTooltip" xml:space="preserve"><value>عدد مرات أخذ عينات الصوت في الثانية. القيم الأعلى تحسن جودة الصوت ولكن تزيد من حمل وحدة المعالجة المركزية. جودة القرص المضغوط هي 44100 هرتز.</value></data>
+<data name="MasterVolumeLabel" xml:space="preserve"><value>مستوى الصوت الرئيسي</value></data>
+<data name="MasterVolumeTooltip" xml:space="preserve"><value>يضبط مستوى الصوت الرئيسي للتطبيق بأكمله. قم بالتعيين ضمن النطاق من 0 (كتم الصوت) إلى 1 (الحد الأقصى).</value></data>
+<data name="NormalizationGroupHeader" xml:space="preserve"><value>التطبيع</value></data>
+<data name="EnableNormalizationCheckbox" xml:space="preserve"><value>تمكين التطبيع</value></data>
+<data name="EnableNormalizationTooltip" xml:space="preserve"><value>يضبط مستوى الصوت تلقائيًا لمنع التقطيع وتوحيد مستوى الصوت العام.</value></data>
+<data name="NormalizationThresholdLabel" xml:space="preserve"><value>العتبة</value></data>
+<data name="NormalizationThresholdTooltip" xml:space="preserve"><value>عتبة مستوى الصوت التي يتم عندها تنشيط التطبيع. يتم تطبيق التطبيع عند تجاوز هذه القيمة.</value></data>
+<data name="NormalizationLevelLabel" xml:space="preserve"><value>المستوى</value></data>
+<data name="NormalizationLevelTooltip" xml:space="preserve"><value>مستوى الصوت المستهدف بعد التطبيع.</value></data>
+<data name="GlobalFadeOutGroupHeader" xml:space="preserve"><value>التلاشي التدريجي العام للخارج</value></data>
+<data name="EnableGlobalFadeOutCheckbox" xml:space="preserve"><value>تمكين التلاشي التدريجي للخارج للصوت النهائي</value></data>
+<data name="EnableGlobalFadeOutTooltip" xml:space="preserve"><value>يتلاشى الصوت تدريجيًا بسلاسة في نهاية التشغيل لمنع الانقطاعات المفاجئة.</value></data>
+<data name="FadeOutTimeLabel" xml:space="preserve"><value>وقت التلاشي (ث)</value></data>
+<data name="FadeOutTimeTooltip" xml:space="preserve"><value>مدة التلاشي التدريجي للخارج بالثواني.</value></data>
+<data name="PresetSaveButton" xml:space="preserve"><value>حفظ</value></data>
+<data name="PresetDeleteButton" xml:space="preserve"><value>حذف</value></data>
+<data name="PerformanceTabHeader" xml:space="preserve"><value>الأداء</value></data>
+<data name="RenderingSettingsGroupHeader" xml:space="preserve"><value>إعدادات العرض</value></data>
+<data name="RenderingModeLabel" xml:space="preserve"><value>وضع العرض</value></data>
+<data name="RenderingModeTooltip" xml:space="preserve"><value>يحدد طريقة عرض الصوت. وضع الوقت الفعلي له زمن انتقال أقل ولكنه قد يقلل الجودة قليلاً. يتطلب وضع GPU بطاقة رسومات متوافقة وقد يتسبب في زيادة حمل نقل البيانات.</value></data>
+<data name="BasicSettingsGroupHeaderPerformance" xml:space="preserve"><value>الإعدادات الأساسية</value></data>
+<data name="BufferSizeLabel" xml:space="preserve"><value>حجم المخزن المؤقت</value></data>
+<data name="BufferSizeTooltip" xml:space="preserve"><value>عدد عينات الصوت التي تتم معالجتها مرة واحدة. تقلل القيم الأصغر من زمن الانتقال ولكنها تزيد من تحميل وحدة المعالج المركزية وقد تتسبب في انقطاع الصوت.</value></data>
+<data name="MaxPolyphonyLabel" xml:space="preserve"><value>أقصى عدد للأصوات المتزامنة</value></data>
+<data name="MaxPolyphonyTooltip" xml:space="preserve"><value>أقصى عدد للنوتات التي يمكن تشغيلها في نفس الوقت. قد يؤدي تجاوز هذه القيمة إلى توقف النوتات الأقدم عن الصوت.</value></data>
+<data name="MaxThreadsLabel" xml:space="preserve"><value>أقصى عدد للخيوط</value></data>
+<data name="MaxThreadsTooltip" xml:space="preserve"><value>El número máximo de hilos de CPU utilizados para el procesamiento de audio. Normalmente</value></data>
+<data name="InitialSyncDurationLabel" xml:space="preserve"><value>وقت التحميل الأولي (ث)</value></data>
+<data name="InitialSyncDurationTooltip" xml:space="preserve"><value>مدة التشغيل (بالثواني) التي يتم تحميلها بشكل متزامن عند فتح الملف. تزيد الأوقات الأطول من الانتظار الأولي ولكنها تقلل المعالجة أثناء التشغيل.</value></data>
+<data name="GpuAccelerationGroupHeader" xml:space="preserve"><value>تسريع GPU (تجريبي)</value></data>
+<data name="GpuAccelerationTooltip" xml:space="preserve"><value>ميزة تجريبية. تستخدم وحدة معالجة الرسومات لتسريع أجزاء من معالجة الصوت. يتطلب بطاقة رسومات متوافقة.</value></data>
+<data name="InitializeGpuOnStartupCheckbox" xml:space="preserve"><value>تهيئة جهاز GPU عند بدء التشغيل</value></data>
+<data name="InitializeGpuOnStartupTooltip" xml:space="preserve"><value>如果啟用，則在YMM4啟動時初始化GPU裝置。如果禁用，則在首次載入MIDI檔案時進行初始化，這可能需要更長時間。</value></data>
+<data name="GpuSynthesisCheckbox" xml:space="preserve"><value>التركيب</value></data>
+<data name="GpuSynthesisTooltip" xml:space="preserve"><value>يستخدم وحدة معالجة الرسومات لمعالجة تركيب شكل الموجة.</value></data>
+<data name="GpuEqualizerCheckbox" xml:space="preserve"><value>المعادل</value></data>
+<data name="GpuEqualizerTooltip" xml:space="preserve"><value>يستخدم وحدة معالجة الرسومات لمعالجة المعادل.</value></data>
+<data name="GpuEffectsChainCheckbox" xml:space="preserve"><value>سلسلة التأثيرات</value></data>
+<data name="GpuEffectsChainTooltip" xml:space="preserve"><value>GPU를 사용하여 여러 이펙트(리버브</value></data>
+<data name="GpuConvolutionReverbCheckbox" xml:space="preserve"><value>صدى الالتفاف</value></data>
+<data name="GpuConvolutionReverbTooltip" xml:space="preserve"><value>يستخدم وحدة معالجة الرسومات لمعالجة صدى الالتفاف عالي الجودة.</value></data>
+<data name="EnableParallelProcessingCheckbox" xml:space="preserve"><value>تمكين المعالجة المتوازية (CPU)</value></data>
+<data name="EnableParallelProcessingTooltip" xml:space="preserve"><value>Utiliza los múltiples núcleos de la CPU para ejecutar el procesamiento de audio por canal en paralelo</value></data>
+<data name="MidiTabHeader" xml:space="preserve"><value>MIDI</value></data>
+<data name="PlaybackSettingsGroupHeader" xml:space="preserve"><value>إعدادات التشغيل</value></data>
+<data name="DefaultTempoLabel" xml:space="preserve"><value>السرعة الافتراضية</value></data>
+<data name="DefaultTempoTooltip" xml:space="preserve"><value>الإيقاع الافتراضي المستخدم إذا لم يحتوي ملف MIDI على معلومات الإيقاع. محدد بالميكروثانية لكل نغمة ربعية (على سبيل المثال ، 120 نبضة في الدقيقة = 500000).</value></data>
+<data name="PitchBendRangeLabel" xml:space="preserve"><value>مدى انحناء درجة الصوت</value></data>
+<data name="PitchBendRangeTooltip" xml:space="preserve"><value>يضبط نطاق انحناء درجة الصوت بأنصاف النغمات. على سبيل المثال ، يؤدي تعيينه إلى 2 إلى السماح بانحناء درجة الصوت ضمن نطاق ± 2 نصف نغمة.</value></data>
+<data name="MinVelocityLabel" xml:space="preserve"><value>أدنى سرعة</value></data>
+<data name="MinVelocityTooltip" xml:space="preserve"><value>أدنى سرعة للنوتات المراد معالجتها. سيتم تجاهل النوتات ذات السرعة الأقل. مفيد لإزالة النوتات غير المرغوب فيها ذات مستوى الصوت المنخفض.</value></data>
+<data name="ProcessingSettingsGroupHeader" xml:space="preserve"><value>إعدادات المعالجة</value></data>
+<data name="ProcessControlChangesCheckbox" xml:space="preserve"><value>معالجة تغييرات التحكم</value></data>
+<data name="ProcessControlChangesTooltip" xml:space="preserve"><value>معالجة رسائل تغيير التحكم مثل مستوى الصوت والتحريك.</value></data>
+<data name="ProcessPitchBendCheckbox" xml:space="preserve"><value>معالجة انحناء درجة الصوت</value></data>
+<data name="ProcessPitchBendTooltip" xml:space="preserve"><value>معالجة رسائل انحناء درجة الصوت لتغيير درجة الصوت بسلاسة.</value></data>
+<data name="ProcessProgramChangesCheckbox" xml:space="preserve"><value>معالجة تغييرات البرنامج</value></data>
+<data name="ProcessProgramChangesTooltip" xml:space="preserve"><value>معالجة رسائل تغيير البرنامج لتبديل أصوات الآلات.</value></data>
+<data name="ExclusionSettingsGroupHeader" xml:space="preserve"><value>إعدادات الاستبعاد</value></data>
+<data name="ExcludedChannelsLabel" xml:space="preserve"><value>القنوات المستبعدة (مفصولة بفواصل)</value></data>
+<data name="ExcludedChannelsTooltip" xml:space="preserve"><value>سيتم تجاهل قنوات MIDI المحددة هنا أثناء التشغيل (مفصولة بفواصل).</value></data>
+<data name="ExcludedTracksLabel" xml:space="preserve"><value>المسارات المستبعدة (مفصولة بفواصل)</value></data>
+<data name="ExcludedTracksTooltip" xml:space="preserve"><value>سيتم تجاهل المسارات المحددة هنا أثناء التشغيل (مفصولة بفواصل).</value></data>
+<data name="SfzTabHeader" xml:space="preserve"><value>SFZ</value></data>
+<data name="EnableSfzCheckbox" xml:space="preserve"><value>تمكين SFZ (الأولوية على SoundFont)</value></data>
+<data name="EnableSfzTooltip" xml:space="preserve"><value>Reproduce MIDI utilizando instrumentos de sampler en formato SFZ. Si está habilitado</value></data>
+<data name="SfzSettingsGroupHeader" xml:space="preserve"><value>الإعدادات (انقر نقرًا مزدوجًا للتحرير)</value></data>
+<data name="SfzSearchPathLabel" xml:space="preserve"><value>مجلد البحث عن SFZ:</value></data>
+<data name="SfzSearchPathTooltip" xml:space="preserve"><value>حدد مسار المجلد للبحث عن ملفات SFZ.</value></data>
+<data name="SfzListStatusHeader" xml:space="preserve"><value>الحالة</value></data>
+<data name="SfzListFilePathHeader" xml:space="preserve"><value>مسار ملف SFZ</value></data>
+<data name="SfzListProgramNumberHeader" xml:space="preserve"><value>رقم البرنامج</value></data>
+<data name="SoundFontTabHeader" xml:space="preserve"><value>SoundFont</value></data>
+<data name="EnableSoundFontCheckbox" xml:space="preserve"><value>تمكين SoundFont</value></data>
+<data name="EnableSoundFontTooltip" xml:space="preserve"><value>تشغيل MIDI باستخدام ملفات SoundFont (.sf2).</value></data>
+<data name="SoundFontBasicSettingsGroupHeader" xml:space="preserve"><value>الإعدادات الأساسية</value></data>
+<data name="UseDefaultSoundFontCheckbox" xml:space="preserve"><value>استخدام SoundFont الافتراضي</value></data>
+<data name="UseDefaultSoundFontTooltip" xml:space="preserve"><value>يستخدم SoundFont الافتراضي (GeneralUser-GS.sf2) المضمن مع المكون الإضافي.</value></data>
+<data name="FallbackToSynthesisCheckbox" xml:space="preserve"><value>الرجوع إلى التوليف إذا لم يتم العثور على SoundFont</value></data>
+<data name="FallbackToSynthesisTooltip" xml:space="preserve"><value>التبديل إلى التشغيل باستخدام المركب المدمج إذا لم يتم العثور على SoundFont مناسب.</value></data>
+<data name="SoundFontDirectoryLabel" xml:space="preserve"><value>دليل SoundFont</value></data>
+<data name="SoundFontDirectoryTooltip" xml:space="preserve"><value>المسار إلى الدليل الذي يحتوي على ملفات SoundFont التي أضافها المستخدم.</value></data>
+<data name="PreferredSoundFontLabel" xml:space="preserve"><value>اسم ملف SoundFont المفضل</value></data>
+<data name="PreferredSoundFontTooltip" xml:space="preserve"><value>حدد اسم ملف SoundFont لإعطائه الأولوية حتى لو لم يتطابق مع القواعد.</value></data>
+<data name="SoundFontLayersGroupHeader" xml:space="preserve"><value>Capas de SoundFont (Usadas apiladas</value></data>
+<data name="LayerUpButtonTooltip" xml:space="preserve"><value>تحريك الطبقة لأعلى.</value></data>
+<data name="LayerDownButtonTooltip" xml:space="preserve"><value>تحريك الطبقة لأسفل.</value></data>
+<data name="RemoveLayerButtonTooltip" xml:space="preserve"><value>إزالة الطبقة المحددة.</value></data>
+<data name="AddLayerButton" xml:space="preserve"><value>إضافة إلى طبقة</value></data>
+<data name="SoundFontListGroupHeader" xml:space="preserve"><value>ملفات SoundFont والقواعد المتاحة (انقر نقرًا مزدوجًا للتحرير)</value></data>
+<data name="SoundFontListStatusHeader" xml:space="preserve"><value>الحالة</value></data>
+<data name="SoundFontListFileNameHeader" xml:space="preserve"><value>ملف SoundFont</value></data>
+<data name="SoundFontListMinDurationHeader" xml:space="preserve"><value>الحد الأدنى للمدة (ث)</value></data>
+<data name="SoundFontListMaxDurationHeader" xml:space="preserve"><value>الحد الأقصى للمدة (ث)</value></data>
+<data name="SoundFontListMinTracksHeader" xml:space="preserve"><value>الحد الأدنى للمسارات</value></data>
+<data name="SoundFontListMaxTracksHeader" xml:space="preserve"><value>الحد الأقصى للمسارات</value></data>
+<data name="SoundFontListRequiredProgramsHeader" xml:space="preserve"><value>البرامج المطلوبة</value></data>
+<data name="SynthesisTabHeader" xml:space="preserve"><value>التركيب</value></data>
+<data name="SynthesisBasicSettingsGroupHeader" xml:space="preserve"><value>الإعدادات الأساسية</value></data>
+<data name="DefaultWaveformLabel" xml:space="preserve"><value>الشكل الموجي الافتراضي</value></data>
+<data name="DefaultWaveformTooltip" xml:space="preserve"><value>حدد نوع الشكل الموجي الأساسي للجرس.</value></data>
+<data name="WavetableDirectoryLabel" xml:space="preserve"><value>مجلد Wavetable</value></data>
+<data name="WavetableDirectoryTooltip" xml:space="preserve"><value>المجلد لوضع ملفات WAV المعرفة من قبل المستخدم.</value></data>
+<data name="A4FrequencyLabel" xml:space="preserve"><value>تردد A4 (هرتز)</value></data>
+<data name="A4FrequencyTooltip" xml:space="preserve"><value>기준음 A4(라)의 주파수를 설정합니다. 현대 표준은 440Hz이지만 고음악 등에서는 다른 값이 사용됩니다.</value></data>
+<data name="MinFrequencyLabel" xml:space="preserve"><value>أدنى تردد (هرتز)</value></data>
+<data name="MinFrequencyTooltip" xml:space="preserve"><value>الحد الأدنى لتردد الصوت الذي تم إنشاؤه. سيتم قص الترددات التي تقل عن هذا.</value></data>
+<data name="MaxFrequencyLabel" xml:space="preserve"><value>أقصى تردد (هرتز)</value></data>
+<data name="MaxFrequencyTooltip" xml:space="preserve"><value>الحد الأعلى لتردد الصوت الذي تم إنشاؤه. سيتم قص الترددات التي تزيد عن هذا.</value></data>
+<data name="EnvelopeScaleLabel" xml:space="preserve"><value>مقياس المغلف</value></data>
+<data name="EnvelopeScaleTooltip" xml:space="preserve"><value>调整ADSR包络（起音、衰减、持续、释放）的时间刻度。大于1的值使其更长，小于1的值使其更短。</value></data>
+<data name="DefaultEnvelopeGroupHeader" xml:space="preserve"><value>المغلف الافتراضي</value></data>
+<data name="DefaultEnvelopeTooltip" xml:space="preserve"><value>يضبط القيم الافتراضية للتغير الزمني للصوت (ADSR).</value></data>
+<data name="AttackLabel" xml:space="preserve"><value>الهجوم</value></data>
+<data name="AttackTooltip" xml:space="preserve"><value>الوقت (بالثواني) من بداية الصوت حتى يصل إلى أقصى مستوى صوت.</value></data>
+<data name="DecayLabel" xml:space="preserve"><value>الاضمحلال</value></data>
+<data name="DecayTooltip" xml:space="preserve"><value>الوقت (بالثواني) للاضمحلال من أقصى مستوى صوت إلى مستوى الاستدامة.</value></data>
+<data name="SustainLabel" xml:space="preserve"><value>الاستدامة</value></data>
+<data name="SustainTooltip" xml:space="preserve"><value>مستوى الصوت أثناء الضغط على النوتة (0-1).</value></data>
+<data name="ReleaseLabel" xml:space="preserve"><value>التحرير</value></data>
+<data name="ReleaseTooltip" xml:space="preserve"><value>الوقت (بالثواني) حتى يتلاشى الصوت بعد تحرير النوتة.</value></data>
+<data name="FmSourceGroupHeader" xml:space="preserve"><value>مصدر FM</value></data>
+<data name="FmSourceTooltip" xml:space="preserve"><value>الإعدادات المتعلقة بطريقة توليف FM.</value></data>
+<data name="ModulatorFrequencyLabel" xml:space="preserve"><value>تردد المُعدِّل (هرتز)</value></data>
+<data name="ModulatorFrequencyTooltip" xml:space="preserve"><value>تردد الموجة المُعدِّلة في توليف FM. يجعل الجرس أكثر تعقيدًا.</value></data>
+<data name="ModulationIndexLabel" xml:space="preserve"><value>معامل التعديل</value></data>
+<data name="ModulationIndexTooltip" xml:space="preserve"><value>عمق التعديل في توليف FM. تؤدي القيم الأكبر إلى أجراس أكثر تعقيدًا ومعدنية.</value></data>
+<data name="QualityNoiseReductionGroupHeader" xml:space="preserve"><value>الجودة / تقليل الضوضاء</value></data>
+<data name="EnableBandlimitedSynthesisCheckbox" xml:space="preserve"><value>تمكين التوليف محدود النطاق (تقليل التعرج)</value></data>
+<data name="EnableBandlimitedSynthesisTooltip" xml:space="preserve"><value>تمكين التقنيات لتقليل التعرج (ضوضاء الطي) أثناء توليد شكل الموجة. يحسن جودة الصوت ولكنه يزيد قليلاً من تحميل وحدة المعالج المركزية.</value></data>
+<data name="EnableAntiPopCheckbox" xml:space="preserve"><value>تمكين منع الفرقعة (تقليل ضوضاء النقر)</value></data>
+<data name="EnableAntiPopTooltip" xml:space="preserve"><value>يطبق تلاشيات قصيرة في بداية ونهاية النوتات لتقليل ضوضاء 'الفرقعة'.</value></data>
+<data name="AntiPopAttackLabel" xml:space="preserve"><value>الهجوم (ث)</value></data>
+<data name="AntiPopReleaseLabel" xml:space="preserve"><value>التحرير (ث)</value></data>
+<data name="EnableNoteCrossfadeCheckbox" xml:space="preserve"><value>تمكين التلاشي المتقاطع للنوتات</value></data>
+<data name="EnableNoteCrossfadeTooltip" xml:space="preserve"><value>ينعم الانتقالات بين النوتات لتقليل الضوضاء.</value></data>
+<data name="CrossfadeTimeLabel" xml:space="preserve"><value>وقت التلاشي المتقاطع(ث)</value></data>
+<data name="EffectsTabHeader" xml:space="preserve"><value>المؤثرات</value></data>
+<data name="EffectsTabTooltip" xml:space="preserve"><value>قم بتكوين مؤثرات مختلفة لضبط جودة الصوت.</value></data>
+<data name="EnableEffectsCheckbox" xml:space="preserve"><value>تمكين المؤثرات</value></data>
+<data name="EnableEffectsTooltip" xml:space="preserve"><value>تبديل جميع المؤثرات الصوتية بين تشغيل / إيقاف.</value></data>
+<data name="CompressorGroupHeader" xml:space="preserve"><value>ضاغط</value></data>
+<data name="CompressorTooltip" xml:space="preserve"><value>تأثير يقلل من تقلبات مستوى الصوت ويزيد من ضغط الصوت.</value></data>
+<data name="EnableCompressorCheckbox" xml:space="preserve"><value>تمكين الضاغط</value></data>
+<data name="CompressorThresholdLabel" xml:space="preserve"><value>العتبة</value></data>
+<data name="CompressorThresholdTooltip" xml:space="preserve"><value>عتبة مستوى الصوت التي يبدأ عندها الضاغط في العمل.</value></data>
+<data name="CompressorRatioLabel" xml:space="preserve"><value>النسبة</value></data>
+<data name="CompressorRatioTooltip" xml:space="preserve"><value>임계값을 초과하는 사운드를 압축하는 비율입니다. 예: 4:1 비율은 임계값을 4dB 초과한 사운드를 1dB 초과한 사운드로 압축합니다.</value></data>
+<data name="CompressorAttackLabel" xml:space="preserve"><value>الهجوم (ث)</value></data>
+<data name="CompressorAttackTooltip" xml:space="preserve"><value>الوقت (بالثواني) الذي يستغرقه الضاغط لبدء العمل.</value></data>
+<data name="CompressorReleaseLabel" xml:space="preserve"><value>التحرير (ث)</value></data>
+<data name="CompressorReleaseTooltip" xml:space="preserve"><value>الوقت (بالثواني) الذي يستغرقه الضاغط للتوقف عن العمل.</value></data>
+<data name="AlgorithmicReverbGroupHeader" xml:space="preserve"><value>صدى خوارزمي</value></data>
+<data name="AlgorithmicReverbTooltip" xml:space="preserve"><value>صدى عالي الجودة يولد صدى صوتي من خلال العمليات الحسابية.</value></data>
+<data name="EnableAlgorithmicReverbCheckbox" xml:space="preserve"><value>تمكين صدى خوارزمي</value></data>
+<data name="ReverbRoomSizeLabel" xml:space="preserve"><value>حجم الغرفة</value></data>
+<data name="ReverbDampingLabel" xml:space="preserve"><value>التخميد</value></data>
+<data name="ReverbWetLevelLabel" xml:space="preserve"><value>رطب</value></data>
+<data name="ReverbDryLevelLabel" xml:space="preserve"><value>جاف</value></data>
+<data name="ReverbWidthLabel" xml:space="preserve"><value>الاتساع</value></data>
+<data name="ConvolutionReverbGroupHeader" xml:space="preserve"><value>صدى التوافقي</value></data>
+<data name="ConvolutionReverbTooltip" xml:space="preserve"><value>يستخدم ملف استجابة نبضية (IR) لإعادة إنتاج صدى صوتي واقعي.</value></data>
+<data name="EnableConvolutionReverbCheckbox" xml:space="preserve"><value>تمكين صدى التوافقي</value></data>
+<data name="IrFilePathLabel" xml:space="preserve"><value>مسار ملف IR</value></data>
+<data name="BrowseButton" xml:space="preserve"><value>استعراض...</value></data>
+<data name="MaxIrDurationLabel" xml:space="preserve"><value>أقصى وقت تحميل (ث)</value></data>
+<data name="MaxIrDurationTooltip" xml:space="preserve"><value>حدد أقصى وقت تحميل لملف الاستجابة النبضية بالثواني.</value></data>
+<data name="DistortionGroupHeader" xml:space="preserve"><value>تشويه</value></data>
+<data name="DistortionTooltip" xml:space="preserve"><value>يشوه الصوت لخلق صوت قوي.</value></data>
+<data name="EnableDistortionCheckbox" xml:space="preserve"><value>تمكين التشويه</value></data>
+<data name="DistortionTypeLabel" xml:space="preserve"><value>النوع</value></data>
+<data name="DistortionDriveLabel" xml:space="preserve"><value>القيادة</value></data>
+<data name="DistortionMixLabel" xml:space="preserve"><value>مزيج</value></data>
+<data name="BitCrusherGroupHeader" xml:space="preserve"><value>سحق البت</value></data>
+<data name="BitCrusherTooltip" xml:space="preserve"><value>يقلل جودة الصوت عمداً لخلق صوت قديم.</value></data>
+<data name="EnableBitCrusherCheckbox" xml:space="preserve"><value>تمكين سحق البت</value></data>
+<data name="BitDepthLabel" xml:space="preserve"><value>عمق البت</value></data>
+<data name="RateReductionLabel" xml:space="preserve"><value>تقليل المعدل</value></data>
+<data name="PingPongDelayGroupHeader" xml:space="preserve"><value>تأخير بينغ بونغ</value></data>
+<data name="PingPongDelayTooltip" xml:space="preserve"><value>تأخير يخلق تأثير صدى يتناوب بين القنوات اليسرى واليمنى.</value></data>
+<data name="EnablePingPongDelayCheckbox" xml:space="preserve"><value>تمكين تأخير بينغ بونغ</value></data>
+<data name="DelayTimeLabel" xml:space="preserve"><value>وقت التأخير (ث)</value></data>
+<data name="DelayTimeTooltip" xml:space="preserve"><value>الفاصل الزمني للصدى (بالثواني).</value></data>
+<data name="FeedbackLabel" xml:space="preserve"><value>ردود الفعل</value></data>
+<data name="FeedbackTooltip" xml:space="preserve"><value>عدد مرات تكرار الصدى.</value></data>
+<data name="MixLabel" xml:space="preserve"><value>مزيج</value></data>
+<data name="MixTooltip" xml:space="preserve"><value>التوازن بين الصوت الأصلي (الجاف) وصوت التأثير (الرطب).</value></data>
+<data name="ChorusGroupHeader" xml:space="preserve"><value>جوقة</value></data>
+<data name="ChorusTooltip" xml:space="preserve"><value>يضيف سماكة واتساعًا للصوت عن طريق تعديل درجة الصوت قليلاً وتطبيقه.</value></data>
+<data name="EnableChorusCheckbox" xml:space="preserve"><value>تمكين الجوقة</value></data>
+<data name="ChorusDelayLabel" xml:space="preserve"><value>التأخير (ث)</value></data>
+<data name="ChorusDelayTooltip" xml:space="preserve"><value>وقت التأخير (بالثواني) للصوت المضاف فوق الصوت الأصلي.</value></data>
+<data name="ChorusDepthLabel" xml:space="preserve"><value>العمق</value></data>
+<data name="ChorusDepthTooltip" xml:space="preserve"><value>عمق تعديل الصوت.</value></data>
+<data name="ChorusRateLabel" xml:space="preserve"><value>المعدل (هرتز)</value></data>
+<data name="ChorusRateTooltip" xml:space="preserve"><value>سرعة تعديل الصوت (بالهرتز).</value></data>
+<data name="ChorusStrengthLabel" xml:space="preserve"><value>القوة</value></data>
+<data name="ChorusStrengthTooltip" xml:space="preserve"><value>قوة صوت الجوقة بالنسبة للصوت الأصلي.</value></data>
+<data name="PhaserGroupHeader" xml:space="preserve"><value>المحول الطوري</value></data>
+<data name="PhaserTooltip" xml:space="preserve"><value>تأثير يخلق صوتًا دوارًا فريدًا عن طريق تحويل طور الصوت.</value></data>
+<data name="EnablePhaserCheckbox" xml:space="preserve"><value>تمكين المحول الطوري</value></data>
+<data name="PhaserRateLabel" xml:space="preserve"><value>المعدل (هرتز)</value></data>
+<data name="PhaserRateTooltip" xml:space="preserve"><value>السرعة التي يتم بها تغيير الطور (بالهرتز).</value></data>
+<data name="PhaserStagesLabel" xml:space="preserve"><value>المراحل</value></data>
+<data name="PhaserStagesTooltip" xml:space="preserve"><value>عدد مراحل المرشح في المحول الطوري. المزيد من المراحل يخلق تأثيرًا أكثر تعقيدًا.</value></data>
+<data name="PhaserFeedbackLabel" xml:space="preserve"><value>ردود الفعل</value></data>
+<data name="PhaserFeedbackTooltip" xml:space="preserve"><value>كمية صوت التأثير المُعاد إدخاله. يؤكد على التأثير.</value></data>
+<data name="FlangerGroupHeader" xml:space="preserve"><value>الشفير</value></data>
+<data name="FlangerTooltip" xml:space="preserve"><value>코러스와 비슷하지만 더 짧고 주기적인 딜레이를 사용하여 금속성의 소용돌이 사운드를 만듭니다.</value></data>
+<data name="EnableFlangerCheckbox" xml:space="preserve"><value>تمكين الشفير</value></data>
+<data name="FlangerDelayLabel" xml:space="preserve"><value>التأخير (ث)</value></data>
+<data name="FlangerDelayTooltip" xml:space="preserve"><value>وقت التأخير (بالثواني).</value></data>
+<data name="FlangerRateLabel" xml:space="preserve"><value>المعدل (هرتز)</value></data>
+<data name="FlangerRateTooltip" xml:space="preserve"><value>سرعة الدوامة (بالهرتز).</value></data>
+<data name="FlangerDepthLabel" xml:space="preserve"><value>العمق</value></data>
+<data name="FlangerDepthTooltip" xml:space="preserve"><value>عمق الدوامة.</value></data>
+<data name="LimiterGroupHeader" xml:space="preserve"><value>المحدد</value></data>
+<data name="LimiterTooltip" xml:space="preserve"><value>Limita el volumen para que no supere un cierto umbral</value></data>
+<data name="EnableLimiterCheckbox" xml:space="preserve"><value>تمكين المحدد</value></data>
+<data name="LimiterThresholdLabel" xml:space="preserve"><value>العتبة</value></data>
+<data name="LimiterThresholdTooltip" xml:space="preserve"><value>الحد الأعلى لتقييد مستوى الصوت.</value></data>
+<data name="EqualizerGroupHeader" xml:space="preserve"><value>المعادل</value></data>
+<data name="EqualizerTooltip" xml:space="preserve"><value>يضبط جودة الصوت عن طريق تعزيز أو خفض نطاقات تردد معينة.</value></data>
+<data name="EnableEqualizerCheckbox" xml:space="preserve"><value>تمكين المعادل</value></data>
+<data name="EqBassGainLabel" xml:space="preserve"><value>كسب الجهير</value></data>
+<data name="EqBassGainTooltip" xml:space="preserve"><value>يضبط الكسب (مستوى الصوت) لنطاق الجهير.</value></data>
+<data name="EqMidGainLabel" xml:space="preserve"><value>كسب المتوسط</value></data>
+<data name="EqMidGainTooltip" xml:space="preserve"><value>يضبط الكسب (مستوى الصوت) للنطاق المتوسط.</value></data>
+<data name="EqTrebleGainLabel" xml:space="preserve"><value>كسب الثلاثي</value></data>
+<data name="EqTrebleGainTooltip" xml:space="preserve"><value>يضبط الكسب (مستوى الصوت) لنطاق الثلاثي.</value></data>
+<data name="OtherEffectsGroupHeader" xml:space="preserve"><value>أخرى</value></data>
+<data name="EnableDcOffsetRemovalCheckbox" xml:space="preserve"><value>تمكين إزالة إزاحة التيار المستمر</value></data>
+<data name="EnableDcOffsetRemovalTooltip" xml:space="preserve"><value>يزيل مكون التيار المستمر (إزاحة التيار المستمر) من إشارة الصوت. يمنع الضوضاء والتشويه غير المرغوب فيه.</value></data>
+<data name="InstrumentTabHeader" xml:space="preserve"><value>الآلات</value></data>
+<data name="InstrumentTabTooltip" xml:space="preserve"><value>تكوين إعدادات الجرس وفقًا لأرقام برنامج MIDI.</value></data>
+<data name="InstrumentPresetTabHeader" xml:space="preserve"><value>إعداد مسبق</value></data>
+<data name="InstrumentPresetTabTooltip" xml:space="preserve"><value>تعيين إعدادات الجرس لنطاق من أرقام برنامج MIDI.</value></data>
+<data name="AddButton" xml:space="preserve"><value>إضافة</value></data>
+<data name="DeleteButton" xml:space="preserve"><value>حذف</value></data>
+<data name="AddInstrumentPresetTooltip" xml:space="preserve"><value>يضيف إعداد مسبق جديد للآلة.</value></data>
+<data name="RemoveInstrumentPresetTooltip" xml:space="preserve"><value>يحذف الإعداد المسبق المحدد.</value></data>
+<data name="HeaderName" xml:space="preserve"><value>الاسم</value></data>
+<data name="HeaderStart" xml:space="preserve"><value>البداية</value></data>
+<data name="HeaderEnd" xml:space="preserve"><value>النهاية</value></data>
+<data name="HeaderWaveform" xml:space="preserve"><value>الشكل الموجي</value></data>
+<data name="HeaderAttack" xml:space="preserve"><value>الهجوم</value></data>
+<data name="HeaderDecay" xml:space="preserve"><value>الاضمحلال</value></data>
+<data name="HeaderSustain" xml:space="preserve"><value>الاستدامة</value></data>
+<data name="HeaderRelease" xml:space="preserve"><value>التحرير</value></data>
+<data name="HeaderVolume" xml:space="preserve"><value>مستوى الصوت</value></data>
+<data name="HeaderFilter" xml:space="preserve"><value>المرشح</value></data>
+<data name="HeaderCutoff" xml:space="preserve"><value>القطع</value></data>
+<data name="HeaderResonance" xml:space="preserve"><value>الرنين</value></data>
+<data name="HeaderFilterLfo" xml:space="preserve"><value>مرشح LFO</value></data>
+<data name="HeaderFLfoRate" xml:space="preserve"><value>معدل F-LFO</value></data>
+<data name="HeaderFLfoDepth" xml:space="preserve"><value>عمق F-LFO</value></data>
+<data name="InstrumentCustomTabHeader" xml:space="preserve"><value>مخصص</value></data>
+<data name="InstrumentCustomTabTooltip" xml:space="preserve"><value>تعيين إعدادات جرس فردية لأرقام برنامج MIDI محددة. اضبط على -1 لقناة الإيقاع (10).</value></data>
+<data name="AddCustomInstrumentTooltip" xml:space="preserve"><value>يضيف آلة مخصصة جديدة.</value></data>
+<data name="RemoveCustomInstrumentTooltip" xml:space="preserve"><value>يحذف الآلة المخصصة المحددة.</value></data>
+<data name="HeaderProgram" xml:space="preserve"><value>البرنامج</value></data>
+<data name="HeaderWavetableFile" xml:space="preserve"><value>ملف Wavetable</value></data>
+<data name="HeaderFLfoWaveform" xml:space="preserve"><value>موجة F-LFO</value></data>
+<data name="HeaderPLfoWaveform" xml:space="preserve"><value>موجة P-LFO</value></data>
+<data name="HeaderPLfoRate" xml:space="preserve"><value>معدل P-LFO</value></data>
+<data name="HeaderPLfoDepth" xml:space="preserve"><value>عمق P-LFO</value></data>
+<data name="HeaderALfoWaveform" xml:space="preserve"><value>موجة A-LFO</value></data>
+<data name="HeaderALfoRate" xml:space="preserve"><value>معدل A-LFO</value></data>
+<data name="HeaderALfoDepth" xml:space="preserve"><value>عمق A-LFO</value></data>
+<data name="DebugTabHeader" xml:space="preserve"><value>تصحيح الأخطاء</value></data>
+<data name="DebugTabTooltip" xml:space="preserve"><value>إعدادات لتصحيح الأخطاء للمساعدة في التحقيق في المشكلات.</value></data>
+<data name="LoggingGroupHeader" xml:space="preserve"><value>التسجيل</value></data>
+<data name="EnableLoggingCheckbox" xml:space="preserve"><value>تمكين التسجيل</value></data>
+<data name="EnableLoggingTooltip" xml:space="preserve"><value>إخراج سجلات تشغيل المكون الإضافي إلى ملف. مفيد للتحقيق في المشكلات.</value></data>
+<data name="VerboseLoggingCheckbox" xml:space="preserve"><value>تمكين التسجيل المطول</value></data>
+<data name="VerboseLoggingTooltip" xml:space="preserve"><value>إخراج سجلات أكثر تفصيلاً.</value></data>
+<data name="LogFilePathLabel" xml:space="preserve"><value>مسار ملف السجل</value></data>
+<data name="LogFilePathTooltip" xml:space="preserve"><value>تحديد مسار الإخراج لملف السجل.</value></data>
+<data name="MaxLogSizeLabel" xml:space="preserve"><value>أقصى حجم للسجل (KB)</value></data>
+<data name="MaxLogSizeTooltip" xml:space="preserve"><value>تحديد الحد الأقصى لحجم ملف السجل بالكيلوبايت. يتم حذف السجلات القديمة عند تجاوز هذا الحد.</value></data>
+<data name="LogLevelLabel" xml:space="preserve"><value>مستوى السجل</value></data>
+<data name="LogLevelTooltip" xml:space="preserve"><value>تعيين مستوى تفاصيل السجلات للإخراج. النطاق من 1 (الأخطاء فقط) إلى 5 (الكل).</value></data>
+<data name="LogViewerHeader" xml:space="preserve"><value>عارض السجل</value></data>
+<data name="ClearLogButton" xml:space="preserve"><value>مسح</value></data>
+<data name="ApiIntegrationGroupHeader" xml:space="preserve"><value>تكامل API</value></data>
+<data name="EnableNamedPipeApiCheckbox" xml:space="preserve"><value>تمكين API الأنابيب المسماة (للتكامل الخارجي)</value></data>
+<data name="EnableNamedPipeApiTooltip" xml:space="preserve"><value>Cuando está habilitado</value></data>
+<data name="ExperimentalFeaturesGroupHeader" xml:space="preserve"><value>ميزات تجريبية</value></data>
+<data name="ShowMidiInfoWindowCheckbox" xml:space="preserve"><value>إظهار نافذة معلومات MIDI عند إضافة ملف MIDI</value></data>
+<data name="ShowMidiInfoWindowTooltip" xml:space="preserve"><value>Si está habilitado</value></data>
+<data name="OpenMidiEditorCheckbox" xml:space="preserve"><value>فتح محرر MIDI عند إضافة ملف MIDI</value></data>
+<data name="OpenMidiEditorTooltip" xml:space="preserve"><value>Si está habilitado</value></data>
+<data name="ShowReleaseNotesTooltip" xml:space="preserve"><value>إظهار ملاحظات الإصدار.</value></data>
+<data name="OpenPluginDirectoryTooltip" xml:space="preserve"><value>افتح مجلد الإضافات.</value></data>
+<data name="RefreshFilesTooltip" xml:space="preserve"><value>تحديث قوائم ملفات SFZ و SoundFont.</value></data>
+<data name="ReloadConfigTooltip" xml:space="preserve"><value>إعادة تحميل الإعدادات الحالية من الملف. سيتم تجاهل التغييرات غير المحفوظة.</value></data>
+<data name="Key_VersionChecking" xml:space="preserve"><value>جارٍ الحصول على معلومات الإصدار...</value></data>
+<data name="Key_VersionCurrent" xml:space="preserve"><value>الإصدار الحالي: {0}</value></data>
+<data name="Key_VersionNewAvailable" xml:space="preserve"><value>Nueva versión disponible: {0}</value></data>
+<data name="Key_VersionUpToDate" xml:space="preserve"><value>إصدارك محدّث.</value></data>
+<data name="Key_VersionCheckFailed" xml:space="preserve"><value>تعذر استرداد معلومات التحديث.</value></data>
+<data name="MidiWriterHeader" xml:space="preserve"><value>MIDI Conversion Settings</value></data>
+<data name="MidiWriterQuantizeLabel" xml:space="preserve"><value>Quantize Resolution</value></data>
+<data name="MidiWriterQuantizeTooltip" xml:space="preserve"><value>Which note value to align MIDI event timing to. 'None' disables quantization.</value></data>
+<data name="MidiWriterPitchAlgoLabel" xml:space="preserve"><value>Pitch Detection Algorithm</value></data>
+<data name="MidiWriterPitchAlgoTooltip" xml:space="preserve"><value>Method to detect pitch from audio. YIN is more accurate but takes longer to process.</value></data>
+<data name="MidiWriterPitchSensitivityLabel" xml:space="preserve"><value>Pitch Sensitivity</value></data>
+<data name="MidiWriterPitchSensitivityTooltip" xml:space="preserve"><value>How much pitch stability is required. Higher values detect more notes. (0.0-1.0)</value></data>
+<data name="MidiWriterFftSizeLabel" xml:space="preserve"><value>FFT Size</value></data>
+<data name="MidiWriterFftSizeTooltip" xml:space="preserve"><value>Number of samples for frequency analysis. Larger values increase frequency resolution but decrease time resolution.</value></data>
+<data name="MidiWriterMinNoteDurationLabel" xml:space="preserve"><value>Min Note Duration (ms)</value></data>
+<data name="MidiWriterMinNoteDurationTooltip" xml:space="preserve"><value>Minimum length (ms) of detected MIDI notes. Excludes notes that are too short.</value></data>
+<data name="MidiWriterVelocitySensitivityLabel" xml:space="preserve"><value>Velocity Sensitivity</value></data>
+<data name="MidiWriterVelocitySensitivityTooltip" xml:space="preserve"><value>Degree to which volume changes are reflected in MIDI velocity. Higher values emphasize volume changes. (0.0-1.0)</value></data>
+<data name="MidiWriterNotesHeader" xml:space="preserve"><value>Notes</value></data>
+<data name="MidiWriterNote1" xml:space="preserve"><value>• This feature is experimental. Accuracy depends heavily on the audio content and settings.</value></data>
+<data name="MidiWriterNote2" xml:space="preserve"><value>• Monophonic instruments or voices are converted more accurately than chords or complex sources.</value></data>
+<data name="MidiWriterNote3" xml:space="preserve"><value>• Processing time increases proportionally to the audio length and FFT size.</value></data>
+<data name="MidiWriterConfigLoadError" xml:space="preserve"><value>Failed to load configuration view: {0}</value></data>
+<data name="UtauModelName" xml:space="preserve"><value>UTAU Voice</value></data>
+<data name="NewUtauModelName" xml:space="preserve"><value>New UTAU Model</value></data>
+<data name="DefaultUtauModelName" xml:space="preserve"><value>Default UTAU</value></data>
+<data name="UtauSettings" xml:space="preserve"><value>UTAU Settings</value></data>
+<data name="AddUtauFolder" xml:space="preserve"><value>Add UTAU Voice Folder</value></data>
+<data name="RemoveUtauFolder" xml:space="preserve"><value>Remove Selected Folder</value></data>
+<data name="UtauVoiceBaseFolders" xml:space="preserve"><value>UTAU Voice Base Folders</value></data>
+<data name="SelectUtauFolderTitle" xml:space="preserve"><value>Select the folder containing UTAU voices</value></data>
+<data name="RefreshUtauVoices" xml:space="preserve"><value>Refresh UTAU Voice List</value></data>
+<data name="NewSFModelName" xml:space="preserve"><value>New SF Model</value></data>
+<data name="NewSynthModelName" xml:space="preserve"><value>New Synth Model</value></data>
+<data name="Loading" xml:space="preserve"><value>جار التحميل...</value></data>
+</root>

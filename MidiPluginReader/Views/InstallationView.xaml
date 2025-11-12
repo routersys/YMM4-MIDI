@@ -1,0 +1,105 @@
+﻿<UserControl x:Class="MidiPlugin.Views.InstallationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:models="clr-namespace:MidiPlugin.Models"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="700"
+             Background="{StaticResource ContentBackgroundColor}"
+             Foreground="{StaticResource PrimaryTextColor}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource WindowBackgroundColor}" BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderColor}" Padding="20">
+            <StackPanel>
+                <TextBlock Text="プリセットのインストール" FontSize="22" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding FileName, StringFormat='{}ファイル: {0}'}" Foreground="{StaticResource SecondaryTextColor}" Margin="0,5,0,0" FontSize="14"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="1" />
+                <ColumnDefinition Width="*" MinWidth="250"/>
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Padding="0,0,20,0">
+                <StackPanel>
+                    <TextBlock Text="このプリセットについて" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource PrimaryAccentColor}"/>
+                    <TextBlock Text="このプリセットをインストールすると、アプリケーションの設定が変更されます。以下の内容を確認してください。" TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14"/>
+
+                    <Separator Margin="0,20"/>
+
+                    <TextBlock Text="概要" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource PrimaryAccentColor}"/>
+                    <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14" MinHeight="40"/>
+
+                    <GroupBox Header="証明書情報" Margin="0,20,0,0" Visibility="{Binding PresetDetails.Certificate, Converter={StaticResource VisibilityConverter}}">
+                        <StackPanel Margin="5">
+                            <TextBlock Text="{Binding PresetDetails.Certificate.Issuer, StringFormat='発行者: {0}'}" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding PresetDetails.Certificate.ComputerName, StringFormat='コンピュータ名: {0}'}" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding PresetDetails.Certificate.UserName, StringFormat='ユーザー名: {0}'}" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding PresetDetails.Certificate.CreatedAt, StringFormat='作成日時: {0}'}"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <Separator Margin="0,20"/>
+
+                    <TextBlock Text="注意事項" FontSize="16" FontWeight="SemiBold" Foreground="#D13438"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" FontSize="14">
+                        <Run>• インストールを実行すると、プリセットファイルがアプリケーションの presets フォルダにコピーされます。</Run><LineBreak/>
+                        <Run>• 既存の同名ファイルは上書きされますのでご注意ください。</Run><LineBreak/>
+                        <Run>• 信頼できる作成者からのプリセットのみをインストールしてください。</Run>
+                    </TextBlock>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Rectangle Grid.Column="1" Fill="{StaticResource BorderColor}" Width="1" HorizontalAlignment="Center"/>
+
+            <Grid Grid.Column="2" Margin="20,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="変更される設定項目" Grid.Row="0" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource PrimaryAccentColor}"/>
+
+                <TreeView Grid.Row="1" ItemsSource="{Binding PresetDetails.ChangedCategories}" Margin="0,10,0,0" Background="Transparent" BorderThickness="0">
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Value}">
+                            <TextBlock Text="{Binding Key}" FontWeight="SemiBold" />
+                            <HierarchicalDataTemplate.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" Margin="2"/>
+                                </DataTemplate>
+                            </HierarchicalDataTemplate.ItemTemplate>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Grid>
+        </Grid>
+
+
+        <Border Grid.Row="2" Background="{StaticResource WindowBackgroundColor}" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderColor}" Padding="15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Command="{Binding InstallCommand}" Style="{StaticResource PrimaryButton}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE896;" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="インストール" VerticalAlignment="Center" FontFamily="Yu Gothic UI"/>
+                    </StackPanel>
+                </Button>
+                <Button Margin="10,0,0,0" Click="CloseButton_Click" Style="{StaticResource SecondaryButton}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE711;" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="キャンセル" VerticalAlignment="Center" FontFamily="Yu Gothic UI"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

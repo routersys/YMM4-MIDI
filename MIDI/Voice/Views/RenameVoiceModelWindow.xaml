@@ -1,0 +1,46 @@
+﻿<Window x:Class="MIDI.Voice.Views.RenameVoiceModelWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:midi="clr-namespace:MIDI"
+        mc:Ignorable="d"
+        Title="{x:Static midi:Translate.RenameModelWindowTitle}"
+        Width="350" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+        Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+        ResizeMode="NoResize" Topmost="True">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MIDI;component/UI/Views/MidiEditor/Resources/MidiEditorResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="Padding" Value="5"/>
+                <Setter Property="Height" Value="36"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            </Style>
+
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{x:Static midi:Translate.NewModelNamePrompt}" Margin="0,0,0,10"/>
+        <TextBox Grid.Row="1" Text="{Binding NewModelName, UpdateSourceTrigger=PropertyChanged}" />
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button Content="{x:Static midi:Translate.CancelButton}" IsCancel="True" Style="{StaticResource RichButtonStyle}" Margin="0,0,5,0"/>
+            <Button Content="{x:Static midi:Translate.OkButton}" IsDefault="True" 
+                    Click="OkButton_Click" Style="{StaticResource RichButtonStyle}" IsEnabled="{Binding CanConfirm}"/>
+        </StackPanel>
+    </Grid>
+</Window>

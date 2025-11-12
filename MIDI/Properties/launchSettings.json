@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "MIDI": {
+      "commandName": "Project"
+    },
+    "YMM4": {
+      "commandName": "Executable",
+      "executablePath": "R:\\Cache\\YukkuriMovieMaker_v4_Lite\\YukkuriMovieMaker.exe"
+    }
+  }
+}

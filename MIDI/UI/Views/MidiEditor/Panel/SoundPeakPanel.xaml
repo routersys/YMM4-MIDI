@@ -1,0 +1,81 @@
+﻿<UserControl x:Class="MIDI.UI.Views.MidiEditor.Panel.SoundPeakPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MIDI.UI.Views.MidiEditor.Panel"
+             xmlns:vm="clr-namespace:MIDI.UI.ViewModels.MidiEditor"
+             xmlns:controls="clr-namespace:MIDI.UI.Views.MidiEditor.Controls"
+             xmlns:converters="clr-namespace:MIDI.UI.Views.MidiEditor.Converters"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=vm:SoundPeakViewModel}"
+             d:DesignHeight="450" d:DesignWidth="300">
+    <UserControl.Resources>
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Peak Meter" Command="{Binding SetMeterTypeCommand}" CommandParameter="{x:Static vm:MeterType.Peak}" IsCheckable="True" IsChecked="{Binding CurrentMeterType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:MeterType.Peak}}"/>
+                <MenuItem Header="RMS Meter" Command="{Binding SetMeterTypeCommand}" CommandParameter="{x:Static vm:MeterType.RMS}" IsCheckable="True" IsChecked="{Binding CurrentMeterType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:MeterType.RMS}}"/>
+                <MenuItem Header="VU Meter" Command="{Binding SetMeterTypeCommand}" CommandParameter="{x:Static vm:MeterType.VU}" IsCheckable="True" IsChecked="{Binding CurrentMeterType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:MeterType.VU}}"/>
+                <MenuItem Header="Loudness Meter" Command="{Binding SetMeterTypeCommand}" CommandParameter="{x:Static vm:MeterType.Loudness}" IsCheckable="True" IsChecked="{Binding CurrentMeterType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:MeterType.Loudness}}"/>
+                <Separator/>
+                <MenuItem Header="ラウドネスをリセット" Command="{Binding ResetLoudnessCommand}"/>
+            </ContextMenu>
+        </Grid.ContextMenu>
+
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding CurrentMeterType}" Value="{x:Static vm:MeterType.Peak}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <controls:PeakMeter DataContext="{Binding}" />
+        </Grid>
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding CurrentMeterType}" Value="{x:Static vm:MeterType.RMS}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <controls:RmsMeter DataContext="{Binding}" />
+        </Grid>
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding CurrentMeterType}" Value="{x:Static vm:MeterType.VU}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <controls:VuMeter DataContext="{Binding}" />
+        </Grid>
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding CurrentMeterType}" Value="{x:Static vm:MeterType.Loudness}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <controls:LoudnessMeter DataContext="{Binding}" />
+        </Grid>
+    </Grid>
+</UserControl>

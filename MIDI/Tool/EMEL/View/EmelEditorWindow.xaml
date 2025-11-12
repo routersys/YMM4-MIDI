@@ -1,0 +1,85 @@
+﻿<Window x:Class="MIDI.Tool.EMEL.View.EmelEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MIDI.Tool.EMEL.ViewModel"
+        xmlns:controls="clr-namespace:MIDI.Tool.EMEL.Controls"
+        mc:Ignorable="d"
+        Title="EMELエディタ" Height="768" Width="1024"
+        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+        Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="5,0"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
+    </Window.Resources>
+    <Window.DataContext>
+        <vm:EmelEditorViewModel/>
+    </Window.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="200"/>
+        </Grid.RowDefinitions>
+
+        <ToolBar Grid.Row="0" Height="30" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+            <Button Content="コンパイル" 
+                    Command="{Binding CompileCommand}"/>
+        </ToolBar>
+
+        <controls:EmelTextEditor
+            Grid.Row="1"
+            x:Name="Editor"
+            DataContext="{Binding}">
+            <controls:EmelTextEditor.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="切り取り" Command="Cut"/>
+                    <MenuItem Header="コピー" Command="Copy"/>
+                    <MenuItem Header="貼り付け" Command="Paste"/>
+                    <Separator/>
+                    <MenuItem Header="すべて選択" Command="SelectAll"/>
+                </ContextMenu>
+            </controls:EmelTextEditor.ContextMenu>
+        </controls:EmelTextEditor>
+
+        <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
+
+        <Grid Grid.Row="3" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+            <TabControl SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
+                <TabItem Header="出力">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBox
+                            Text="{Binding CompiledOutput, Mode=OneWay}"
+                            IsReadOnly="True"
+                            FontFamily="Consolas"
+                            FontSize="12"
+                            VerticalScrollBarVisibility="Auto"
+                            HorizontalScrollBarVisibility="Auto"
+                            AcceptsReturn="True"
+                            Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                            Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="エラー">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBox
+                            Text="{Binding ErrorMessage, Mode=OneWay}"
+                            IsReadOnly="True"
+                            FontFamily="Consolas"
+                            FontSize="12"
+                            VerticalScrollBarVisibility="Auto"
+                            HorizontalScrollBarVisibility="Auto"
+                            AcceptsReturn="True"
+                            Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                            Foreground="#FFDC3232"/>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</Window>

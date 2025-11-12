@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="MidiPlugin.Views.EffectInstallationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="550" d:DesignWidth="800"
+             Background="{StaticResource ContentBackgroundColor}"
+             Foreground="{StaticResource PrimaryTextColor}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource WindowBackgroundColor}" BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderColor}" Padding="20">
+            <StackPanel>
+                <TextBlock Text="プラグインのインストール" FontSize="22" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding FileName, StringFormat='{}ファイル: {0}'}" Foreground="{StaticResource SecondaryTextColor}" Margin="0,5,0,0" FontSize="14"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="20" MinHeight="250">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" MinWidth="250"/>
+            </Grid.ColumnDefinitions>
+
+            <Expander Grid.Column="0" Header="このプラグインについて" IsExpanded="True" Margin="0,0,10,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="{StaticResource WindowBackgroundColor}" BorderThickness="1" BorderBrush="{StaticResource BorderColor}" Padding="10" MinHeight="150">
+                    <TextBlock Text="{Binding ReadmeContent}" TextWrapping="Wrap" />
+                </ScrollViewer>
+            </Expander>
+
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch" ResizeDirection="Columns" Background="Transparent" />
+
+            <Expander Grid.Column="2" Header="ファイルの内容" IsExpanded="True" Margin="10,0,0,0">
+                <ListBox ItemsSource="{Binding FileEntries}" Background="{StaticResource WindowBackgroundColor}" BorderThickness="1" BorderBrush="{StaticResource BorderColor}" MinHeight="150" />
+            </Expander>
+        </Grid>
+
+        <Border Grid.Row="2" Padding="15" Background="{StaticResource WindowBackgroundColor}" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderColor}">
+            <StackPanel>
+                <Expander Header="プラグインのインストールに関する注意事項" IsExpanded="True" Margin="0,0,0,10">
+                    <TextBlock TextWrapping="Wrap" Margin="5" Foreground="{StaticResource SecondaryTextColor}">
+                        <Run>• インストールを実行すると、このインストーラーと同じ階層にある 'Extensions' フォルダ内に、プラグイン名のフォルダが作成され、そこにファイルが展開されます。</Run><LineBreak/>
+                        <Run>• (例: ...\Extensions\プラグインファイル名\...)</Run><LineBreak/>
+                        <Run>• 既存の同名ファイルは上書きされますのでご注意ください。</Run><LineBreak/>
+                        <Run>• 信頼できる作成者からのプラグインのみをインストールしてください。</Run><LineBreak/>
+                        <Run>• 悪意のある開発者が配布しているプラグインを使用した場合、データの漏洩や不正アクセス、システムの不安定化などの問題が発生する可能性があります。</Run><LineBreak/>
+                        <Run>• なお、プラグインのインストールや使用に伴うあらゆる損害や問題について、開発者は一切の責任を負いかねます。あらかじめご了承ください。</Run>
+                    </TextBlock>
+                </Expander>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <CheckBox IsChecked="{Binding IsTrusted}" VerticalAlignment="Center" Margin="0,0,10,0">
+                            <TextBlock Text="このプラグインの開発者を信頼する" FontFamily="Yu Gothic UI" />
+                        </CheckBox>
+
+                        <Button Command="{Binding InstallCommand}" Style="{StaticResource PrimaryButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE896;" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="インストール" VerticalAlignment="Center" FontFamily="Yu Gothic UI"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="10,0,0,0" Click="CloseButton_Click" Style="{StaticResource SecondaryButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE711;" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="キャンセル" VerticalAlignment="Center" FontFamily="Yu Gothic UI"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1" Text="{Binding StatusMessage}" Foreground="Green" VerticalAlignment="Center" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

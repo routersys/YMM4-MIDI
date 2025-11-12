@@ -1,0 +1,34 @@
+﻿<Window x:Class="MidiPlugin.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewmodels="clr-namespace:MidiPlugin.ViewModels"
+        xmlns:views="clr-namespace:MidiPlugin.Views"
+        mc:Ignorable="d"
+        Title="{Binding Models.AppConfig.AppName, Source={x:Static Application.Current}}" Height="550" Width="800"
+        WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+        AllowsTransparency="True" Background="Transparent">
+
+    <Window.Resources>
+
+        <DataTemplate DataType="{x:Type viewmodels:InstallationViewModel}">
+            <views:InstallationView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels:EffectInstallationViewModel}">
+            <views:EffectInstallationView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels:SettingsViewModel}">
+            <views:SettingsView/>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="1" Background="{StaticResource WindowBackgroundColor}" MouseDown="Border_MouseDown">
+        <Grid>
+            <ContentControl Content="{Binding CurrentViewModel}" />
+
+            <Button Style="{StaticResource CloseButton}" Click="CloseButton_Click" />
+        </Grid>
+    </Border>
+
+</Window>

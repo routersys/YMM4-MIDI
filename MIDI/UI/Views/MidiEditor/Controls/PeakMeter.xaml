@@ -1,0 +1,119 @@
+﻿<UserControl x:Class="MIDI.UI.Views.MidiEditor.Controls.PeakMeter"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MIDI.UI.Views.MidiEditor.Controls"
+             xmlns:converters="clr-namespace:MIDI.UI.Views.MidiEditor.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="150"
+             Background="#1E1E1E">
+    <UserControl.Resources>
+        <converters:DbToPercentageConverter x:Key="DbToPercentageConverter"/>
+        <converters:HeightPercentageConverter x:Key="HeightPercentageConverter"/>
+        <x:Array x:Key="Ticks" Type="{x:Type local:MeterTick}">
+            <local:MeterTick Label="+9"  Height="25"/>
+            <local:MeterTick Label="0"   Height="25"/>
+            <local:MeterTick Label="-5"  Height="25"/>
+            <local:MeterTick Label="-10" Height="25"/>
+            <local:MeterTick Label="-15" Height="25"/>
+            <local:MeterTick Label="-20" Height="25"/>
+            <local:MeterTick Label="-25" Height="25"/>
+            <local:MeterTick Label="-30" Height="25"/>
+            <local:MeterTick Label="-35" Height="25"/>
+            <local:MeterTick Label="-40" Height="25"/>
+            <local:MeterTick Label="-50" Height="25"/>
+            <local:MeterTick Label="-60" Height="25"/>
+            <local:MeterTick Label="-70" Height="25"/>
+        </x:Array>
+    </UserControl.Resources>
+    <Viewbox Stretch="Uniform" Margin="10">
+        <Grid Width="120" Height="350">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Margin="5,0">
+                <Border Background="#252526" BorderBrush="#3F3F46" BorderThickness="1">
+                    <Grid x:Name="RmsMeterLeft">
+                        <Rectangle VerticalAlignment="Bottom">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush EndPoint="0.5,0" StartPoint="0.5,1">
+                                    <GradientStop Color="#4CAF50" Offset="0"/>
+                                    <GradientStop Color="#FFEB3B" Offset="0.85"/>
+                                    <GradientStop Color="#F44336" Offset="0.95"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                            <Rectangle.Height>
+                                <MultiBinding Converter="{StaticResource HeightPercentageConverter}">
+                                    <Binding Path="RmsLeftDb" Converter="{StaticResource DbToPercentageConverter}"/>
+                                    <Binding ElementName="RmsMeterLeft" Path="ActualHeight"/>
+                                </MultiBinding>
+                            </Rectangle.Height>
+                        </Rectangle>
+                        <Rectangle Fill="#B0BEC5" VerticalAlignment="Bottom">
+                            <Rectangle.Height>
+                                <MultiBinding Converter="{StaticResource HeightPercentageConverter}">
+                                    <Binding Path="PeakLeftDb" Converter="{StaticResource DbToPercentageConverter}"/>
+                                    <Binding ElementName="RmsMeterLeft" Path="ActualHeight"/>
+                                </MultiBinding>
+                            </Rectangle.Height>
+                        </Rectangle>
+                    </Grid>
+                </Border>
+                <TextBlock Text="{Binding PeakLeftDb, StringFormat={}{0:F1}}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,5" Foreground="#ECEFF1" FontSize="10" FontWeight="Bold"/>
+                <TextBlock Text="L" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5" Foreground="#ECEFF1" FontWeight="Bold" FontSize="12"/>
+            </Grid>
+
+            <ItemsControl Grid.Column="1" ItemsSource="{StaticResource Ticks}" Margin="5,0">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Bottom"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Height="{Binding Height}">
+                            <Line X1="0" Y1="0" X2="5" Y2="0" Stroke="#90A4AE" StrokeThickness="1" VerticalAlignment="Top"/>
+                            <TextBlock Text="{Binding Label}" Foreground="#B0BEC5" FontSize="8" VerticalAlignment="Top" Margin="8,-5,0,0"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Grid Grid.Column="2" Margin="5,0">
+                <Border Background="#252526" BorderBrush="#3F3F46" BorderThickness="1">
+                    <Grid x:Name="RmsMeterRight">
+                        <Rectangle VerticalAlignment="Bottom">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush EndPoint="0.5,0" StartPoint="0.5,1">
+                                    <GradientStop Color="#4CAF50" Offset="0"/>
+                                    <GradientStop Color="#FFEB3B" Offset="0.85"/>
+                                    <GradientStop Color="#F44336" Offset="0.95"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                            <Rectangle.Height>
+                                <MultiBinding Converter="{StaticResource HeightPercentageConverter}">
+                                    <Binding Path="RmsRightDb" Converter="{StaticResource DbToPercentageConverter}"/>
+                                    <Binding ElementName="RmsMeterRight" Path="ActualHeight"/>
+                                </MultiBinding>
+                            </Rectangle.Height>
+                        </Rectangle>
+                        <Rectangle Fill="#B0BEC5" VerticalAlignment="Bottom">
+                            <Rectangle.Height>
+                                <MultiBinding Converter="{StaticResource HeightPercentageConverter}">
+                                    <Binding Path="PeakRightDb" Converter="{StaticResource DbToPercentageConverter}"/>
+                                    <Binding ElementName="RmsMeterRight" Path="ActualHeight"/>
+                                </MultiBinding>
+                            </Rectangle.Height>
+                        </Rectangle>
+                    </Grid>
+                </Border>
+                <TextBlock Text="{Binding PeakRightDb, StringFormat={}{0:F1}}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,5" Foreground="#ECEFF1" FontSize="10" FontWeight="Bold"/>
+                <TextBlock Text="R" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5" Foreground="#ECEFF1" FontWeight="Bold" FontSize="12"/>
+            </Grid>
+        </Grid>
+    </Viewbox>
+</UserControl>

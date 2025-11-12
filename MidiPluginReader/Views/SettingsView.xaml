@@ -1,0 +1,102 @@
+﻿<UserControl x:Class="MidiPlugin.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="700"
+             Background="{StaticResource ContentBackgroundColor}"
+             Foreground="{StaticResource PrimaryTextColor}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource WindowBackgroundColor}" BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderColor}" Padding="20">
+            <TextBlock Text="各種設定" FontSize="22" FontWeight="SemiBold"/>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20">
+            <StackPanel>
+                <TextBlock Text="ファイル関連付け" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource PrimaryAccentColor}"/>
+                <Border Background="{StaticResource WindowBackgroundColor}" BorderThickness="1" BorderBrush="{StaticResource BorderColor}" Padding="20" Margin="0,10,0,0">
+                    <TextBlock Name="StatusTextBlock" Text="{Binding StatusMessage}" TextWrapping="Wrap" FontSize="14" TextAlignment="Center" MinHeight="40"/>
+                </Border>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
+                    <Button Command="{Binding AssociateCommand}" Style="{StaticResource PrimaryButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE73E;" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="このアプリに関連付け" VerticalAlignment="Center" FontFamily="Yu Gothic UI"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding DisassociateCommand}" Margin="10,0,0,0" Style="{StaticResource SecondaryButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE74D;" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="関連付けを解除" VerticalAlignment="Center" FontFamily="Yu Gothic UI"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <Separator Margin="0,20"/>
+
+                <TextBlock Text="インストール優先度" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource PrimaryAccentColor}"/>
+                <TextBlock Text="リストの上にあるものから順にインストールを試みます。" Margin="0,5,0,10" Foreground="{StaticResource SecondaryTextColor}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ListBox x:Name="PriorityListBox" Grid.Column="0" ItemsSource="{Binding PrioritizedPaths}" SelectedItem="{Binding SelectedPath}" Height="150">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                        <Button Command="{Binding MoveUpCommand}" ToolTip="上へ移動" Width="40" Height="40" Style="{StaticResource SecondaryButton}">
+                            <TextBlock Text="&#xE70E;" FontSize="16"/>
+                        </Button>
+                        <Button Command="{Binding MoveDownCommand}" ToolTip="下へ移動" Width="40" Height="40" Margin="0,5,0,0" Style="{StaticResource SecondaryButton}">
+                            <TextBlock Text="&#xE70D;" FontSize="16"/>
+                        </Button>
+                        <Button Command="{Binding RemovePathCommand}" CommandParameter="{Binding SelectedItem, ElementName=PriorityListBox}" ToolTip="選択したパスを削除" Width="40" Height="40" Margin="0,15,0,0" Style="{StaticResource SecondaryButton}">
+                            <TextBlock Text="&#xE74D;" FontSize="16"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+                <Button Command="{Binding SavePriorityCommand}" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,10,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE74E;" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="優先度を保存" VerticalAlignment="Center" FontFamily="Yu Gothic UI"/>
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Padding="15" Background="{StaticResource WindowBackgroundColor}" BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderColor}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding SaveStatusMessage}" Foreground="Green" VerticalAlignment="Center" FontWeight="SemiBold"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Click="CloseButton_Click" Style="{StaticResource SecondaryButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE711;" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="閉じる" VerticalAlignment="Center" FontFamily="Yu Gothic UI"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

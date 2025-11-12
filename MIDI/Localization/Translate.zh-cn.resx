@@ -1,0 +1,449 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
+<data name="PluginName" xml:space="preserve"><value>MIDI Import/Edit</value></data>
+<data name="PluginWriterName" xml:space="preserve"><value>MIDI Export</value></data>
+<data name="PluginToolName" xml:space="preserve"><value>MIDI Editor</value></data>
+<data name="NoteVoicePluginName" xml:space="preserve"><value>音符记谱法合成</value></data>
+<data name="NoteVoiceSettingsName" xml:space="preserve"><value>音符记谱法合成设置</value></data>
+<data name="NoteVoiceSpeakerEngineName" xml:space="preserve"><value>音符记谱法合成器</value></data>
+<data name="KanjiToYomiNotSupported" xml:space="preserve"><value>不支持汉字到读音转换。</value></data>
+<data name="DefaultSynthModelName" xml:space="preserve"><value>DefaultSynth</value></data>
+<data name="DefaultSoundFontModelName" xml:space="preserve"><value>DefaultSoundFont</value></data>
+<data name="CreateNewModelWindowTitle" xml:space="preserve"><value>创建新模型</value></data>
+<data name="ModelNameLabel" xml:space="preserve"><value>模型名称：</value></data>
+<data name="ModelTypeLabel" xml:space="preserve"><value>模型类型：</value></data>
+<data name="InternalSynthRadioButton" xml:space="preserve"><value>内置合成器</value></data>
+<data name="SoundFontRadioButton" xml:space="preserve"><value>SoundFont</value></data>
+<data name="CreateButton" xml:space="preserve"><value>创建</value></data>
+<data name="CancelButton" xml:space="preserve"><value>取消</value></data>
+<data name="OkButton" xml:space="preserve"><value>确定</value></data>
+<data name="NoteVoiceSettingsSampleRateLabel" xml:space="preserve"><value>采样率 (Hz)</value></data>
+<data name="NoteVoiceSettingsModelSelectionHeader" xml:space="preserve"><value>音源模型选择</value></data>
+<data name="NoteVoiceSettingsNewButton" xml:space="preserve"><value>新建</value></data>
+<data name="NoteVoiceSettingsSaveButton" xml:space="preserve"><value>保存</value></data>
+<data name="NoteVoiceSettingsSoundFontLayerSettingsHeader" xml:space="preserve"><value>SoundFont层设置</value></data>
+<data name="NoteVoiceSettingsAddLayerButton" xml:space="preserve"><value>添加层</value></data>
+<data name="NoteVoiceSettingsBrowseAddButton" xml:space="preserve"><value>浏览并添加...</value></data>
+<data name="NoteVoiceSettingsUpdateFileListTooltip" xml:space="preserve"><value>更新文件列表</value></data>
+<data name="NoteVoiceSettingsMoveLayerUpTooltip" xml:space="preserve"><value>上移</value></data>
+<data name="NoteVoiceSettingsMoveLayerDownTooltip" xml:space="preserve"><value>下移</value></data>
+<data name="NoteVoiceSettingsDeleteLayerTooltip" xml:space="preserve"><value>删除</value></data>
+<data name="NoteVoiceSettingsInternalSynthSettingsHeader" xml:space="preserve"><value>内置合成器设置</value></data>
+<data name="NoteVoiceSettingsDefaultWaveformLabel" xml:space="preserve"><value>默认波形</value></data>
+<data name="NoteVoiceSettingsDefaultWaveformTooltip" xml:space="preserve"><value>音色的基本波形。</value></data>
+<data name="NoteVoiceSettingsAttackLabel" xml:space="preserve"><value>起音 (秒)</value></data>
+<data name="NoteVoiceSettingsAttackTooltip" xml:space="preserve"><value>声音达到最大音量所需的时间（秒）。</value></data>
+<data name="NoteVoiceSettingsDecayLabel" xml:space="preserve"><value>衰减 (秒)</value></data>
+<data name="NoteVoiceSettingsDecayTooltip" xml:space="preserve"><value>从最大音量衰减到持续音量所需的时间（秒）。</value></data>
+<data name="NoteVoiceSettingsSustainLabel" xml:space="preserve"><value>持续音量</value></data>
+<data name="NoteVoiceSettingsSustainTooltip" xml:space="preserve"><value>声音持续期间的音量级别 (0-1)。</value></data>
+<data name="NoteVoiceSettingsReleaseLabel" xml:space="preserve"><value>释放 (秒)</value></data>
+<data name="NoteVoiceSettingsReleaseTooltip" xml:space="preserve"><value>音符释放后声音消失所需的时间（秒）。</value></data>
+<data name="NoteVoiceSettingsBandlimitedSynthCheckbox" xml:space="preserve"><value>带限合成（减少高频噪声）</value></data>
+<data name="NoteVoiceSettingsBandlimitedSynthTooltip" xml:space="preserve"><value>启用可减少混叠噪声，但会略微增加CPU负载。</value></data>
+<data name="NoteVoiceSettingsModelManagementTab" xml:space="preserve"><value>模型管理</value></data>
+<data name="NoteVoiceSettingsModelManagementHeader" xml:space="preserve"><value>音源模型管理</value></data>
+<data name="NoteVoiceSettingsRenameButton" xml:space="preserve"><value>重命名</value></data>
+<data name="NoteVoiceSettingsDeleteButton" xml:space="preserve"><value>删除</value></data>
+<data name="RenameModelWindowTitle" xml:space="preserve"><value>重命名模型</value></data>
+<data name="NewModelNamePrompt" xml:space="preserve"><value>请输入新的模型名称：</value></data>
+<data name="ConfirmDeleteModelMessage" xml:space="preserve"><value>删除模型“{0}”？</value></data>
+<data name="DeleteConfirmationTitle" xml:space="preserve"><value>确认删除</value></data>
+<data name="InvalidOrExistingModelNameError" xml:space="preserve"><value>模型名称无效或已存在。</value></data>
+<data name="ErrorTitle" xml:space="preserve"><value>错误</value></data>
+<data name="AudioTabHeader" xml:space="preserve"><value>音频</value></data>
+<data name="PresetGroupHeader" xml:space="preserve"><value>预设</value></data>
+<data name="BasicSettingsGroupHeader" xml:space="preserve"><value>基本设置</value></data>
+<data name="SampleRateLabel" xml:space="preserve"><value>采样率 (Hz)</value></data>
+<data name="SampleRateTooltip" xml:space="preserve"><value>每秒采样音频的次数。值越高，音质越好，但CPU负载也会增加。CD音质为44100Hz。</value></data>
+<data name="MasterVolumeLabel" xml:space="preserve"><value>主音量</value></data>
+<data name="MasterVolumeTooltip" xml:space="preserve"><value>调整整个应用程序的主音量。设置范围为0（静音）到1（最大）。</value></data>
+<data name="NormalizationGroupHeader" xml:space="preserve"><value>归一化</value></data>
+<data name="EnableNormalizationCheckbox" xml:space="preserve"><value>启用归一化</value></data>
+<data name="EnableNormalizationTooltip" xml:space="preserve"><value>自动调整音量以防止削波并均衡整体音量。</value></data>
+<data name="NormalizationThresholdLabel" xml:space="preserve"><value>阈值</value></data>
+<data name="NormalizationThresholdTooltip" xml:space="preserve"><value>归一化激活的音量阈值。超过此值时应用归一化。</value></data>
+<data name="NormalizationLevelLabel" xml:space="preserve"><value>水平</value></data>
+<data name="NormalizationLevelTooltip" xml:space="preserve"><value>归一化后的目标音量水平。</value></data>
+<data name="GlobalFadeOutGroupHeader" xml:space="preserve"><value>全局淡出</value></data>
+<data name="EnableGlobalFadeOutCheckbox" xml:space="preserve"><value>启用最终音频的淡出</value></data>
+<data name="EnableGlobalFadeOutTooltip" xml:space="preserve"><value>在播放结束时平滑地淡出声音，以防止突然中断。</value></data>
+<data name="FadeOutTimeLabel" xml:space="preserve"><value>淡出时间 (秒)</value></data>
+<data name="FadeOutTimeTooltip" xml:space="preserve"><value>淡出持续时间（秒）。</value></data>
+<data name="PresetSaveButton" xml:space="preserve"><value>保存</value></data>
+<data name="PresetDeleteButton" xml:space="preserve"><value>删除</value></data>
+<data name="PerformanceTabHeader" xml:space="preserve"><value>性能</value></data>
+<data name="RenderingSettingsGroupHeader" xml:space="preserve"><value>渲染设置</value></data>
+<data name="RenderingModeLabel" xml:space="preserve"><value>渲染模式</value></data>
+<data name="RenderingModeTooltip" xml:space="preserve"><value>选择音频渲染方法。实时模式延迟较低，但质量可能略有下降。GPU模式需要兼容的显卡，并可能产生数据传输开销。</value></data>
+<data name="BasicSettingsGroupHeaderPerformance" xml:space="preserve"><value>基本设置</value></data>
+<data name="BufferSizeLabel" xml:space="preserve"><value>缓冲区大小</value></data>
+<data name="BufferSizeTooltip" xml:space="preserve"><value>一次处理的音频样本数。值越小延迟越低，但CPU负载越高，可能导致音频中断。</value></data>
+<data name="MaxPolyphonyLabel" xml:space="preserve"><value>最大复音数</value></data>
+<data name="MaxPolyphonyTooltip" xml:space="preserve"><value>可同时播放的最大音符数。超过此值可能会导致较早的音符停止发声。</value></data>
+<data name="MaxThreadsLabel" xml:space="preserve"><value>最大线程数</value></data>
+<data name="MaxThreadsTooltip" xml:space="preserve"><value>matching this to the number of CPU cores is effective.</value></data>
+<data name="InitialSyncDurationLabel" xml:space="preserve"><value>初始加载时间 (秒)</value></data>
+<data name="InitialSyncDurationTooltip" xml:space="preserve"><value>文件加载时同步加载的播放时长（秒）。时间越长，初始等待时间越长，但会减少播放期间的处理。</value></data>
+<data name="GpuAccelerationGroupHeader" xml:space="preserve"><value>GPU加速 (实验性)</value></data>
+<data name="GpuAccelerationTooltip" xml:space="preserve"><value>实验性功能。使用GPU加速部分音频处理。需要兼容的显卡。</value></data>
+<data name="InitializeGpuOnStartupCheckbox" xml:space="preserve"><value>启动时初始化GPU设备</value></data>
+<data name="InitializeGpuOnStartupTooltip" xml:space="preserve"><value>initializes the GPU device when YMM4 starts. If disabled</value></data>
+<data name="GpuSynthesisCheckbox" xml:space="preserve"><value>合成</value></data>
+<data name="GpuSynthesisTooltip" xml:space="preserve"><value>使用GPU进行波形合成处理。</value></data>
+<data name="GpuEqualizerCheckbox" xml:space="preserve"><value>均衡器</value></data>
+<data name="GpuEqualizerTooltip" xml:space="preserve"><value>使用GPU进行均衡器处理。</value></data>
+<data name="GpuEffectsChainCheckbox" xml:space="preserve"><value>效果链</value></data>
+<data name="GpuEffectsChainTooltip" xml:space="preserve"><value>compression</value></data>
+<data name="GpuConvolutionReverbCheckbox" xml:space="preserve"><value>卷积混响</value></data>
+<data name="GpuConvolutionReverbTooltip" xml:space="preserve"><value>使用GPU处理高质量卷积混响。</value></data>
+<data name="EnableParallelProcessingCheckbox" xml:space="preserve"><value>启用并行处理 (CPU)</value></data>
+<data name="EnableParallelProcessingTooltip" xml:space="preserve"><value>speeding up rendering.</value></data>
+<data name="MidiTabHeader" xml:space="preserve"><value>MIDI</value></data>
+<data name="PlaybackSettingsGroupHeader" xml:space="preserve"><value>播放设置</value></data>
+<data name="DefaultTempoLabel" xml:space="preserve"><value>默认速度</value></data>
+<data name="DefaultTempoTooltip" xml:space="preserve"><value>MIDI 文件不包含速度信息时使用的默认速度。以微秒/四分音符指定（例如：120BPM = 500000）。</value></data>
+<data name="PitchBendRangeLabel" xml:space="preserve"><value>弯音范围</value></data>
+<data name="PitchBendRangeTooltip" xml:space="preserve"><value>设置弯音范围（以半音为单位）。例如，设置为2允许在±2半音范围内弯音。</value></data>
+<data name="MinVelocityLabel" xml:space="preserve"><value>最小力度</value></data>
+<data name="MinVelocityTooltip" xml:space="preserve"><value>处理音符的最小力度。力度低于此值的音符将被忽略。有助于移除不需要的低音量音符。</value></data>
+<data name="ProcessingSettingsGroupHeader" xml:space="preserve"><value>处理设置</value></data>
+<data name="ProcessControlChangesCheckbox" xml:space="preserve"><value>处理控制变更</value></data>
+<data name="ProcessControlChangesTooltip" xml:space="preserve"><value>处理控制变更消息，例如音量和声相。</value></data>
+<data name="ProcessPitchBendCheckbox" xml:space="preserve"><value>处理弯音</value></data>
+<data name="ProcessPitchBendTooltip" xml:space="preserve"><value>处理弯音消息以平滑地改变音高。</value></data>
+<data name="ProcessProgramChangesCheckbox" xml:space="preserve"><value>处理程序变更</value></data>
+<data name="ProcessProgramChangesTooltip" xml:space="preserve"><value>处理程序变更消息以切换乐器声音。</value></data>
+<data name="ExclusionSettingsGroupHeader" xml:space="preserve"><value>排除设置</value></data>
+<data name="ExcludedChannelsLabel" xml:space="preserve"><value>排除通道 (逗号分隔)</value></data>
+<data name="ExcludedChannelsTooltip" xml:space="preserve"><value>此处指定的MIDI通道将在播放时被忽略（逗号分隔）。</value></data>
+<data name="ExcludedTracksLabel" xml:space="preserve"><value>排除轨道 (逗号分隔)</value></data>
+<data name="ExcludedTracksTooltip" xml:space="preserve"><value>此处指定的轨道将在播放时被忽略（逗号分隔）。</value></data>
+<data name="SfzTabHeader" xml:space="preserve"><value>SFZ</value></data>
+<data name="EnableSfzCheckbox" xml:space="preserve"><value>启用SFZ (优先于SoundFont)</value></data>
+<data name="EnableSfzTooltip" xml:space="preserve"><value>takes precedence over SoundFont.</value></data>
+<data name="SfzSettingsGroupHeader" xml:space="preserve"><value>设置 (双击编辑)</value></data>
+<data name="SfzSearchPathLabel" xml:space="preserve"><value>SFZ 搜索文件夹：</value></data>
+<data name="SfzSearchPathTooltip" xml:space="preserve"><value>指定搜索SFZ文件的文件夹路径。</value></data>
+<data name="SfzListStatusHeader" xml:space="preserve"><value>状态</value></data>
+<data name="SfzListFilePathHeader" xml:space="preserve"><value>SFZ 文件路径</value></data>
+<data name="SfzListProgramNumberHeader" xml:space="preserve"><value>程序号</value></data>
+<data name="SoundFontTabHeader" xml:space="preserve"><value>SoundFont</value></data>
+<data name="EnableSoundFontCheckbox" xml:space="preserve"><value>启用SoundFont</value></data>
+<data name="EnableSoundFontTooltip" xml:space="preserve"><value>使用SoundFont (.sf2) 文件播放MIDI。</value></data>
+<data name="SoundFontBasicSettingsGroupHeader" xml:space="preserve"><value>基本设置</value></data>
+<data name="UseDefaultSoundFontCheckbox" xml:space="preserve"><value>使用默认SoundFont</value></data>
+<data name="UseDefaultSoundFontTooltip" xml:space="preserve"><value>使用插件附带的默认SoundFont (GeneralUser-GS.sf2)。</value></data>
+<data name="FallbackToSynthesisCheckbox" xml:space="preserve"><value>如果找不到SoundFont，则回退到合成</value></data>
+<data name="FallbackToSynthesisTooltip" xml:space="preserve"><value>如果找不到合适的SoundFont，则切换到使用内置合成器播放。</value></data>
+<data name="SoundFontDirectoryLabel" xml:space="preserve"><value>SoundFont 目录</value></data>
+<data name="SoundFontDirectoryTooltip" xml:space="preserve"><value>包含用户添加的SoundFont文件的目录路径。</value></data>
+<data name="PreferredSoundFontLabel" xml:space="preserve"><value>首选SoundFont文件名</value></data>
+<data name="PreferredSoundFontTooltip" xml:space="preserve"><value>指定即使不符合规则也要优先使用的SoundFont文件名。</value></data>
+<data name="SoundFontLayersGroupHeader" xml:space="preserve"><value>SoundFont 层 (堆叠使用，从上到下优先)</value></data>
+<data name="LayerUpButtonTooltip" xml:space="preserve"><value>将层向上移动。</value></data>
+<data name="LayerDownButtonTooltip" xml:space="preserve"><value>将层向下移动。</value></data>
+<data name="RemoveLayerButtonTooltip" xml:space="preserve"><value>移除选定的层。</value></data>
+<data name="AddLayerButton" xml:space="preserve"><value>添加到层</value></data>
+<data name="SoundFontListGroupHeader" xml:space="preserve"><value>可用SoundFont和规则 (双击编辑)</value></data>
+<data name="SoundFontListStatusHeader" xml:space="preserve"><value>状态</value></data>
+<data name="SoundFontListFileNameHeader" xml:space="preserve"><value>SoundFont 文件</value></data>
+<data name="SoundFontListMinDurationHeader" xml:space="preserve"><value>最短时间(秒)</value></data>
+<data name="SoundFontListMaxDurationHeader" xml:space="preserve"><value>最长时间(秒)</value></data>
+<data name="SoundFontListMinTracksHeader" xml:space="preserve"><value>最小轨道</value></data>
+<data name="SoundFontListMaxTracksHeader" xml:space="preserve"><value>最大轨道</value></data>
+<data name="SoundFontListRequiredProgramsHeader" xml:space="preserve"><value>必需程序</value></data>
+<data name="SynthesisTabHeader" xml:space="preserve"><value>合成</value></data>
+<data name="SynthesisBasicSettingsGroupHeader" xml:space="preserve"><value>基本设置</value></data>
+<data name="DefaultWaveformLabel" xml:space="preserve"><value>默认波形</value></data>
+<data name="DefaultWaveformTooltip" xml:space="preserve"><value>选择音色的基本波形类型。</value></data>
+<data name="WavetableDirectoryLabel" xml:space="preserve"><value>Wavetable 文件夹</value></data>
+<data name="WavetableDirectoryTooltip" xml:space="preserve"><value>放置用户定义的WAV文件的文件夹。</value></data>
+<data name="A4FrequencyLabel" xml:space="preserve"><value>A4 频率 (Hz)</value></data>
+<data name="A4FrequencyTooltip" xml:space="preserve"><value>but different values are used in early music</value></data>
+<data name="MinFrequencyLabel" xml:space="preserve"><value>最小频率 (Hz)</value></data>
+<data name="MinFrequencyTooltip" xml:space="preserve"><value>生成音频频率的下限。低于此频率将被削波。</value></data>
+<data name="MaxFrequencyLabel" xml:space="preserve"><value>最大频率 (Hz)</value></data>
+<data name="MaxFrequencyTooltip" xml:space="preserve"><value>生成音频频率的上限。高于此频率将被削波。</value></data>
+<data name="EnvelopeScaleLabel" xml:space="preserve"><value>包络比例</value></data>
+<data name="EnvelopeScaleTooltip" xml:space="preserve"><value>decay</value></data>
+<data name="DefaultEnvelopeGroupHeader" xml:space="preserve"><value>默认包络</value></data>
+<data name="DefaultEnvelopeTooltip" xml:space="preserve"><value>设置声音时间变化（ADSR）的默认值。</value></data>
+<data name="AttackLabel" xml:space="preserve"><value>起音</value></data>
+<data name="AttackTooltip" xml:space="preserve"><value>声音从开始到达到最大音量所需的时间（秒）。</value></data>
+<data name="DecayLabel" xml:space="preserve"><value>衰减</value></data>
+<data name="DecayTooltip" xml:space="preserve"><value>从最大音量衰减到持续音量水平所需的时间（秒）。</value></data>
+<data name="SustainLabel" xml:space="preserve"><value>持续音量</value></data>
+<data name="SustainTooltip" xml:space="preserve"><value>音符被按住期间的音量水平 (0-1)。</value></data>
+<data name="ReleaseLabel" xml:space="preserve"><value>释放</value></data>
+<data name="ReleaseTooltip" xml:space="preserve"><value>音符释放后声音消失所需的时间（秒）。</value></data>
+<data name="FmSourceGroupHeader" xml:space="preserve"><value>FM 音源</value></data>
+<data name="FmSourceTooltip" xml:space="preserve"><value>与FM合成方法相关的设置。</value></data>
+<data name="ModulatorFrequencyLabel" xml:space="preserve"><value>调制频率 (Hz)</value></data>
+<data name="ModulatorFrequencyTooltip" xml:space="preserve"><value>FM 合成中调制波的频率。使音色更复杂。</value></data>
+<data name="ModulationIndexLabel" xml:space="preserve"><value>调制指数</value></data>
+<data name="ModulationIndexTooltip" xml:space="preserve"><value>FM 合成中调制的深度。值越大，音色越复杂和金属化。</value></data>
+<data name="QualityNoiseReductionGroupHeader" xml:space="preserve"><value>质量/降噪</value></data>
+<data name="EnableBandlimitedSynthesisCheckbox" xml:space="preserve"><value>启用带限合成 (减少混叠)</value></data>
+<data name="EnableBandlimitedSynthesisTooltip" xml:space="preserve"><value>启用在波形生成时减少混叠（折返噪声）的技术。提高音质，但会略微增加CPU负载。</value></data>
+<data name="EnableAntiPopCheckbox" xml:space="preserve"><value>启用抗爆音 (减少咔嗒声)</value></data>
+<data name="EnableAntiPopTooltip" xml:space="preserve"><value>在音符的开始和结束时应用短时淡入淡出来减少“爆音”噪声。</value></data>
+<data name="AntiPopAttackLabel" xml:space="preserve"><value>起音 (秒)</value></data>
+<data name="AntiPopReleaseLabel" xml:space="preserve"><value>释放 (秒)</value></data>
+<data name="EnableNoteCrossfadeCheckbox" xml:space="preserve"><value>启用音符交叉淡化</value></data>
+<data name="EnableNoteCrossfadeTooltip" xml:space="preserve"><value>平滑音符之间的过渡以减少噪音。</value></data>
+<data name="CrossfadeTimeLabel" xml:space="preserve"><value>交叉淡化时间(秒)</value></data>
+<data name="EffectsTabHeader" xml:space="preserve"><value>效果</value></data>
+<data name="EffectsTabTooltip" xml:space="preserve"><value>配置各种效果来调整音质。</value></data>
+<data name="EnableEffectsCheckbox" xml:space="preserve"><value>启用效果</value></data>
+<data name="EnableEffectsTooltip" xml:space="preserve"><value>切换所有音频效果的开关。</value></data>
+<data name="CompressorGroupHeader" xml:space="preserve"><value>压缩器</value></data>
+<data name="CompressorTooltip" xml:space="preserve"><value>抑制音量变化并增加声压的效果。</value></data>
+<data name="EnableCompressorCheckbox" xml:space="preserve"><value>启用压缩器</value></data>
+<data name="CompressorThresholdLabel" xml:space="preserve"><value>阈值</value></data>
+<data name="CompressorThresholdTooltip" xml:space="preserve"><value>压缩器开始工作的音量阈值。</value></data>
+<data name="CompressorRatioLabel" xml:space="preserve"><value>比率</value></data>
+<data name="CompressorRatioTooltip" xml:space="preserve"><value>at 4:1</value></data>
+<data name="CompressorAttackLabel" xml:space="preserve"><value>起音 (秒)</value></data>
+<data name="CompressorAttackTooltip" xml:space="preserve"><value>压缩器开始工作所需的时间（秒）。</value></data>
+<data name="CompressorReleaseLabel" xml:space="preserve"><value>释放 (秒)</value></data>
+<data name="CompressorReleaseTooltip" xml:space="preserve"><value>压缩器释放所需的时间（秒）。</value></data>
+<data name="AlgorithmicReverbGroupHeader" xml:space="preserve"><value>算法混响</value></data>
+<data name="AlgorithmicReverbTooltip" xml:space="preserve"><value>通过计算产生混响的高质量混响。</value></data>
+<data name="EnableAlgorithmicReverbCheckbox" xml:space="preserve"><value>启用算法混响</value></data>
+<data name="ReverbRoomSizeLabel" xml:space="preserve"><value>房间大小</value></data>
+<data name="ReverbDampingLabel" xml:space="preserve"><value>阻尼</value></data>
+<data name="ReverbWetLevelLabel" xml:space="preserve"><value>湿声</value></data>
+<data name="ReverbDryLevelLabel" xml:space="preserve"><value>干声</value></data>
+<data name="ReverbWidthLabel" xml:space="preserve"><value>宽度</value></data>
+<data name="ConvolutionReverbGroupHeader" xml:space="preserve"><value>卷积混响</value></data>
+<data name="ConvolutionReverbTooltip" xml:space="preserve"><value>使用脉冲响应(IR)文件再现实时混响。</value></data>
+<data name="EnableConvolutionReverbCheckbox" xml:space="preserve"><value>启用卷积混响</value></data>
+<data name="IrFilePathLabel" xml:space="preserve"><value>IR 文件路径</value></data>
+<data name="BrowseButton" xml:space="preserve"><value>浏览...</value></data>
+<data name="MaxIrDurationLabel" xml:space="preserve"><value>最大加载时间 (秒)</value></data>
+<data name="MaxIrDurationTooltip" xml:space="preserve"><value>指定脉冲响应文件的最大加载时间（秒）。</value></data>
+<data name="DistortionGroupHeader" xml:space="preserve"><value>失真</value></data>
+<data name="DistortionTooltip" xml:space="preserve"><value>扭曲声音以创造强大的声音。</value></data>
+<data name="EnableDistortionCheckbox" xml:space="preserve"><value>启用失真</value></data>
+<data name="DistortionTypeLabel" xml:space="preserve"><value>类型</value></data>
+<data name="DistortionDriveLabel" xml:space="preserve"><value>驱动</value></data>
+<data name="DistortionMixLabel" xml:space="preserve"><value>混合</value></data>
+<data name="BitCrusherGroupHeader" xml:space="preserve"><value>比特失真</value></data>
+<data name="BitCrusherTooltip" xml:space="preserve"><value>故意降低音质以创造复古声音。</value></data>
+<data name="EnableBitCrusherCheckbox" xml:space="preserve"><value>启用比特失真</value></data>
+<data name="BitDepthLabel" xml:space="preserve"><value>位深度</value></data>
+<data name="RateReductionLabel" xml:space="preserve"><value>速率降低</value></data>
+<data name="PingPongDelayGroupHeader" xml:space="preserve"><value>乒乓延迟</value></data>
+<data name="PingPongDelayTooltip" xml:space="preserve"><value>在左右声道之间交替产生回声效果的延迟。</value></data>
+<data name="EnablePingPongDelayCheckbox" xml:space="preserve"><value>启用乒乓延迟</value></data>
+<data name="DelayTimeLabel" xml:space="preserve"><value>延迟时间 (秒)</value></data>
+<data name="DelayTimeTooltip" xml:space="preserve"><value>回声的间隔（秒）。</value></data>
+<data name="FeedbackLabel" xml:space="preserve"><value>反馈</value></data>
+<data name="FeedbackTooltip" xml:space="preserve"><value>回声重复的次数。</value></data>
+<data name="MixLabel" xml:space="preserve"><value>混合</value></data>
+<data name="MixTooltip" xml:space="preserve"><value>原始声音（干声）和效果声音（湿声）之间的平衡。</value></data>
+<data name="ChorusGroupHeader" xml:space="preserve"><value>合唱</value></data>
+<data name="ChorusTooltip" xml:space="preserve"><value>通过轻微的晃动和叠加声音，为声音增添厚度和宽度。</value></data>
+<data name="EnableChorusCheckbox" xml:space="preserve"><value>启用合唱</value></data>
+<data name="ChorusDelayLabel" xml:space="preserve"><value>延迟 (秒)</value></data>
+<data name="ChorusDelayTooltip" xml:space="preserve"><value>叠加声音相对于原始声音的延迟时间（秒）。</value></data>
+<data name="ChorusDepthLabel" xml:space="preserve"><value>深度</value></data>
+<data name="ChorusDepthTooltip" xml:space="preserve"><value>声音调制的深度。</value></data>
+<data name="ChorusRateLabel" xml:space="preserve"><value>速率 (Hz)</value></data>
+<data name="ChorusRateTooltip" xml:space="preserve"><value>声音调制的速度（Hz）。</value></data>
+<data name="ChorusStrengthLabel" xml:space="preserve"><value>强度</value></data>
+<data name="ChorusStrengthTooltip" xml:space="preserve"><value>合唱声音相对于原始声音的强度。</value></data>
+<data name="PhaserGroupHeader" xml:space="preserve"><value>移相器</value></data>
+<data name="PhaserTooltip" xml:space="preserve"><value>通过改变声音的相位来创造独特旋转声音的效果。</value></data>
+<data name="EnablePhaserCheckbox" xml:space="preserve"><value>启用移相器</value></data>
+<data name="PhaserRateLabel" xml:space="preserve"><value>速率 (Hz)</value></data>
+<data name="PhaserRateTooltip" xml:space="preserve"><value>改变相位的速度（Hz）。</value></data>
+<data name="PhaserStagesLabel" xml:space="preserve"><value>级数</value></data>
+<data name="PhaserStagesTooltip" xml:space="preserve"><value>移相器中滤波器的级数。级数越多，效果越复杂。</value></data>
+<data name="PhaserFeedbackLabel" xml:space="preserve"><value>反馈</value></data>
+<data name="PhaserFeedbackTooltip" xml:space="preserve"><value>反馈到输入的效应声音量。强调效果。</value></data>
+<data name="FlangerGroupHeader" xml:space="preserve"><value>镶边器</value></data>
+<data name="FlangerTooltip" xml:space="preserve"><value>but uses shorter</value></data>
+<data name="EnableFlangerCheckbox" xml:space="preserve"><value>启用镶边器</value></data>
+<data name="FlangerDelayLabel" xml:space="preserve"><value>延迟 (秒)</value></data>
+<data name="FlangerDelayTooltip" xml:space="preserve"><value>延迟时间（秒）。</value></data>
+<data name="FlangerRateLabel" xml:space="preserve"><value>速率 (Hz)</value></data>
+<data name="FlangerRateTooltip" xml:space="preserve"><value>旋转的速度（Hz）。</value></data>
+<data name="FlangerDepthLabel" xml:space="preserve"><value>深度</value></data>
+<data name="FlangerDepthTooltip" xml:space="preserve"><value>旋转的深度。</value></data>
+<data name="LimiterGroupHeader" xml:space="preserve"><value>限制器</value></data>
+<data name="LimiterTooltip" xml:space="preserve"><value>preventing clipping.</value></data>
+<data name="EnableLimiterCheckbox" xml:space="preserve"><value>启用限制器</value></data>
+<data name="LimiterThresholdLabel" xml:space="preserve"><value>阈值</value></data>
+<data name="LimiterThresholdTooltip" xml:space="preserve"><value>限制音量的上限。</value></data>
+<data name="EqualizerGroupHeader" xml:space="preserve"><value>均衡器</value></data>
+<data name="EqualizerTooltip" xml:space="preserve"><value>通过增强或抑制特定频段来调整音质。</value></data>
+<data name="EnableEqualizerCheckbox" xml:space="preserve"><value>启用均衡器</value></data>
+<data name="EqBassGainLabel" xml:space="preserve"><value>低音增益</value></data>
+<data name="EqBassGainTooltip" xml:space="preserve"><value>调整低音范围的增益（音量）。</value></data>
+<data name="EqMidGainLabel" xml:space="preserve"><value>中音增益</value></data>
+<data name="EqMidGainTooltip" xml:space="preserve"><value>调整中音范围的增益（音量）。</value></data>
+<data name="EqTrebleGainLabel" xml:space="preserve"><value>高音增益</value></data>
+<data name="EqTrebleGainTooltip" xml:space="preserve"><value>调整高音范围的增益（音量）。</value></data>
+<data name="OtherEffectsGroupHeader" xml:space="preserve"><value>其他</value></data>
+<data name="EnableDcOffsetRemovalCheckbox" xml:space="preserve"><value>启用直流偏移消除</value></data>
+<data name="EnableDcOffsetRemovalTooltip" xml:space="preserve"><value>消除音频信号中的直流分量（DC偏移）。防止不必要的噪音和失真。</value></data>
+<data name="InstrumentTabHeader" xml:space="preserve"><value>乐器</value></data>
+<data name="InstrumentTabTooltip" xml:space="preserve"><value>根据MIDI程序编号配置音色设置。</value></data>
+<data name="InstrumentPresetTabHeader" xml:space="preserve"><value>预设</value></data>
+<data name="InstrumentPresetTabTooltip" xml:space="preserve"><value>为MIDI程序编号范围分配音色设置。</value></data>
+<data name="AddButton" xml:space="preserve"><value>添加</value></data>
+<data name="DeleteButton" xml:space="preserve"><value>删除</value></data>
+<data name="AddInstrumentPresetTooltip" xml:space="preserve"><value>添加新的乐器预设。</value></data>
+<data name="RemoveInstrumentPresetTooltip" xml:space="preserve"><value>删除所选预设。</value></data>
+<data name="HeaderName" xml:space="preserve"><value>名称</value></data>
+<data name="HeaderStart" xml:space="preserve"><value>开始</value></data>
+<data name="HeaderEnd" xml:space="preserve"><value>结束</value></data>
+<data name="HeaderWaveform" xml:space="preserve"><value>波形</value></data>
+<data name="HeaderAttack" xml:space="preserve"><value>起音</value></data>
+<data name="HeaderDecay" xml:space="preserve"><value>衰减</value></data>
+<data name="HeaderSustain" xml:space="preserve"><value>持续</value></data>
+<data name="HeaderRelease" xml:space="preserve"><value>释放</value></data>
+<data name="HeaderVolume" xml:space="preserve"><value>音量</value></data>
+<data name="HeaderFilter" xml:space="preserve"><value>滤波器</value></data>
+<data name="HeaderCutoff" xml:space="preserve"><value>截止</value></data>
+<data name="HeaderResonance" xml:space="preserve"><value>共振</value></data>
+<data name="HeaderFilterLfo" xml:space="preserve"><value>滤波器LFO</value></data>
+<data name="HeaderFLfoRate" xml:space="preserve"><value>F-LFO 速率</value></data>
+<data name="HeaderFLfoDepth" xml:space="preserve"><value>F-LFO 深度</value></data>
+<data name="InstrumentCustomTabHeader" xml:space="preserve"><value>自定义</value></data>
+<data name="InstrumentCustomTabTooltip" xml:space="preserve"><value>为特定的MIDI程序编号分配单独的音色设置。打击乐通道（10）请设置为-1。</value></data>
+<data name="AddCustomInstrumentTooltip" xml:space="preserve"><value>添加新的自定义乐器。</value></data>
+<data name="RemoveCustomInstrumentTooltip" xml:space="preserve"><value>删除所选的自定义乐器。</value></data>
+<data name="HeaderProgram" xml:space="preserve"><value>程序</value></data>
+<data name="HeaderWavetableFile" xml:space="preserve"><value>Wavetable 文件</value></data>
+<data name="HeaderFLfoWaveform" xml:space="preserve"><value>F-LFO 波形</value></data>
+<data name="HeaderPLfoWaveform" xml:space="preserve"><value>P-LFO 波形</value></data>
+<data name="HeaderPLfoRate" xml:space="preserve"><value>P-LFO 速率</value></data>
+<data name="HeaderPLfoDepth" xml:space="preserve"><value>P-LFO 深度</value></data>
+<data name="HeaderALfoWaveform" xml:space="preserve"><value>A-LFO 波形</value></data>
+<data name="HeaderALfoRate" xml:space="preserve"><value>A-LFO 速率</value></data>
+<data name="HeaderALfoDepth" xml:space="preserve"><value>A-LFO 深度</value></data>
+<data name="DebugTabHeader" xml:space="preserve"><value>调试</value></data>
+<data name="DebugTabTooltip" xml:space="preserve"><value>用于调试以帮助调查问题的设置。</value></data>
+<data name="LoggingGroupHeader" xml:space="preserve"><value>日志记录</value></data>
+<data name="EnableLoggingCheckbox" xml:space="preserve"><value>启用日志</value></data>
+<data name="EnableLoggingTooltip" xml:space="preserve"><value>将插件操作日志输出到文件。有助于调查问题。</value></data>
+<data name="VerboseLoggingCheckbox" xml:space="preserve"><value>启用详细日志</value></data>
+<data name="VerboseLoggingTooltip" xml:space="preserve"><value>输出更详细的日志。</value></data>
+<data name="LogFilePathLabel" xml:space="preserve"><value>日志文件路径</value></data>
+<data name="LogFilePathTooltip" xml:space="preserve"><value>指定日志文件的输出路径。</value></data>
+<data name="MaxLogSizeLabel" xml:space="preserve"><value>最大日志大小 (KB)</value></data>
+<data name="MaxLogSizeTooltip" xml:space="preserve"><value>指定日志文件的最大大小（KB）。超过此限制将删除旧日志。</value></data>
+<data name="LogLevelLabel" xml:space="preserve"><value>日志级别</value></data>
+<data name="LogLevelTooltip" xml:space="preserve"><value>设置要输出的日志的详细级别。范围从1（仅错误）到5（全部）。</value></data>
+<data name="LogViewerHeader" xml:space="preserve"><value>日志查看器</value></data>
+<data name="ClearLogButton" xml:space="preserve"><value>清除</value></data>
+<data name="ApiIntegrationGroupHeader" xml:space="preserve"><value>API 集成</value></data>
+<data name="EnableNamedPipeApiCheckbox" xml:space="preserve"><value>启用命名管道 API (用于外部集成)</value></data>
+<data name="EnableNamedPipeApiTooltip" xml:space="preserve"><value>external applications can access plugin features. Requires YMM4 restart after change.</value></data>
+<data name="ExperimentalFeaturesGroupHeader" xml:space="preserve"><value>实验性功能</value></data>
+<data name="ShowMidiInfoWindowCheckbox" xml:space="preserve"><value>添加MIDI文件时显示MIDI信息窗口</value></data>
+<data name="ShowMidiInfoWindowTooltip" xml:space="preserve"><value>a window displaying internal MIDI information for the file will automatically open when adding a MIDI file to the timeline. Useful for debugging and detailed confirmation.</value></data>
+<data name="OpenMidiEditorCheckbox" xml:space="preserve"><value>添加MIDI文件时打开MIDI编辑器</value></data>
+<data name="OpenMidiEditorTooltip" xml:space="preserve"><value>the MIDI editor window will automatically open when adding a MIDI file to the timeline.</value></data>
+<data name="ShowReleaseNotesTooltip" xml:space="preserve"><value>显示发行说明。</value></data>
+<data name="OpenPluginDirectoryTooltip" xml:space="preserve"><value>打开插件文件夹。</value></data>
+<data name="RefreshFilesTooltip" xml:space="preserve"><value>更新SFZ和SoundFont文件列表。</value></data>
+<data name="ReloadConfigTooltip" xml:space="preserve"><value>从文件重新加载当前设置。未保存的更改将被丢弃。</value></data>
+<data name="Key_VersionChecking" xml:space="preserve"><value>正在获取版本信息...</value></data>
+<data name="Key_VersionCurrent" xml:space="preserve"><value>当前版本: {0}</value></data>
+<data name="Key_VersionNewAvailable" xml:space="preserve"><value>New version available: {0}</value></data>
+<data name="Key_VersionUpToDate" xml:space="preserve"><value>您的版本已是最新。</value></data>
+<data name="Key_VersionCheckFailed" xml:space="preserve"><value>无法获取更新信息。</value></data>
+<data name="MidiWriterHeader" xml:space="preserve"><value>MIDI Conversion Settings</value></data>
+<data name="MidiWriterQuantizeLabel" xml:space="preserve"><value>Quantize Resolution</value></data>
+<data name="MidiWriterQuantizeTooltip" xml:space="preserve"><value>Which note value to align MIDI event timing to. 'None' disables quantization.</value></data>
+<data name="MidiWriterPitchAlgoLabel" xml:space="preserve"><value>Pitch Detection Algorithm</value></data>
+<data name="MidiWriterPitchAlgoTooltip" xml:space="preserve"><value>Method to detect pitch from audio. YIN is more accurate but takes longer to process.</value></data>
+<data name="MidiWriterPitchSensitivityLabel" xml:space="preserve"><value>Pitch Sensitivity</value></data>
+<data name="MidiWriterPitchSensitivityTooltip" xml:space="preserve"><value>How much pitch stability is required. Higher values detect more notes. (0.0-1.0)</value></data>
+<data name="MidiWriterFftSizeLabel" xml:space="preserve"><value>FFT Size</value></data>
+<data name="MidiWriterFftSizeTooltip" xml:space="preserve"><value>Number of samples for frequency analysis. Larger values increase frequency resolution but decrease time resolution.</value></data>
+<data name="MidiWriterMinNoteDurationLabel" xml:space="preserve"><value>Min Note Duration (ms)</value></data>
+<data name="MidiWriterMinNoteDurationTooltip" xml:space="preserve"><value>Minimum length (ms) of detected MIDI notes. Excludes notes that are too short.</value></data>
+<data name="MidiWriterVelocitySensitivityLabel" xml:space="preserve"><value>Velocity Sensitivity</value></data>
+<data name="MidiWriterVelocitySensitivityTooltip" xml:space="preserve"><value>Degree to which volume changes are reflected in MIDI velocity. Higher values emphasize volume changes. (0.0-1.0)</value></data>
+<data name="MidiWriterNotesHeader" xml:space="preserve"><value>Notes</value></data>
+<data name="MidiWriterNote1" xml:space="preserve"><value>• This feature is experimental. Accuracy depends heavily on the audio content and settings.</value></data>
+<data name="MidiWriterNote2" xml:space="preserve"><value>• Monophonic instruments or voices are converted more accurately than chords or complex sources.</value></data>
+<data name="MidiWriterNote3" xml:space="preserve"><value>• Processing time increases proportionally to the audio length and FFT size.</value></data>
+<data name="MidiWriterConfigLoadError" xml:space="preserve"><value>Failed to load configuration view: {0}</value></data>
+<data name="UtauModelName" xml:space="preserve"><value>UTAU Voice</value></data>
+<data name="NewUtauModelName" xml:space="preserve"><value>New UTAU Model</value></data>
+<data name="DefaultUtauModelName" xml:space="preserve"><value>Default UTAU</value></data>
+<data name="UtauSettings" xml:space="preserve"><value>UTAU Settings</value></data>
+<data name="AddUtauFolder" xml:space="preserve"><value>Add UTAU Voice Folder</value></data>
+<data name="RemoveUtauFolder" xml:space="preserve"><value>Remove Selected Folder</value></data>
+<data name="UtauVoiceBaseFolders" xml:space="preserve"><value>UTAU Voice Base Folders</value></data>
+<data name="SelectUtauFolderTitle" xml:space="preserve"><value>Select the folder containing UTAU voices</value></data>
+<data name="RefreshUtauVoices" xml:space="preserve"><value>Refresh UTAU Voice List</value></data>
+<data name="NewSFModelName" xml:space="preserve"><value>New SF Model</value></data>
+<data name="NewSynthModelName" xml:space="preserve"><value>New Synth Model</value></data>
+<data name="Loading" xml:space="preserve"><value>加载中...</value></data>
+</root>

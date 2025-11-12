@@ -1,0 +1,1869 @@
+﻿<UserControl x:Class="MIDI.MidiSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:MIDI"
+             xmlns:configModels="clr-namespace:MIDI.Configuration.Models"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:midi="clr-namespace:MIDI"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=local:MidiSettingsViewModel}"
+             d:DesignHeight="600" d:DesignWidth="800"
+             Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+             Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+             SizeChanged="MidiSettingsView_SizeChanged"
+             AllowDrop="True">
+    <UserControl.Resources>
+        <local:IntListToStringConverter x:Key="IntListConverter" />
+        <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <local:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <ObjectDataProvider x:Key="RenderingModeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="configModels:RenderingMode"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <ObjectDataProvider x:Key="LfoWaveformEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:LfoWaveformType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <ObjectDataProvider x:Key="DistortionTypeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:DistortionType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <Style TargetType="Label">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Padding" Value="5,0"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+        </Style>
+
+        <Style x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="templateRoot"
+                                Background="Transparent"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                                BorderThickness="0"
+                                SnapsToDevicePixels="true">
+                            <Border x:Name="splitBorder"
+                                    Width="{DynamicResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}"
+                                    Margin="0"
+                                    HorizontalAlignment="Right"
+                                    BorderThickness="1"
+                                    BorderBrush="Transparent">
+                                <Path x:Name="arrow"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"
+                                      Data="M 0 0 L 4 4 L 8 0 Z"
+                                      Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+                            </Border>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="arrow" Property="Fill" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter TargetName="arrow" Property="Fill" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Fill" TargetName="arrow" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type ComboBox}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="4,3"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid x:Name="templateRoot" SnapsToDevicePixels="true">
+                            <Popup x:Name="PART_Popup"
+                                   AllowsTransparency="true"
+                                   Grid.ColumnSpan="2"
+                                   IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                   Placement="Bottom"
+                                   PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimationKey}}">
+                                <Border x:Name="dropDownBorder"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                        MinWidth="{Binding ActualWidth, ElementName=templateRoot}"
+                                        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                                        BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"
+                                        BorderThickness="1">
+                                    <ScrollViewer x:Name="DropDownScrollViewer">
+                                        <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                <Grid>
+                                    <ContentPresenter x:Name="contentPresenter"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                      Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      IsHitTestVisible="false"
+                                                      Margin="{TemplateBinding Padding}"
+                                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                    <ToggleButton x:Name="toggleButton"
+                                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                                  Background="Transparent"
+                                                  IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                  Style="{StaticResource ComboBoxToggleButton}" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Padding" Value="4,3"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="CheckBox">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,5"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="checkBoxBorder"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="1"
+                                    Background="{TemplateBinding Background}"
+                                    Width="16"
+                                    Height="16"
+                                    VerticalAlignment="Center">
+                                <Path x:Name="checkMark"
+                                      Data="M 0 5 L 5 10 L 10 0"
+                                      Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                                      StrokeThickness="2"
+                                      Stretch="Uniform"
+                                      Width="10"
+                                      Height="10"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"
+                                      Visibility="Collapsed"/>
+                            </Border>
+                            <ContentPresenter Grid.Column="1"
+                                              Margin="5,0,0,0"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="checkBoxBorder" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter TargetName="checkMark" Property="Stroke" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.56"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ResponsiveTabControlStyle" TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TabPanel x:Name="HeaderPanel"
+                                      Grid.Row="0"
+                                      IsItemsHost="true"
+                                      Background="Transparent"/>
+                            <Border x:Name="ContentPanel"
+                                    Grid.Row="1"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter x:Name="PART_SelectedContentHost"
+                                                  ContentSource="SelectedContent"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Border"
+                                BorderThickness="0,0,0,2"
+                                BorderBrush="Transparent"
+                                Background="Transparent"
+                                Margin="0,0,10,0">
+                            <ContentPresenter x:Name="ContentSite"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"
+                                              ContentSource="Header"
+                                              Margin="{TemplateBinding Padding}">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=TabItem}, Path=Foreground}"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
+            <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
+            <Setter Property="ColumnWidth" Value="Auto"/>
+        </Style>
+
+        <Style x:Key="RichButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Focusable="False"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.56"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CompactButtonStyle" TargetType="Button" BasedOn="{StaticResource RichButtonStyle}">
+            <Setter Property="Padding" Value="6"/>
+        </Style>
+
+        <Style x:Key="HamburgerToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Focusable="False"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.56"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="false"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="MinWidth" Value="8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="{TemplateBinding Background}">
+                            <Track x:Name="PART_Track"
+                                   IsDirectionReversed="true"
+                                   IsEnabled="{TemplateBinding IsMouseOver}">
+                                <Track.Thumb>
+                                    <Thumb Style="{DynamicResource ScrollBarThumbStyle}"/>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Width" Value="Auto"/>
+                    <Setter Property="MinWidth" Value="0"/>
+                    <Setter Property="Height" Value="8"/>
+                    <Setter Property="MinHeight" Value="8"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ScrollBar}">
+                                <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="{TemplateBinding Background}">
+                                    <Track x:Name="PART_Track" IsEnabled="{TemplateBinding IsMouseOver}">
+                                        <Track.Thumb>
+                                            <Thumb Style="{DynamicResource ScrollBarThumbStyle}"/>
+                                        </Track.Thumb>
+                                    </Track>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ScrollBarThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border x:Name="rectangle"
+                                SnapsToDevicePixels="True"
+                                Background="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                                CornerRadius="3"
+                                Opacity="0.6"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="rectangle" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="true">
+                                <Setter TargetName="rectangle" Property="Opacity" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid x:Name="LayoutRoot" Margin="15">
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="DragEnter">
+                <i:InvokeCommandAction Command="{Binding DragOverCommand}" PassEventArgsToCommand="True" />
+            </i:EventTrigger>
+            <i:EventTrigger EventName="DragOver">
+                <i:InvokeCommandAction Command="{Binding DragOverCommand}" PassEventArgsToCommand="True" />
+            </i:EventTrigger>
+            <i:EventTrigger EventName="DragLeave">
+                <i:InvokeCommandAction Command="{Binding DragLeaveCommand}" />
+            </i:EventTrigger>
+            <i:EventTrigger EventName="Drop">
+                <i:InvokeCommandAction Command="{Binding DropCommand}" PassEventArgsToCommand="True" />
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="WindowStates">
+                <VisualState x:Name="Wide">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="HamburgerButton" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Collapsed}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="UpdateStatusTextBorder" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="UpdateStatusIcon" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Collapsed}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+                <VisualState x:Name="Compact">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="HamburgerButton" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="UpdateStatusTextBorder" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Collapsed}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="UpdateStatusIcon" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <WrapPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Command="{Binding ShowReleaseNotesCommand}" Style="{StaticResource RichButtonStyle}" Padding="8,4" Margin="0,0,10,0" ToolTip="{x:Static midi:Translate.ShowReleaseNotesTooltip}">
+                    <TextBlock Text="{Binding CurrentVersionText}" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                </Button>
+                <Border x:Name="UpdateStatusTextBorder" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="8,4" Visibility="{Binding UpdateStatusVisibility}">
+                    <TextBlock Text="{Binding UpdateStatusText}" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                </Border>
+                <Button x:Name="UpdateStatusIcon" Style="{StaticResource CompactButtonStyle}" ToolTip="{Binding UpdateStatusText}" Visibility="Collapsed">
+                    <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V15H11V17M11,13H13V7H11V13Z" 
+                          Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Width="16" Height="16" Stretch="Uniform"/>
+                </Button>
+            </WrapPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Command="{Binding OpenPluginDirectoryCommand}" ToolTip="{x:Static midi:Translate.OpenPluginDirectoryTooltip}" Style="{StaticResource CompactButtonStyle}" Margin="0,0,5,0">
+                    <Path Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"
+                          Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="16" Height="16" Stretch="Uniform"/>
+                </Button>
+                <Button Command="{Binding RefreshFilesCommand}" ToolTip="{x:Static midi:Translate.RefreshFilesTooltip}" Style="{StaticResource CompactButtonStyle}">
+                    <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
+                           Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="16" Height="16" Stretch="Uniform"/>
+                </Button>
+                <Button Command="{Binding ReloadConfigCommand}" Margin="5,0,0,0"
+                        ToolTip="{x:Static midi:Translate.ReloadConfigTooltip}" Style="{StaticResource CompactButtonStyle}">
+                    <Path Data="M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3M12,8V13L16.28,15.54L17,14.33L13.5,12.25V8H12Z"
+                          Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="16" Height="16" Stretch="Uniform"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <DockPanel Grid.Row="1">
+            <ToggleButton x:Name="HamburgerButton" Style="{StaticResource HamburgerToggleButtonStyle}" DockPanel.Dock="Left" VerticalAlignment="Top" Visibility="Collapsed" Width="32" Height="32" Margin="0,0,5,0">
+                <Path Data="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Stretch="Uniform" Width="16" Height="16"/>
+            </ToggleButton>
+
+            <Popup x:Name="MenuPopup" IsOpen="{Binding IsChecked, ElementName=HamburgerButton, Mode=TwoWay}" StaysOpen="False" Placement="Bottom" PlacementTarget="{Binding ElementName=HamburgerButton}">
+                <Border Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1">
+                    <ListBox x:Name="TabListBox"
+                             ItemsSource="{Binding Items, ElementName=MainTabControl}"
+                             SelectedItem="{Binding SelectedItem, ElementName=MainTabControl, Mode=TwoWay}"
+                             SelectionChanged="TabListBox_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Header}" Margin="5"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </Popup>
+
+            <TabControl x:Name="MainTabControl" Style="{StaticResource ResponsiveTabControlStyle}">
+                <TabItem Header="{x:Static midi:Translate.AudioTabHeader}" ToolTip="音声出力に関する全体的な設定を行います。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.PresetGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid x:Name="PresetGrid" Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="0"/>
+                                        </Grid.RowDefinitions>
+
+                                        <ComboBox x:Name="PresetComboBox" Grid.Column="0" Grid.Row="0" ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
+                                            VerticalContentAlignment="Center" Margin="0,0,10,0" Height="32">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <StackPanel x:Name="DropdownView">
+                                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+                                                            <TextBlock Text="{Binding ChangesCount, StringFormat='変更点: {0}件'}" FontSize="10" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" Margin="0,2,0,0"/>
+                                                        </StackPanel>
+                                                        <TextBlock x:Name="SelectionView" Text="{Binding Name}" Visibility="Collapsed"/>
+                                                    </Grid>
+                                                    <DataTemplate.Triggers>
+                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ComboBoxItem}}" Value="{x:Null}">
+                                                            <Setter TargetName="DropdownView" Property="Visibility" Value="Collapsed"/>
+                                                            <Setter TargetName="SelectionView" Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </DataTemplate.Triggers>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+
+                                        <StackPanel x:Name="PresetActionsPanel" Grid.Column="1" Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBox Text="{Binding NewPresetName, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,5,0" MinWidth="120" Height="32"/>
+                                            <Button Content="{x:Static midi:Translate.PresetSaveButton}" Command="{Binding SavePresetCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,0,5,0" Padding="10,3" Height="32"/>
+                                            <Button Content="{x:Static midi:Translate.PresetDeleteButton}" Command="{Binding DeletePresetCommand}" Style="{StaticResource RichButtonStyle}" Padding="10,3" Height="32"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.BasicSettingsGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.SampleRateLabel}" ToolTip="{x:Static midi:Translate.SampleRateTooltip}"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Audio.SampleRate, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.SampleRateTooltip}"/>
+
+                                        <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.MasterVolumeLabel}" ToolTip="{x:Static midi:Translate.MasterVolumeTooltip}"/>
+                                        <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Audio.MasterVolume, Mode=TwoWay}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0" Unit="%"
+                                                    ToolTip="{x:Static midi:Translate.MasterVolumeTooltip}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.NormalizationGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Audio.EnableNormalization}" Content="{x:Static midi:Translate.EnableNormalizationCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.EnableNormalizationTooltip}"/>
+                                        <Grid IsEnabled="{Binding Settings.Audio.EnableNormalization}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.NormalizationThresholdLabel}" ToolTip="{x:Static midi:Translate.NormalizationThresholdTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Audio.NormalizationThreshold, Mode=TwoWay}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10" Unit="%"
+                                                        ToolTip="{x:Static midi:Translate.NormalizationThresholdTooltip}"/>
+
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.NormalizationLevelLabel}" ToolTip="{x:Static midi:Translate.NormalizationLevelTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Audio.NormalizationLevel, Mode=TwoWay}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0" Unit="%"
+                                                        ToolTip="{x:Static midi:Translate.NormalizationLevelTooltip}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.GlobalFadeOutGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Audio.EnableGlobalFadeOut}" Content="{x:Static midi:Translate.EnableGlobalFadeOutCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.EnableGlobalFadeOutTooltip}"/>
+                                        <Grid IsEnabled="{Binding Settings.Audio.EnableGlobalFadeOut}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.FadeOutTimeLabel}" ToolTip="{x:Static midi:Translate.FadeOutTimeTooltip}"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Audio.GlobalFadeOutSeconds}" Margin="10,0,0,0"
+                                                ToolTip="{x:Static midi:Translate.FadeOutTimeTooltip}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="{x:Static midi:Translate.PerformanceTabHeader}" ToolTip="CPU負荷やメモリ使用量など、処理性能に関する設定を行います。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.RenderingSettingsGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.RenderingModeLabel}" ToolTip="{x:Static midi:Translate.RenderingModeTooltip}"/>
+                                        <ComboBox Grid.Row="0" Grid.Column="1"
+                                            ItemsSource="{Binding Source={StaticResource RenderingModeEnum}}"
+                                            SelectedItem="{Binding Settings.Performance.RenderingMode}"
+                                            Margin="10,0,0,0"
+                                            ToolTip="{x:Static midi:Translate.RenderingModeTooltip}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                            <ComboBox.ItemContainerStyle>
+                                                <Style TargetType="ComboBoxItem">
+                                                    <Setter Property="Padding" Value="4,3"/>
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding}" Value="{x:Static configModels:RenderingMode.HighQualityGPU}"/>
+                                                                <Condition Binding="{Binding DataContext.Settings.Performance.GPU.EnableGpuSynthesis, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding}" Value="{x:Static configModels:RenderingMode.RealtimeGPU}"/>
+                                                                <Condition Binding="{Binding DataContext.Settings.Performance.GPU.EnableGpuSynthesis, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ComboBox.ItemContainerStyle>
+                                        </ComboBox>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.BasicSettingsGroupHeaderPerformance}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.BufferSizeLabel}" ToolTip="{x:Static midi:Translate.BufferSizeTooltip}"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Performance.BufferSize}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.BufferSizeTooltip}"/>
+
+                                        <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.MaxPolyphonyLabel}" ToolTip="{x:Static midi:Translate.MaxPolyphonyTooltip}"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Performance.MaxPolyphony}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.MaxPolyphonyTooltip}"/>
+
+                                        <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.MaxThreadsLabel}" ToolTip="{x:Static midi:Translate.MaxThreadsTooltip}"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Performance.MaxThreads}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.MaxThreadsTooltip}"/>
+
+                                        <Label Grid.Row="3" Grid.Column="0" Content="{x:Static midi:Translate.InitialSyncDurationLabel}" ToolTip="{x:Static midi:Translate.InitialSyncDurationTooltip}"/>
+                                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Performance.InitialSyncDurationSeconds}" Margin="10,0,0,0"
+                                            ToolTip="{x:Static midi:Translate.InitialSyncDurationTooltip}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.GpuAccelerationGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"
+                                        ToolTip="{x:Static midi:Translate.GpuAccelerationTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Performance.InitializeGpuOnStartup}" Content="{x:Static midi:Translate.InitializeGpuOnStartupCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.InitializeGpuOnStartupTooltip}"/>
+                                        <Separator Margin="0,5"/>
+                                        <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuSynthesis}" Content="{x:Static midi:Translate.GpuSynthesisCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.GpuSynthesisTooltip}"/>
+                                        <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuEqualizer}" Content="{x:Static midi:Translate.GpuEqualizerCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.GpuEqualizerTooltip}"/>
+                                        <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuEffectsChain}" Content="{x:Static midi:Translate.GpuEffectsChainCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.GpuEffectsChainTooltip}"/>
+                                        <CheckBox IsChecked="{Binding Settings.Performance.GPU.EnableGpuConvolutionReverb}" Content="{x:Static midi:Translate.GpuConvolutionReverbCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.GpuConvolutionReverbTooltip}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <CheckBox IsChecked="{Binding Settings.Performance.EnableParallelProcessing}" Content="{x:Static midi:Translate.EnableParallelProcessingCheckbox}"
+                                ToolTip="{x:Static midi:Translate.EnableParallelProcessingTooltip}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="{x:Static midi:Translate.MidiTabHeader}" ToolTip="MIDIファイルの読み込みと解釈に関する設定を行います。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.PlaybackSettingsGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.DefaultTempoLabel}" ToolTip="{x:Static midi:Translate.DefaultTempoTooltip}"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.MIDI.DefaultTempo}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.DefaultTempoTooltip}"/>
+
+                                        <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.PitchBendRangeLabel}" ToolTip="{x:Static midi:Translate.PitchBendRangeTooltip}"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.MIDI.PitchBendRange}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.PitchBendRangeTooltip}"/>
+
+                                        <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.MinVelocityLabel}" ToolTip="{x:Static midi:Translate.MinVelocityTooltip}"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.MIDI.MinVelocity}" Margin="10,0,0,0"
+                                            ToolTip="{x:Static midi:Translate.MinVelocityTooltip}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.ProcessingSettingsGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.MIDI.ProcessControlChanges}" Content="{x:Static midi:Translate.ProcessControlChangesCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.ProcessControlChangesTooltip}"/>
+                                        <CheckBox IsChecked="{Binding Settings.MIDI.ProcessPitchBend}" Content="{x:Static midi:Translate.ProcessPitchBendCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.ProcessPitchBendTooltip}"/>
+                                        <CheckBox IsChecked="{Binding Settings.MIDI.ProcessProgramChanges}" Content="{x:Static midi:Translate.ProcessProgramChangesCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.ProcessProgramChangesTooltip}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.ExclusionSettingsGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.ExcludedChannelsLabel}" ToolTip="{x:Static midi:Translate.ExcludedChannelsTooltip}"/>
+                                        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Settings.MIDI.ExcludedChannels, Converter={StaticResource IntListConverter}}" Margin="0,0,5,0"
+                                            ToolTip="{x:Static midi:Translate.ExcludedChannelsTooltip}"/>
+                                        <Label Grid.Row="0" Grid.Column="1" Content="{x:Static midi:Translate.ExcludedTracksLabel}" Margin="5,0,0,0" ToolTip="{x:Static midi:Translate.ExcludedTracksTooltip}"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.MIDI.ExcludedTracks, Converter={StaticResource IntListConverter}}" Margin="5,0,0,0"
+                                            ToolTip="{x:Static midi:Translate.ExcludedTracksTooltip}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="{x:Static midi:Translate.SfzTabHeader}" ToolTip="SFZ形式のサンプラー音源を使用するための設定です。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <CheckBox IsChecked="{Binding Settings.SFZ.EnableSfz}" Content="{x:Static midi:Translate.EnableSfzCheckbox}"
+                                ToolTip="{x:Static midi:Translate.EnableSfzTooltip}"/>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,10,0,0" IsEnabled="{Binding Settings.SFZ.EnableSfz}">
+                                <Grid>
+                                    <TextBlock Text="{x:Static midi:Translate.SfzSettingsGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <DockPanel Margin="0,30,0,0">
+                                        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                                            <Label DockPanel.Dock="Left" Content="{x:Static midi:Translate.SfzSearchPathLabel}" ToolTip="{x:Static midi:Translate.SfzSearchPathTooltip}"/>
+                                            <TextBox Text="{Binding Settings.SFZ.SfzSearchPath}"/>
+                                        </DockPanel>
+
+                                        <DataGrid ItemsSource="{Binding SfzFiles}" x:Name="SfzDataGrid"
+                                            AutoGenerateColumns="False" CanUserAddRows="False" MinHeight="250"
+                                            IsReadOnly="True">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDoubleClick">
+                                                    <i:InvokeCommandAction Command="{Binding EditSfzMapCommand}" CommandParameter="{Binding ElementName=SfzDataGrid, Path=SelectedItem}"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                            <DataGrid.Columns>
+                                                <DataGridTemplateColumn Width="Auto" MinWidth="40" Header="{x:Static midi:Translate.SfzListStatusHeader}">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <Ellipse Width="10" Height="10" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="{Binding IsMissing, StringFormat='ファイルが見つかりません: {0}'}">
+                                                                <Ellipse.Style>
+                                                                    <Style TargetType="Ellipse">
+                                                                        <Setter Property="Fill" Value="Gray"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsMapped}" Value="True">
+                                                                                <Setter Property="Fill" Value="Green"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding IsMissing}" Value="True">
+                                                                                <Setter Property="Fill" Value="Red"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Ellipse.Style>
+                                                            </Ellipse>
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
+                                                <DataGridTextColumn Header="{x:Static midi:Translate.SfzListFilePathHeader}" Binding="{Binding FileName}" Width="*"/>
+                                                <DataGridTextColumn Header="{x:Static midi:Translate.SfzListProgramNumberHeader}" Binding="{Binding Map.Program}" Width="Auto" MinWidth="90"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </DockPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="{x:Static midi:Translate.SoundFontTabHeader}" ToolTip="SoundFont (.sf2) ファイルを使用してMIDIを再生するための設定です。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <CheckBox IsChecked="{Binding Settings.SoundFont.EnableSoundFont}" Content="{x:Static midi:Translate.EnableSoundFontCheckbox}"
+                                ToolTip="{x:Static midi:Translate.EnableSoundFontTooltip}"/>
+                            <Grid IsEnabled="{Binding Settings.SoundFont.EnableSoundFont}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.Row="0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,10,0,10">
+                                    <Grid>
+                                        <TextBlock Text="{x:Static midi:Translate.SoundFontBasicSettingsGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                        <StackPanel Margin="0,30,0,0">
+                                            <CheckBox IsChecked="{Binding Settings.SoundFont.UseDefaultSoundFont}" Content="{x:Static midi:Translate.UseDefaultSoundFontCheckbox}"
+                                                ToolTip="{x:Static midi:Translate.UseDefaultSoundFontTooltip}"/>
+                                            <CheckBox IsChecked="{Binding Settings.SoundFont.FallbackToSynthesis}" Content="{x:Static midi:Translate.FallbackToSynthesisCheckbox}"
+                                                ToolTip="{x:Static midi:Translate.FallbackToSynthesisTooltip}"/>
+                                            <Grid Margin="0,5,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.SoundFontDirectoryLabel}" ToolTip="{x:Static midi:Translate.SoundFontDirectoryTooltip}"/>
+                                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.SoundFont.DefaultSoundFontDirectory}" Margin="10,0,0,10"
+                                                    ToolTip="{x:Static midi:Translate.SoundFontDirectoryTooltip}"/>
+                                                <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.PreferredSoundFontLabel}" ToolTip="{x:Static midi:Translate.PreferredSoundFontTooltip}"/>
+                                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.SoundFont.PreferredSoundFont}" Margin="10,0,0,0"
+                                                    ToolTip="{x:Static midi:Translate.PreferredSoundFontTooltip}"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Row="1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Text="{x:Static midi:Translate.SoundFontLayersGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                                        <DockPanel Grid.Row="1">
+                                            <StackPanel DockPanel.Dock="Right" Margin="5,0,0,0">
+                                                <Button Command="{Binding MoveSoundFontLayerUpCommand}" CommandParameter="{Binding ElementName=SoundFontLayerGrid, Path=SelectedItem}" Margin="0,0,0,5" Style="{StaticResource CompactButtonStyle}" ToolTip="{x:Static midi:Translate.LayerUpButtonTooltip}">
+                                                    <Path Width="10" Height="10" Stretch="Uniform" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Data="M0,5 L5,0 L10,5 Z" />
+                                                </Button>
+                                                <Button Command="{Binding MoveSoundFontLayerDownCommand}" CommandParameter="{Binding ElementName=SoundFontLayerGrid, Path=SelectedItem}" Style="{StaticResource CompactButtonStyle}" ToolTip="{x:Static midi:Translate.LayerDownButtonTooltip}">
+                                                    <Path Width="10" Height="10" Stretch="Uniform" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Data="M0,0 L5,5 L10,0 Z" />
+                                                </Button>
+                                                <Button Command="{Binding RemoveSoundFontLayerCommand}" CommandParameter="{Binding ElementName=SoundFontLayerGrid, Path=SelectedItem}" Margin="0,10,0,0" Style="{StaticResource RichButtonStyle}" ToolTip="{x:Static midi:Translate.RemoveLayerButtonTooltip}">
+                                                    <Path Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Data="M9,3V4H4V6H5V19C5,20.1 5.9,21 7,21H17C18.1,21 19,20.1 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z" />
+                                                </Button>
+                                            </StackPanel>
+                                            <DataGrid ItemsSource="{Binding SoundFontLayers}" x:Name="SoundFontLayerGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" MinHeight="150">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="{x:Static midi:Translate.SoundFontListFileNameHeader}" Binding="{Binding SoundFontFile}" Width="*"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </DockPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Button Grid.Row="2" Content="{x:Static midi:Translate.AddLayerButton}" Command="{Binding AddSoundFontLayerCommand}" CommandParameter="{Binding ElementName=SoundFontRuleGrid, Path=SelectedItem}" Margin="0,0,0,10" HorizontalAlignment="Center" Style="{StaticResource RichButtonStyle}"/>
+
+                                <Border Grid.Row="3" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
+                                    <Grid>
+                                        <TextBlock Text="{x:Static midi:Translate.SoundFontListGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                        <DataGrid ItemsSource="{Binding SoundFontFiles}" x:Name="SoundFontRuleGrid" AutoGenerateColumns="False" CanUserAddRows="False" Margin="0,30,0,0" MinHeight="200" IsReadOnly="True">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDoubleClick">
+                                                    <i:InvokeCommandAction Command="{Binding EditSoundFontRuleCommand}" CommandParameter="{Binding ElementName=SoundFontRuleGrid, Path=SelectedItem}"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                            <DataGrid.Columns>
+                                                <DataGridTemplateColumn Width="Auto" MinWidth="40" Header="{x:Static midi:Translate.SoundFontListStatusHeader}">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <Ellipse Width="10" Height="10" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="{Binding IsMissing, StringFormat='ファイルが見つかりません: {0}'}">
+                                                                <Ellipse.Style>
+                                                                    <Style TargetType="Ellipse">
+                                                                        <Setter Property="Fill" Value="Gray"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsMapped}" Value="True">
+                                                                                <Setter Property="Fill" Value="Green"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding IsMissing}" Value="True">
+                                                                                <Setter Property="Fill" Value="Red"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Ellipse.Style>
+                                                            </Ellipse>
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
+                                                <DataGridTextColumn Header="{x:Static midi:Translate.SoundFontListFileNameHeader}" Binding="{Binding FileName}" Width="*"/>
+                                                <DataGridTextColumn Header="{x:Static midi:Translate.SoundFontListMinDurationHeader}" Binding="{Binding Rule.MinDurationSeconds, TargetNullValue=''}" Width="Auto" MinWidth="90"/>
+                                                <DataGridTextColumn Header="{x:Static midi:Translate.SoundFontListMaxDurationHeader}" Binding="{Binding Rule.MaxDurationSeconds, TargetNullValue=''}" Width="Auto" MinWidth="90"/>
+                                                <DataGridTextColumn Header="{x:Static midi:Translate.SoundFontListMinTracksHeader}" Binding="{Binding Rule.MinTrackCount, TargetNullValue=''}" Width="Auto" MinWidth="75"/>
+                                                <DataGridTextColumn Header="{x:Static midi:Translate.SoundFontListMaxTracksHeader}" Binding="{Binding Rule.MaxTrackCount, TargetNullValue=''}" Width="Auto" MinWidth="75"/>
+                                                <DataGridTextColumn Header="{x:Static midi:Translate.SoundFontListRequiredProgramsHeader}" Binding="{Binding Rule.RequiredPrograms, Converter={StaticResource IntListConverter}, TargetNullValue=''}" Width="*"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Grid>
+                                </Border>
+
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="{x:Static midi:Translate.SynthesisTabHeader}" ToolTip="内蔵シンセサイザーの音作りに関する設定です。SoundFontやSFZを使用しない場合に適用されます。">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.SynthesisBasicSettingsGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.DefaultWaveformLabel}" ToolTip="{x:Static midi:Translate.DefaultWaveformTooltip}"/>
+                                        <ComboBox Grid.Row="0" Grid.Column="1" SelectedItem="{Binding Settings.Synthesis.DefaultWaveform}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.DefaultWaveformTooltip}">
+                                            <sys:String>Sine</sys:String>
+                                            <sys:String>Square</sys:String>
+                                            <sys:String>Sawtooth</sys:String>
+                                            <sys:String>Triangle</sys:String>
+                                            <sys:String>Organ</sys:String>
+                                            <sys:String>Noise</sys:String>
+                                            <sys:String>Wavetable</sys:String>
+                                            <sys:String>UserWavetable</sys:String>
+                                        </ComboBox>
+
+                                        <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.WavetableDirectoryLabel}" ToolTip="{x:Static midi:Translate.WavetableDirectoryTooltip}"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.WavetableDirectory}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.WavetableDirectoryTooltip}"/>
+
+                                        <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.A4FrequencyLabel}" ToolTip="{x:Static midi:Translate.A4FrequencyTooltip}"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Synthesis.A4Frequency}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.A4FrequencyTooltip}"/>
+
+                                        <Label Grid.Row="3" Grid.Column="0" Content="{x:Static midi:Translate.MinFrequencyLabel}" ToolTip="{x:Static midi:Translate.MinFrequencyTooltip}"/>
+                                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Synthesis.MinFrequency}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.MinFrequencyTooltip}"/>
+
+                                        <Label Grid.Row="4" Grid.Column="0" Content="{x:Static midi:Translate.MaxFrequencyLabel}" ToolTip="{x:Static midi:Translate.MaxFrequencyTooltip}"/>
+                                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Settings.Synthesis.MaxFrequency}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.MaxFrequencyTooltip}"/>
+
+                                        <Label Grid.Row="5" Grid.Column="0" Content="{x:Static midi:Translate.EnvelopeScaleLabel}" ToolTip="{x:Static midi:Translate.EnvelopeScaleTooltip}"/>
+                                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Settings.Synthesis.EnvelopeScale}" Margin="10,0,0,0"
+                                            ToolTip="{x:Static midi:Translate.EnvelopeScaleTooltip}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.DefaultEnvelopeGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.DefaultEnvelopeTooltip}"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.AttackLabel}" ToolTip="{x:Static midi:Translate.AttackTooltip}"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultAttack}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.AttackTooltip}"/>
+                                        <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.DecayLabel}" ToolTip="{x:Static midi:Translate.DecayTooltip}"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultDecay}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.DecayTooltip}"/>
+                                        <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.SustainLabel}" ToolTip="{x:Static midi:Translate.SustainTooltip}"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultSustain}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.SustainTooltip}"/>
+                                        <Label Grid.Row="3" Grid.Column="0" Content="{x:Static midi:Translate.ReleaseLabel}" ToolTip="{x:Static midi:Translate.ReleaseTooltip}"/>
+                                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Synthesis.DefaultRelease}" Margin="10,0,0,0"
+                                            ToolTip="{x:Static midi:Translate.ReleaseTooltip}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.FmSourceGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.FmSourceTooltip}"/>
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.ModulatorFrequencyLabel}" ToolTip="{x:Static midi:Translate.ModulatorFrequencyTooltip}"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Synthesis.FmModulatorFrequency}" Margin="10,0,0,10"
+                                            ToolTip="{x:Static midi:Translate.ModulatorFrequencyTooltip}"/>
+                                        <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.ModulationIndexLabel}" ToolTip="{x:Static midi:Translate.ModulationIndexTooltip}"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.FmModulationIndex}" Margin="10,0,0,0"
+                                            ToolTip="{x:Static midi:Translate.ModulationIndexTooltip}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.QualityNoiseReductionGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Synthesis.EnableBandlimitedSynthesis}" Content="{x:Static midi:Translate.EnableBandlimitedSynthesisCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.EnableBandlimitedSynthesisTooltip}"/>
+                                        <CheckBox IsChecked="{Binding Settings.Synthesis.EnableAntiPop}" Content="{x:Static midi:Translate.EnableAntiPopCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.EnableAntiPopTooltip}"/>
+                                        <Grid IsEnabled="{Binding Settings.Synthesis.EnableAntiPop}" Margin="20,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.AntiPopAttackLabel}"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Synthesis.AntiPopAttackSeconds}" Margin="10,0,0,10"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.AntiPopReleaseLabel}"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Synthesis.AntiPopReleaseSeconds}" Margin="10,0,0,0"/>
+                                        </Grid>
+                                        <CheckBox IsChecked="{Binding Settings.Synthesis.EnableNoteCrossfade}" Content="{x:Static midi:Translate.EnableNoteCrossfadeCheckbox}" ToolTip="{x:Static midi:Translate.EnableNoteCrossfadeTooltip}" Margin="0,10,0,0"/>
+                                        <Grid IsEnabled="{Binding Settings.Synthesis.EnableNoteCrossfade}" Margin="20,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="{x:Static midi:Translate.CrossfadeTimeLabel}"/>
+                                            <TextBox Grid.Column="1" Text="{Binding Settings.Synthesis.NoteCrossfadeDuration}" Margin="10,0,0,0"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="{x:Static midi:Translate.EffectsTabHeader}" ToolTip="{x:Static midi:Translate.EffectsTabTooltip}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <CheckBox IsChecked="{Binding Settings.Effects.EnableEffects}" Content="{x:Static midi:Translate.EnableEffectsCheckbox}" ToolTip="{x:Static midi:Translate.EnableEffectsTooltip}"/>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,10,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.CompressorGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.CompressorTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableCompression}" Content="{x:Static midi:Translate.EnableCompressorCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableCompression}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.CompressorThresholdLabel}" ToolTip="{x:Static midi:Translate.CompressorThresholdTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.CompressionThreshold}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10" Unit="%"
+                                                             ToolTip="{x:Static midi:Translate.CompressorThresholdTooltip}"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.CompressorRatioLabel}" ToolTip="{x:Static midi:Translate.CompressorRatioTooltip}"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.CompressionRatio}" Margin="10,0,0,10"
+                                                     ToolTip="{x:Static midi:Translate.CompressorRatioTooltip}"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.CompressorAttackLabel}" ToolTip="{x:Static midi:Translate.CompressorAttackTooltip}"/>
+                                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Effects.CompressionAttack}" Margin="10,0,0,10"
+                                                     ToolTip="{x:Static midi:Translate.CompressorAttackTooltip}"/>
+                                            <Label Grid.Row="3" Grid.Column="0" Content="{x:Static midi:Translate.CompressorReleaseLabel}" ToolTip="{x:Static midi:Translate.CompressorReleaseTooltip}"/>
+                                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Settings.Effects.CompressionRelease}" Margin="10,0,0,0"
+                                                     ToolTip="{x:Static midi:Translate.CompressorReleaseTooltip}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.AlgorithmicReverbGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.AlgorithmicReverbTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.AlgorithmicReverb.Enable}" Content="{x:Static midi:Translate.EnableAlgorithmicReverbCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.AlgorithmicReverb.Enable}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.ReverbRoomSizeLabel}"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.AlgorithmicReverb.RoomSize}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10" Unit="%" />
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.ReverbDampingLabel}"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.AlgorithmicReverb.Damping}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10" Unit="%" />
+                                            <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.ReverbWetLevelLabel}"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.AlgorithmicReverb.WetLevel}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10" Unit="%" />
+                                            <Label Grid.Row="3" Grid.Column="0" Content="{x:Static midi:Translate.ReverbDryLevelLabel}"/>
+                                            <c:TextBoxSlider Grid.Row="3" Grid.Column="1" Value="{Binding Settings.Effects.AlgorithmicReverb.DryLevel}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10" Unit="%" />
+                                            <Label Grid.Row="4" Grid.Column="0" Content="{x:Static midi:Translate.ReverbWidthLabel}"/>
+                                            <c:TextBoxSlider Grid.Row="4" Grid.Column="1" Value="{Binding Settings.Effects.AlgorithmicReverb.Width}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0" Unit="%" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.ConvolutionReverbGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.ConvolutionReverbTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableConvolutionReverb}" Content="{x:Static midi:Translate.EnableConvolutionReverbCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableConvolutionReverb}" Margin="0,5,0,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid Grid.Row="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="{x:Static midi:Translate.IrFilePathLabel}"/>
+                                                <TextBox Grid.Column="1" Text="{Binding Settings.Effects.ImpulseResponseFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,5,0" IsReadOnly="True"/>
+                                                <Button Grid.Column="2" Content="{x:Static midi:Translate.BrowseButton}" Command="{Binding SelectImpulseResponseFileCommand}" Style="{StaticResource CompactButtonStyle}"/>
+                                            </Grid>
+                                            <Grid Grid.Row="1" Margin="0,5,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Grid.Column="0" Content="{x:Static midi:Translate.MaxIrDurationLabel}" ToolTip="{x:Static midi:Translate.MaxIrDurationTooltip}"/>
+                                                <c:TextBoxSlider Grid.Column="1" Value="{Binding Settings.Effects.MaxImpulseResponseDurationSeconds, Mode=TwoWay}" Min="0.1" Max="10" StringFormat="F1" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0" Unit="s"
+                                                                 ToolTip="{x:Static midi:Translate.MaxIrDurationTooltip}"/>
+                                            </Grid>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.DistortionGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.DistortionTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.Distortion.Enable}" Content="{x:Static midi:Translate.EnableDistortionCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.Distortion.Enable}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.DistortionTypeLabel}"/>
+                                            <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Source={StaticResource DistortionTypeEnum}}" SelectedItem="{Binding Settings.Effects.Distortion.Type}" Margin="10,0,0,10"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.DistortionDriveLabel}"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.Distortion.Drive}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10" Unit="%" />
+                                            <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.DistortionMixLabel}"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.Distortion.Mix}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0" Unit="%" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.BitCrusherGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.BitCrusherTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.BitCrusher.Enable}" Content="{x:Static midi:Translate.EnableBitCrusherCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.BitCrusher.Enable}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.BitDepthLabel}"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.BitCrusher.BitDepth}" Min="1" Max="16" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10" Unit="bit"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.RateReductionLabel}"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.BitCrusher.RateReduction}" Min="1" Max="50" StringFormat="F1" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0" Unit="x"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.PingPongDelayGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.PingPongDelayTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnablePingPongDelay}" Content="{x:Static midi:Translate.EnablePingPongDelayCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnablePingPongDelay}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.DelayTimeLabel}" ToolTip="{x:Static midi:Translate.DelayTimeTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.DelayTime}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                             ToolTip="{x:Static midi:Translate.DelayTimeTooltip}" Unit="s"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.FeedbackLabel}" ToolTip="{x:Static midi:Translate.FeedbackTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.Feedback}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                             ToolTip="{x:Static midi:Translate.FeedbackTooltip}" Unit="%"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.MixLabel}" ToolTip="{x:Static midi:Translate.MixTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.WetDryMix}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                             ToolTip="{x:Static midi:Translate.MixTooltip}" Unit="%"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.ChorusGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.ChorusTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableChorus}" Content="{x:Static midi:Translate.EnableChorusCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableChorus}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.ChorusDelayLabel}" ToolTip="{x:Static midi:Translate.ChorusDelayTooltip}"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Effects.ChorusDelay}" Margin="10,0,0,10"
+                                                     ToolTip="{x:Static midi:Translate.ChorusDelayTooltip}"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.ChorusDepthLabel}" ToolTip="{x:Static midi:Translate.ChorusDepthTooltip}"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.ChorusDepth}" Margin="10,0,0,10"
+                                                     ToolTip="{x:Static midi:Translate.ChorusDepthTooltip}"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.ChorusRateLabel}" ToolTip="{x:Static midi:Translate.ChorusRateTooltip}"/>
+                                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.Effects.ChorusRate}" Margin="10,0,0,10"
+                                                     ToolTip="{x:Static midi:Translate.ChorusRateTooltip}"/>
+                                            <Label Grid.Row="3" Grid.Column="0" Content="{x:Static midi:Translate.ChorusStrengthLabel}" ToolTip="{x:Static midi:Translate.ChorusStrengthTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="3" Grid.Column="1" Value="{Binding Settings.Effects.ChorusStrength}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                              ToolTip="{x:Static midi:Translate.ChorusStrengthTooltip}" Unit="%"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.PhaserGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.PhaserTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnablePhaser}" Content="{x:Static midi:Translate.EnablePhaserCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnablePhaser}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.PhaserRateLabel}" ToolTip="{x:Static midi:Translate.PhaserRateTooltip}"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Effects.PhaserRate}" Margin="10,0,0,10"
+                                                     ToolTip="{x:Static midi:Translate.PhaserRateTooltip}"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.PhaserStagesLabel}" ToolTip="{x:Static midi:Translate.PhaserStagesTooltip}"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.PhaserStages}" Margin="10,0,0,10"
+                                                     ToolTip="{x:Static midi:Translate.PhaserStagesTooltip}"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.PhaserFeedbackLabel}" ToolTip="{x:Static midi:Translate.PhaserFeedbackTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.PhaserFeedback}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                              ToolTip="{x:Static midi:Translate.PhaserFeedbackTooltip}" Unit="%"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.FlangerGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.FlangerTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableFlanger}" Content="{x:Static midi:Translate.EnableFlangerCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableFlanger}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.FlangerDelayLabel}" ToolTip="{x:Static midi:Translate.FlangerDelayTooltip}"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Effects.FlangerDelay}" Margin="10,0,0,10"
+                                                     ToolTip="{x:Static midi:Translate.FlangerDelayTooltip}"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.FlangerRateLabel}" ToolTip="{x:Static midi:Translate.FlangerRateTooltip}"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.Effects.FlangerRate}" Margin="10,0,0,10"
+                                                     ToolTip="{x:Static midi:Translate.FlangerRateTooltip}"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.FlangerDepthLabel}" ToolTip="{x:Static midi:Translate.FlangerDepthTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.FlangerDepth}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                             ToolTip="{x:Static midi:Translate.FlangerDepthTooltip}" Unit="%"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.LimiterGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.LimiterTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableLimiter}" Content="{x:Static midi:Translate.EnableLimiterCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableLimiter}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.LimiterThresholdLabel}" ToolTip="{x:Static midi:Translate.LimiterThresholdTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.LimiterThreshold}" Min="0" Max="1" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0" Unit="%"
+                                                             ToolTip="{x:Static midi:Translate.LimiterThresholdTooltip}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.EqualizerGroupHeader}" FontWeight="Bold" Margin="0,0,0,10" ToolTip="{x:Static midi:Translate.EqualizerTooltip}"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableEqualizer}" Content="{x:Static midi:Translate.EnableEqualizerCheckbox}"/>
+                                        <Grid IsEnabled="{Binding Settings.Effects.EnableEqualizer}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.EqBassGainLabel}" ToolTip="{x:Static midi:Translate.EqBassGainTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="0" Grid.Column="1" Value="{Binding Settings.Effects.EQ.BassGain}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                             ToolTip="{x:Static midi:Translate.EqBassGainTooltip}" Unit="x"/>
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.EqMidGainLabel}" ToolTip="{x:Static midi:Translate.EqMidGainTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Effects.EQ.MidGain}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                             ToolTip="{x:Static midi:Translate.EqMidGainTooltip}" Unit="x"/>
+                                            <Label Grid.Row="2" Grid.Column="0" Content="{x:Static midi:Translate.EqTrebleGainLabel}" ToolTip="{x:Static midi:Translate.EqTrebleGainTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Effects.EQ.TrebleGain}" Min="0" Max="2" StringFormat="F2" Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                             ToolTip="{x:Static midi:Translate.EqTrebleGainTooltip}" Unit="x"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" IsEnabled="{Binding Settings.Effects.EnableEffects}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.OtherEffectsGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Effects.EnableDCOffsetRemoval}" Content="{x:Static midi:Translate.EnableDcOffsetRemovalCheckbox}"
+                                                  ToolTip="{x:Static midi:Translate.EnableDcOffsetRemovalTooltip}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="{x:Static midi:Translate.InstrumentTabHeader}" ToolTip="{x:Static midi:Translate.InstrumentTabTooltip}">
+                    <TabControl Margin="0,10,0,0">
+                        <TabItem Header="{x:Static midi:Translate.InstrumentPresetTabHeader}" ToolTip="{x:Static midi:Translate.InstrumentPresetTabTooltip}">
+                            <DockPanel Margin="0,10,0,10">
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                    <Button Content="{x:Static midi:Translate.AddButton}" Command="{Binding AddInstrumentPresetCommand}" Margin="5" ToolTip="{x:Static midi:Translate.AddInstrumentPresetTooltip}" Style="{StaticResource RichButtonStyle}"/>
+                                    <Button Content="{x:Static midi:Translate.DeleteButton}" Command="{Binding RemoveInstrumentPresetCommand}" CommandParameter="{Binding ElementName=InstrumentPresetGrid, Path=SelectedItem}" Margin="5"
+                                            ToolTip="{x:Static midi:Translate.RemoveInstrumentPresetTooltip}" Style="{StaticResource RichButtonStyle}"/>
+                                </StackPanel>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                    <DataGrid ItemsSource="{Binding Settings.InstrumentPresets}" x:Name="InstrumentPresetGrid" AutoGenerateColumns="False" CanUserAddRows="False">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderName}" Binding="{Binding Name}" Width="Auto" MinWidth="120"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderStart}" Binding="{Binding StartProgram}" Width="Auto" MinWidth="40"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderEnd}" Binding="{Binding EndProgram}" Width="Auto" MinWidth="40"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderWaveform}" Binding="{Binding Waveform}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderAttack}" Binding="{Binding Attack}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderDecay}" Binding="{Binding Decay}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderSustain}" Binding="{Binding Sustain}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderRelease}" Binding="{Binding Release}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderVolume}" Binding="{Binding Volume}" Width="Auto" MinWidth="40"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderFilter}" Binding="{Binding Filter.Type}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderCutoff}" Binding="{Binding Filter.Cutoff}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderResonance}" Binding="{Binding Filter.Resonance}" Width="Auto" MinWidth="75"/>
+                                            <DataGridComboBoxColumn Header="{x:Static midi:Translate.HeaderFilterLfo}" SelectedItemBinding="{Binding Filter.Lfo.Waveform}" ItemsSource="{Binding Source={StaticResource LfoWaveformEnum}}" Width="Auto" MinWidth="90"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderFLfoRate}" Binding="{Binding Filter.Lfo.Rate}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderFLfoDepth}" Binding="{Binding Filter.Lfo.Depth}" Width="Auto" MinWidth="60"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </ScrollViewer>
+                            </DockPanel>
+                        </TabItem>
+                        <TabItem Header="{x:Static midi:Translate.InstrumentCustomTabHeader}" ToolTip="{x:Static midi:Translate.InstrumentCustomTabTooltip}">
+                            <DockPanel Margin="0,10,0,10">
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                    <Button Content="{x:Static midi:Translate.AddButton}" Command="{Binding AddCustomInstrumentCommand}" Margin="5" ToolTip="{x:Static midi:Translate.AddCustomInstrumentTooltip}" 
+                                            Style="{StaticResource RichButtonStyle}"/>
+                                    <Button Content="{x:Static midi:Translate.DeleteButton}" Command="{Binding RemoveCustomInstrumentCommand}" CommandParameter="{Binding ElementName=CustomInstrumentGrid, Path=SelectedItem}" Margin="5"
+                                            ToolTip="{x:Static midi:Translate.RemoveCustomInstrumentTooltip}" Style="{StaticResource RichButtonStyle}"/>
+                                </StackPanel>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                    <DataGrid ItemsSource="{Binding Settings.CustomInstruments}" x:Name="CustomInstrumentGrid" AutoGenerateColumns="False" CanUserAddRows="False">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderProgram}" Binding="{Binding Program}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderWaveform}" Binding="{Binding Waveform}" Width="Auto" MinWidth="75"/>
+                                            <DataGridComboBoxColumn Header="{x:Static midi:Translate.HeaderWavetableFile}"
+                                                                  SelectedItemBinding="{Binding UserWavetableFile}"
+                                                                  Width="Auto" MinWidth="125">
+                                                <DataGridComboBoxColumn.ElementStyle>
+                                                    <Style TargetType="ComboBox">
+                                                        <Setter Property="ItemsSource" Value="{Binding DataContext.WavetableFiles, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                    </Style>
+                                                </DataGridComboBoxColumn.ElementStyle>
+                                                <DataGridComboBoxColumn.EditingElementStyle>
+                                                    <Style TargetType="ComboBox">
+                                                        <Setter Property="ItemsSource" Value="{Binding DataContext.WavetableFiles, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                    </Style>
+                                                </DataGridComboBoxColumn.EditingElementStyle>
+                                            </DataGridComboBoxColumn>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderRelease}" Binding="{Binding Release}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderVolume}" Binding="{Binding Volume}" Width="Auto" MinWidth="40"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderFilter}" Binding="{Binding Filter.Type}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderCutoff}" Binding="{Binding Filter.Cutoff}" Width="Auto" MinWidth="75"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderResonance}" Binding="{Binding Filter.Resonance}" Width="Auto" MinWidth="75"/>
+                                            <DataGridComboBoxColumn Header="{x:Static midi:Translate.HeaderFLfoWaveform}" SelectedItemBinding="{Binding Filter.Lfo.Waveform}" ItemsSource="{Binding Source={StaticResource LfoWaveformEnum}}" Width="Auto" MinWidth="90"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderFLfoRate}" Binding="{Binding Filter.Lfo.Rate}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderFLfoDepth}" Binding="{Binding Filter.Lfo.Depth}" Width="Auto" MinWidth="60"/>
+                                            <DataGridComboBoxColumn Header="{x:Static midi:Translate.HeaderPLfoWaveform}" SelectedItemBinding="{Binding PitchLfo.Waveform}" ItemsSource="{Binding Source={StaticResource LfoWaveformEnum}}" Width="Auto" MinWidth="90"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderPLfoRate}" Binding="{Binding PitchLfo.Rate}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderPLfoDepth}" Binding="{Binding PitchLfo.Depth}" Width="Auto" MinWidth="60"/>
+                                            <DataGridComboBoxColumn Header="{x:Static midi:Translate.HeaderALfoWaveform}" SelectedItemBinding="{Binding AmplitudeLfo.Waveform}" ItemsSource="{Binding Source={StaticResource LfoWaveformEnum}}" Width="Auto" MinWidth="90"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderALfoRate}" Binding="{Binding AmplitudeLfo.Rate}" Width="Auto" MinWidth="60"/>
+                                            <DataGridTextColumn Header="{x:Static midi:Translate.HeaderALfoDepth}" Binding="{Binding AmplitudeLfo.Depth}" Width="Auto" MinWidth="60"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </ScrollViewer>
+                            </DockPanel>
+                        </TabItem>
+                    </TabControl>
+                </TabItem>
+                <TabItem Header="{x:Static midi:Translate.DebugTabHeader}" ToolTip="{x:Static midi:Translate.DebugTabTooltip}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,10,2,10">
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.LoggingGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Debug.EnableLogging}" Content="{x:Static midi:Translate.EnableLoggingCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.EnableLoggingTooltip}"/>
+                                        <CheckBox IsChecked="{Binding Settings.Debug.VerboseLogging}" Content="{x:Static midi:Translate.VerboseLoggingCheckbox}" IsEnabled="{Binding Settings.Debug.EnableLogging}"
+                                            ToolTip="{x:Static midi:Translate.VerboseLoggingTooltip}"/>
+                                        <Grid IsEnabled="{Binding Settings.Debug.EnableLogging}" Margin="0,5,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.LogFilePathLabel}" ToolTip="{x:Static midi:Translate.LogFilePathTooltip}"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Debug.LogFilePath}" Margin="10,0,0,10"
+                                                ToolTip="{x:Static midi:Translate.LogFilePathTooltip}"/>
+
+                                            <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.MaxLogSizeLabel}" ToolTip="{x:Static midi:Translate.MaxLogSizeTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Debug.MaxLogSizeKB, Mode=TwoWay}" Min="10" Max="1024" 
+                                                Unit="KB" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
+                                                ToolTip="{x:Static midi:Translate.MaxLogSizeTooltip}"/>
+
+                                            <Label Grid.Row="2" 
+                                                Grid.Column="0" Content="{x:Static midi:Translate.LogLevelLabel}" ToolTip="{x:Static midi:Translate.LogLevelTooltip}"/>
+                                            <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Debug.LogLevel, Mode=TwoWay}" Min="1" Max="5" Unit=" " Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
+                                                ToolTip="{x:Static midi:Translate.LogLevelTooltip}"/>
+                                        </Grid>
+
+                                        <Grid Margin="0,15,0,0" Visibility="{Binding Settings.Debug.EnableLogging, 
+                                            Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                <TextBlock Text="{x:Static midi:Translate.LogViewerHeader}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <Button Content="{x:Static midi:Translate.ClearLogButton}" Command="{Binding ClearLogCommand}" Style="{StaticResource RichButtonStyle}" Padding="8,2" Margin="10,0,0,0"/>
+                                            </StackPanel>
+                                            <TextBox Grid.Row="1"
+                                                Text="{Binding LogContent, Mode=OneWay}"
+                                                IsReadOnly="True"
+                                                AcceptsReturn="True"
+                                                VerticalScrollBarVisibility="Auto"
+                                                Height="200"
+                                                FontFamily="Consolas"
+                                                TextChanged="LogTextBox_TextChanged"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.ApiIntegrationGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Debug.EnableNamedPipeApi}" Content="{x:Static midi:Translate.EnableNamedPipeApiCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.EnableNamedPipeApiTooltip}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.ExperimentalFeaturesGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Settings.Debug.ShowMidiInfoWindowOnLoad}" Content="{x:Static midi:Translate.ShowMidiInfoWindowCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.ShowMidiInfoWindowTooltip}"/>
+                                        <CheckBox IsChecked="{Binding Settings.Debug.EnableMidiEditor}" Content="{x:Static midi:Translate.OpenMidiEditorCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.OpenMidiEditorTooltip}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
+        <Border VerticalAlignment="Bottom"
+                Height="50"
+                Panel.ZIndex="99"
+                IsHitTestVisible="False">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Setter Property="Opacity" Value="0"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsApiActive}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Border.Effect>
+                <DropShadowEffect ShadowDepth="2" BlurRadius="10" Color="#000000" Opacity="0.3"/>
+            </Border.Effect>
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#C1362B" Offset="0.0" />
+                    <GradientStop Color="#A82F26" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Ellipse Width="12" Height="12" Fill="White" Margin="0,0,10,0">
+                    <Ellipse.Style>
+                        <Style TargetType="Ellipse">
+                            <Setter Property="Opacity" Value="1.0" />
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                <DoubleAnimation From="1.0" To="0.3" Duration="0:0:0.8" Storyboard.TargetProperty="Opacity"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Ellipse.Style>
+                </Ellipse>
+                <TextBlock Text="API連携中"
+                           Foreground="White"
+                           FontSize="16"
+                           FontWeight="Bold">
+                    <TextBlock.Effect>
+                        <DropShadowEffect ShadowDepth="1" BlurRadius="2" Color="#000000" Opacity="0.2"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.RowSpan="2" Background="#A0000000"
+              Visibility="{Binding IsDraggingOver, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"
+              IsHitTestVisible="False"
+              Panel.ZIndex="100">
+            <TextBlock Text="{Binding DragDropMessage}"
+                       Foreground="White"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+        </Grid>
+    </Grid>
+</UserControl>

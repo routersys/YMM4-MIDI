@@ -1,0 +1,26 @@
+﻿<UserControl x:Class="MIDI.UI.Views.MidiEditor.Panel.QuantizeSettingsPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MIDI.UI.Views.MidiEditor.Panel"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="300">
+    <Grid Margin="15" DataContext="{Binding QuantizeSettings}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <GroupBox  Header="クオンタイズ" Grid.Row="0" Margin="5">
+            <ComboBox ItemsSource="{Binding QuantizeOptions}" SelectedItem="{Binding SelectedQuantizeOption}" />
+        </GroupBox>
+
+        <GroupBox Header="強さ (%)" Grid.Row="1" Margin="5">
+            <Slider Value="{Binding Strength, Mode=TwoWay}" Minimum="0" Maximum="100" IsSnapToTickEnabled="True"  TickFrequency="1" />
+        </GroupBox>
+        <GroupBox Header="スウィング (%)" Grid.Row="2" Margin="5">
+            <Slider Value="{Binding Swing}" Minimum="0" Maximum="100" IsSnapToTickEnabled="True" TickFrequency="1" />
+        </GroupBox>
+    </Grid>
+</UserControl>

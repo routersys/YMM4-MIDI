@@ -1,0 +1,701 @@
+﻿<Window x:Class="MIDI.Voice.Views.HelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MIDI.Voice.ViewModels"
+        xmlns:midi="clr-namespace:MIDI"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:HelpWindowViewModel}"
+        Title="記法ヘルプ" Height="600" Width="800"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+        Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MIDI;component/UI/Views/MidiEditor/Resources/MidiEditorResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style TargetType="TextBlock" x:Key="H1">
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="Margin" Value="0,10,0,5" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            </Style>
+            <Style TargetType="TextBlock" x:Key="H2">
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="Margin" Value="0,10,0,5" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            </Style>
+            <Style TargetType="TextBlock" x:Key="H3">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="Margin" Value="0,8,0,3" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            </Style>
+            <Style TargetType="Border" x:Key="CodeBorder">
+                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="3"/>
+                <Setter Property="Padding" Value="3,1"/>
+                <Setter Property="Margin" Value="2,0"/>
+                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"/>
+            </Style>
+            <Style TargetType="TextBlock" x:Key="Code">
+                <Setter Property="FontFamily" Value="Consolas, 'Courier New', monospace"/>
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                <Setter Property="TextWrapping" Value="NoWrap" />
+            </Style>
+            <Style TargetType="Border" x:Key="CodeBlockBorder">
+                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="3"/>
+                <Setter Property="Margin" Value="0,5,0,5"/>
+                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"/>
+            </Style>
+            <Style TargetType="TextBlock" x:Key="CodeBlock" BasedOn="{StaticResource Code}">
+                <Setter Property="Padding" Value="10" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="TextWrapping" Value="NoWrap" />
+            </Style>
+            <Style TargetType="TextBlock" x:Key="Body">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="Margin" Value="0,0,0,5" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            </Style>
+            <Style TargetType="TextBlock" x:Key="Bullet" BasedOn="{StaticResource Body}">
+                <Setter Property="Margin" Value="20,0,0,5" />
+            </Style>
+            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Padding" Value="5,3" />
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListBoxItem">
+                            <Border x:Name="Bd"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="true">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="true">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsSelected" Value="true"/>
+                                        <Condition Property="Selector.IsSelectionActive" Value="false"/>
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                </MultiTrigger>
+                                <Trigger Property="IsMouseOver" Value="true">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <DataTemplate x:Key="DefaultHelp">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <TextBlock Style="{StaticResource Body}">左のメニューから項目を選択してください。</TextBlock>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelOverview">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H1}">EMEL (Extended MIDI Expression Language)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">EMELは、MIDIシーケンサー向けのMML風記法です。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">コードは <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">#!EMEL</TextBlock></Border> または <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">#!EMEL2</TextBlock></Border> で開始する必要があります。</TextBlock>
+                        <TextBlock Style="{StaticResource H3}">ブロック</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Track[トラック番号] { ... }</TextBlock></Border>: トラックを指定してシーケンスを定義します。</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Global { ... }</TextBlock></Border>: 全トラック共通の変数定義などを行います。</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelBasicSyntax">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <TextBlock Style="{StaticResource H2}">基本構文</TextBlock>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelNoteRest">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">ノートと休符</TextBlock>
+                        <TextBlock Style="{StaticResource H3}"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Note(ピッチ, デュレーション)</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}">音符を再生します。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Note("C4", q)</TextBlock></Border> (C4の音を四分音符の長さで)</TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Rest(デュレーション)</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}">休符を挿入します。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Rest(h)</TextBlock></Border> (二分休符)</TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">デュレーション定数</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">w</TextBlock></Border>: 全音符 (4.0)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">h</TextBlock></Border>: 二分音符 (2.0)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">q</TextBlock></Border>: 四分音符 (1.0)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">e</TextBlock></Border>: 八分音符 (0.5)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">s</TextBlock></Border>: 十六分音符 (0.25)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">t</TextBlock></Border>: 三十二分音符 (0.125)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">数値で直接指定することも可能です（例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">1.5</TextBlock></Border> は付点四分音符）。</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelNoteEx">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">ノートの詳細指定 (NoteEx)</TextBlock>
+                        <TextBlock Style="{StaticResource H3}"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">NoteEx(ピッチ, デュレーション, ベロシティ, レガート, ピッチベンド, モジュレーション, エクスプレッション, パン, チャンネルプレッシャー)</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">NoteEx("C4", q, 120, 0, 8192, 0, 127, 64, 0)</TextBlock></Border></TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">デフォルト値の設定</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">デュレーションを <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">0</TextBlock></Border> にすると、以降の<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Note()</TextBlock></Border>で使用されるデフォルト値を設定します。</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">// ベロシティを100、エクスプレッションを100に設定
+NoteEx("C4", 0, 100, 0, 8192, 0, 100, 64, 0)
+// ベロシティ100、Exp100で再生される
+Note("D4", q)</TextBlock>
+                        </Border>
+
+                        <TextBlock Style="{StaticResource H3}">パラメータの内部変数</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">これらの変数は <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">let</TextBlock></Border> や代入文で直接操作することも可能です。</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">__V</TextBlock></Border>: ベロシティ (0-127, デフォルト: 100)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">__L</TextBlock></Border>: レガート (0-127, デフォルト: 0)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">__PB</TextBlock></Border>: ピッチベンド (0-16383, 中央値 8192, デフォルト: 8192)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">__M</TextBlock></Border>: モジュレーション (0-127, デフォルト: 0)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">__E</TextBlock></Border>: エクスプレッション (0-127, デフォルト: 127)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">__P</TextBlock></Border>: パン (0-127, 中央値 64, デフォルト: 64)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">__CP</TextBlock></Border>: チャンネルプレッシャー (0-127, デフォルト: 0)</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelControl">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">MIDI制御コマンド</TextBlock>
+                        <TextBlock Style="{StaticResource H3}"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">CC(コントロール番号, 値)</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}">コントロールチェンジを送信します。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">CC(1, 127)</TextBlock></Border> (モジュレーションを127に)</TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Program(プログラム番号)</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}">プログラムチェンジ（音色変更）を送信します。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Program(1)</TextBlock></Border> (音色を1番に変更)</TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">PitchBend(値)</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">ピッチベンドを送信します。値の範囲: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">0</TextBlock></Border> ～ <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">16383</TextBlock></Border> (中央: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">8192</TextBlock></Border>)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">PitchBend(8192)</TextBlock></Border> (ピッチベンドを中央に)</TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">ChannelPressure(値)</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}">チャンネルプレッシャーを送信します。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">ChannelPressure(100)</TextBlock></Border> (値を100に)</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelChord">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">コード（和音）</TextBlock>
+                        <TextBlock Style="{StaticResource H3}"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Chord(ピッチ配列 または コード名, デュレーション)</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}">和音を鳴らします。NoteExで設定したデフォルト値（ベロシティなど）が適用されます。</TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">コード名指定</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Chord("Cmaj7", q)</TextBlock></Border> (Cメジャーセブンスを四分音符で)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">サポートされるコードタイプ: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">maj</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">m</TextBlock></Border> (min), <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">7</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">maj7</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">m7</TextBlock></Border> (min7), <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">dim</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">aug</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">sus4</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">sus2</TextBlock></Border></TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">配列指定</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">Chord(["C4", "E4", "G4"], q)</TextBlock></Border></TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelControlSyntax">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <TextBlock Style="{StaticResource H2}">制御構文</TextBlock>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelVariables">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">変数 (let / assign)</TextBlock>
+                        <TextBlock Style="{StaticResource H3}">変数定義 (let)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">let</TextBlock></Border> キーワードで新しい変数を定義します。</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">let myPitch = "C4"
+let myDuration = q
+Note(myPitch, myDuration)</TextBlock>
+                        </Border>
+
+                        <TextBlock Style="{StaticResource H3}">変数代入 (=)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">let</TextBlock></Border> で定義済みの変数に新しい値を代入します。</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">let myNote = "C4"
+Note(myNote, q) // C4
+myNote = "D4"
+Note(myNote, q) // D4</TextBlock>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelRepeat">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">繰り返し (repeat)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">repeat(回数) { ... }</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}">ブロック内の処理を指定回数繰り返します。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">index</TextBlock></Border> 変数で現在の回数を参照できます (0から開始)。</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">// C4, C#4, D4 と再生される
+repeat(3) { 
+  Note("C4" + index, q) 
+}</TextBlock>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelIf">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">条件分岐 (if / else)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">if (条件) { ... } else { ... }</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">条件が真 (<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">true</TextBlock></Border> または 0以外の数値) の場合に <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">if</TextBlock></Border> ブロックを実行します。偽の場合は <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">else</TextBlock></Border> ブロックを実行します（elseは省略可能）。</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">repeat(4) {
+  if (index % 2 == 0) {
+    Note("C4", e) // 0, 2回目
+  } else {
+    Note("G4", e) // 1, 3回目
+  }
+}</TextBlock>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelFunc">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">関数 (func)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">func 名前(引数1, 引数2, ...) { ... }</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}">独自の関数を定義できます。戻り値はありません。</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">// フレーズを定義
+func myPhrase(note) {
+  Note(note, e)
+  Note(note + 7, e) // 5度上
+  Note(note, e)
+}
+
+// 関数呼び出し
+myPhrase("C4")
+myPhrase("G4")</TextBlock>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelOperators">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">演算子</TextBlock>
+                        <TextBlock Style="{StaticResource H3}">算術演算子</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">+</TextBlock></Border> (加算、文字列/ピッチ結合)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">-</TextBlock></Border> (減算、単項マイナス、ピッチ減算)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">*</TextBlock></Border> (乗算)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">/</TextBlock></Border> (除算)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">%</TextBlock></Border> (剰余)</TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">比較演算子</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">==</TextBlock></Border> (等しい)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">!=</TextBlock></Border> (等しくない)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">&gt;</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">&gt;=</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">&lt;</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">&lt;=</TextBlock></Border> (大小比較)</TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">論理演算子</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">&amp;&amp;</TextBlock></Border> (AND)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">||</TextBlock></Border> (OR)</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EmelTypes">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">データ型</TextBlock>
+                        <TextBlock Style="{StaticResource H3}">数値 (Number)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}">すべての数値は内部的に倍精度浮動小数点数（double）として扱われます。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">100</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">0.5</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">-3.14</TextBlock></Border></TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">文字列 (String)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}">ダブルクォートで囲みます。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">"C4"</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">"Hello"</TextBlock></Border></TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">配列 (Array)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">[ ]</TextBlock></Border> で囲み、カンマで区切ります。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">["C4", "E4", "G4"]</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">[1, 2, 3]</TextBlock></Border></TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">ブール値 (Boolean)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">比較演算子や論理演算子の結果として返されます。<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">true</TextBlock></Border> または <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">false</TextBlock></Border> です。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">if</TextBlock></Border> 文では、<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">false</TextBlock></Border> と数値の <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">0</TextBlock></Border> 以外はすべて真として扱われます。</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="SuslOverview">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H1}">SUSL (Simple UTAU Sound Language)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}">SUSLは、UTAUなどの歌声合成エンジン向けのシーケンス記法です。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">コードは <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">#!SUSL</TextBlock></Border> で開始する必要があります。</TextBlock>
+                        <TextBlock Style="{StaticResource H3}">セクション構成</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">CONFIG { ... }</TextBlock></Border>: タイムベースやテンポなどの基本設定</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">DEFAULT { ... }</TextBlock></Border>: ノートのデフォルトパラメータ設定</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">SEQUENCE { ... }</TextBlock></Border>: ノートシーケンス</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="SuslConfig">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">CONFIG セクション</TextBlock>
+                        <TextBlock Style="{StaticResource Body}">曲の基本設定を行います。</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">CONFIG {
+  TIMEBASE = 480;
+  TEMPO = 120.0;
+  TIMESIGNATURE = "4/4";
+}</TextBlock>
+                        </Border>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">TIMEBASE</TextBlock>: 分解能 (ティック数/四分音符)。通常は<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">480</TextBlock></Border>です。</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">TEMPO</TextBlock>: 曲の初期テンポ (BPM)。</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">TIMESIGNATURE</TextBlock>: 曲の初期拍子。</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="SuslDefault">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">DEFAULT セクション</TextBlock>
+                        <TextBlock Style="{StaticResource Body}">ノートパラメータのデフォルト値を設定します。</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">DEFAULT {
+  VOL = 100.0;
+  PAN = 64.0;
+  VIBRATO {
+    PERIOD = 200.0;
+    DEPTH = 50.0;
+  }
+}</TextBlock>
+                        </Border>
+                        <TextBlock Style="{StaticResource Body}">詳細は <TextBlock FontWeight="Bold">Parameters ブロック</TextBlock> を参照してください。</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="SuslSequence">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">SEQUENCE セクション</TextBlock>
+                        <TextBlock Style="{StaticResource Body}">ノート（音符）や制御コマンドを時系列に配置します。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">各コマンドは <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">AT (小節, 拍, ティック)</TextBlock></Border> で位置を指定する必要があります。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">AT (1, 1, 0) NOTE(...)</TextBlock></Border> (1小節目の1拍目、0ティック目から)</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="SuslNote">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">NOTE (ノート)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">AT (位置) NOTE (長さ, ピッチ, 歌詞/音素);</TextBlock></Border></TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">長さ (Length)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">定数</TextBlock>: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">QUARTER_NOTE</TextBlock></Border> (四分音符), <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">EIGHTH_NOTE</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">SIXTEENTH_NOTE</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">HALF_NOTE</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">WHOLE_NOTE</TextBlock></Border> など。</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">付点</TextBlock>: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">QUARTER_NOTE.DOT</TextBlock></Border> (付点四分音符)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">ティック</TextBlock>: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">480</TextBlock></Border> (ティック値で直接指定)</TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">ピッチ (Pitch)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">科学的表記</TextBlock>: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">"C4"</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">"F#5"</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">MIDIノートナンバー</TextBlock>: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">60</TextBlock></Border> (C4のこと)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">相対ピッチ</TextBlock>: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">+12</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">-12</TextBlock></Border> (※現在未サポート)</TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">歌詞/音素 (Lyric/Phoneme)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">歌詞のみ</TextBlock>: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">"あ"</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">歌詞と音素</TextBlock>: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">"あ":"a"</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">音素のみ</TextBlock>: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">:"a"</TextBlock></Border></TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="SuslRest">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">REST (休符)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">AT (位置) REST (長さ);</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Body}">長さの指定はNOTEと同じです。</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">例: <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">AT (2, 1, 0) REST (QUARTER_NOTE);</TextBlock></Border></TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="SuslControl">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">制御コマンド</TextBlock>
+                        <TextBlock Style="{StaticResource Body}">テンポや拍子を変更します。</TextBlock>
+                        <TextBlock Style="{StaticResource H3}">テンポ変更</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">AT (位置) TEMPO (130.0);</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource H3}">拍子変更</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">AT (位置) TIMESIGNATURE ("3/4");</TextBlock></Border></TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="SuslParams">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">PARAMETERS ブロック</TextBlock>
+                        <TextBlock Style="{StaticResource Body}">ノートに詳細なパラメータを指定します。</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">AT (1, 1, 0) NOTE (480, 60, "あ":"a") 
+PARAMETERS {
+  VEL = 100.0;
+  VOL = 100.0;
+  // 他のパラメータ...
+  VIBRATO { ... }
+  PITCHCURVE { ... }
+};</TextBlock>
+                        </Border>
+                        <TextBlock Style="{StaticResource H3}">主要なパラメータ</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">VEL</TextBlock></Border>: (Velocity) ベロシティ (0-127)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">VOL</TextBlock></Border>: (Volume) ボリューム (0-127)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">PAN</TextBlock></Border>: パン (0-127, 64が中央)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">MOD</TextBlock></Border>: (Modulation) モジュレーション (0-127)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">GEN</TextBlock></Border>: (Gender) ジェンダー (0-127)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">BRE</TextBlock></Border>: (Breathiness) 息っぽさ (0-127)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">BRI</TextBlock></Border>: (Brightness) 明るさ (0-127)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">CLE</TextBlock></Border>: (Clearness) 明瞭さ (0-127)</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="SuslVibrato">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">VIBRATO (ビブラート)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">VIBRATO { ... }</TextBlock></Border> ブロックで指定します。</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">VIBRATO {
+  PERIOD = 220.0;
+  DEPTH = 60.0;
+  FADE_IN = 100.0;
+  FADE_OUT = 100.0;
+}</TextBlock>
+                        </Border>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">PERIOD</TextBlock></Border>: 周期 (ミリ秒)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">DEPTH</TextBlock></Border>: 深さ (セント)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">FADE_IN</TextBlock></Border>: フェードイン時間 (ミリ秒)</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">FADE_OUT</TextBlock></Border>: フェードアウト時間 (ミリ秒)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap">ノートの <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">PARAMETERS</TextBlock></Border> ブロック内で <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">VIBRATO OFF;</TextBlock></Border> とするとビブラートを無効にできます。</TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="SuslPitchCurve">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}">PITCHCURVE (ピッチカーブ)</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">PITCHCURVE { ... }</TextBlock></Border> または <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">PITCHCURVE BEZIER { ... }</TextBlock></Border> で指定します。</TextBlock>
+                        <TextBlock Style="{StaticResource H3}">ポイントの書式</TextBlock>
+                        <TextBlock Style="{StaticResource Body}" TextWrapping="Wrap"><Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">(ティック, セント, [形状])</TextBlock></Border></TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}">・<TextBlock FontWeight="Bold">ティック</TextBlock>: ノート開始からの相対ティック位置</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}">・<TextBlock FontWeight="Bold">セント</TextBlock>: ノートのピッチからの相対セント（100セント = 半音）</TextBlock>
+                        <TextBlock Style="{StaticResource Bullet}" TextWrapping="Wrap">・<TextBlock FontWeight="Bold">形状</TextBlock>: (オプション) <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">"IN"</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">"OUT"</TextBlock></Border>, <Border Style="{StaticResource CodeBorder}"><TextBlock Style="{StaticResource Code}">"IO"</TextBlock></Border></TextBlock>
+
+                        <TextBlock Style="{StaticResource H3}">リニア補間</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">PITCHCURVE {
+  (0, 0),
+  (120, 100),
+  (240, 0)
+}</TextBlock>
+                        </Border>
+
+                        <TextBlock Style="{StaticResource H3}">ベジェ補間 (BEZIER)</TextBlock>
+                        <Border Style="{StaticResource CodeBlockBorder}">
+                            <TextBlock Style="{StaticResource CodeBlock}">PITCHCURVE BEZIER {
+  (0, 0, "OUT"),
+  (120, 100, "IO"),
+  (240, 0, "IN")
+}</TextBlock>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <TabControl SelectedIndex="{Binding SelectedTabIndex}" TabStripPlacement="Left" BorderThickness="0"
+                Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+        <TabControl.ItemContainerStyle>
+            <Style TargetType="TabItem">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </Style>
+        </TabControl.ItemContainerStyle>
+
+        <TabItem Header="EMEL">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200" MinWidth="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <ListBox Grid.Column="0" ItemsSource="{Binding EmelTopics}" SelectedItem="{Binding SelectedTopic}" Margin="0,0,10,0"
+                         BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Title}" Margin="{Binding IndentMargin}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Border Grid.Column="1" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1">
+                    <ContentControl x:Name="EmelContent">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="ContentTemplate" Value="{StaticResource EmelOverview}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="基本構文">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelBasicSyntax}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  Note / Rest">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelNoteRest}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  NoteEx (詳細指定)">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelNoteEx}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  制御コマンド">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelControl}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  Chord (和音)">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelChord}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="制御構文">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelControlSyntax}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  変数 (let / assign)">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelVariables}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  繰り返し (repeat)">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelRepeat}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  条件分岐 (if / else)">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelIf}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  関数 (func)">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelFunc}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="演算子">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelOperators}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="データ型">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource EmelTypes}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic}" Value="{x:Null}">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource DefaultHelp}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                </Border>
+            </Grid>
+        </TabItem>
+        <TabItem Header="SUSL">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200" MinWidth="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <ListBox Grid.Column="0" ItemsSource="{Binding SuslTopics}" SelectedItem="{Binding SelectedTopic}" Margin="0,0,10,0"
+                         BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Title}" Margin="{Binding IndentMargin}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Border Grid.Column="1" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1">
+                    <ContentControl x:Name="SuslContent">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="ContentTemplate" Value="{StaticResource SuslOverview}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="Config セクション">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource SuslConfig}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="Default セクション">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource SuslDefault}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="Sequence セクション">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource SuslSequence}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  Note (ノート)">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource SuslNote}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  Rest (休符)">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource SuslRest}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  制御コマンド">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource SuslControl}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="  Parameters ブロック">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource SuslParams}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="    Vibrato">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource SuslVibrato}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic.Title}" Value="    PitchCurve">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource SuslPitchCurve}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedTopic}" Value="{x:Null}">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource DefaultHelp}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                </Border>
+            </Grid>
+        </TabItem>
+    </TabControl>
+</Window>

@@ -1,0 +1,25 @@
+﻿<Window x:Class="MIDI.UI.Views.MidiEditor.Modals.MidiEditorLoadingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MIDI.UI.Views.MidiEditor.Modals"
+        mc:Ignorable="d"
+        Title="MIDIエディターを準備中..."
+        Width="350"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Topmost="True">
+    <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" BorderThickness="1" CornerRadius="0" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+        <StackPanel Margin="25">
+            <TextBlock Text="MIDIエディターを準備しています..." FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+            <ProgressBar IsIndeterminate="True" Height="15"/>
+            <TextBlock Text="しばらくお待ちください..." FontSize="12" HorizontalAlignment="Center" Margin="0,10,0,0" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+        </StackPanel>
+    </Border>
+</Window>

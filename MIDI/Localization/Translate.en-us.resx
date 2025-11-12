@@ -1,0 +1,449 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
+<data name="PluginName" xml:space="preserve"><value>MIDI Import/Edit</value></data>
+<data name="PluginWriterName" xml:space="preserve"><value>MIDI Export</value></data>
+<data name="PluginToolName" xml:space="preserve"><value>MIDI Editor</value></data>
+<data name="NoteVoicePluginName" xml:space="preserve"><value>Note Notation Synthesis</value></data>
+<data name="NoteVoiceSettingsName" xml:space="preserve"><value>Note Notation Synthesis Settings</value></data>
+<data name="NoteVoiceSpeakerEngineName" xml:space="preserve"><value>Note Notation Synthesizer</value></data>
+<data name="KanjiToYomiNotSupported" xml:space="preserve"><value>Kanji to Yomi conversion is not supported.</value></data>
+<data name="DefaultSynthModelName" xml:space="preserve"><value>DefaultSynth</value></data>
+<data name="DefaultSoundFontModelName" xml:space="preserve"><value>DefaultSoundFont</value></data>
+<data name="CreateNewModelWindowTitle" xml:space="preserve"><value>Create New Model</value></data>
+<data name="ModelNameLabel" xml:space="preserve"><value>Model Name:</value></data>
+<data name="ModelTypeLabel" xml:space="preserve"><value>Model Type:</value></data>
+<data name="InternalSynthRadioButton" xml:space="preserve"><value>Internal Synth</value></data>
+<data name="SoundFontRadioButton" xml:space="preserve"><value>SoundFont</value></data>
+<data name="CreateButton" xml:space="preserve"><value>Create</value></data>
+<data name="CancelButton" xml:space="preserve"><value>Cancel</value></data>
+<data name="OkButton" xml:space="preserve"><value>OK</value></data>
+<data name="NoteVoiceSettingsSampleRateLabel" xml:space="preserve"><value>Sample Rate (Hz)</value></data>
+<data name="NoteVoiceSettingsModelSelectionHeader" xml:space="preserve"><value>Voice Model Selection</value></data>
+<data name="NoteVoiceSettingsNewButton" xml:space="preserve"><value>New</value></data>
+<data name="NoteVoiceSettingsSaveButton" xml:space="preserve"><value>Save</value></data>
+<data name="NoteVoiceSettingsSoundFontLayerSettingsHeader" xml:space="preserve"><value>SoundFont Layer Settings</value></data>
+<data name="NoteVoiceSettingsAddLayerButton" xml:space="preserve"><value>Add Layer</value></data>
+<data name="NoteVoiceSettingsBrowseAddButton" xml:space="preserve"><value>Browse and Add...</value></data>
+<data name="NoteVoiceSettingsUpdateFileListTooltip" xml:space="preserve"><value>Update File List</value></data>
+<data name="NoteVoiceSettingsMoveLayerUpTooltip" xml:space="preserve"><value>Move Up</value></data>
+<data name="NoteVoiceSettingsMoveLayerDownTooltip" xml:space="preserve"><value>Move Down</value></data>
+<data name="NoteVoiceSettingsDeleteLayerTooltip" xml:space="preserve"><value>Delete</value></data>
+<data name="NoteVoiceSettingsInternalSynthSettingsHeader" xml:space="preserve"><value>Internal Synthesizer Settings</value></data>
+<data name="NoteVoiceSettingsDefaultWaveformLabel" xml:space="preserve"><value>Default Waveform</value></data>
+<data name="NoteVoiceSettingsDefaultWaveformTooltip" xml:space="preserve"><value>This is the basic waveform for the timbre.</value></data>
+<data name="NoteVoiceSettingsAttackLabel" xml:space="preserve"><value>Attack (s)</value></data>
+<data name="NoteVoiceSettingsAttackTooltip" xml:space="preserve"><value>Time in seconds for the sound to reach maximum volume.</value></data>
+<data name="NoteVoiceSettingsDecayLabel" xml:space="preserve"><value>Decay (s)</value></data>
+<data name="NoteVoiceSettingsDecayTooltip" xml:space="preserve"><value>Time in seconds to decay from maximum volume to sustain level.</value></data>
+<data name="NoteVoiceSettingsSustainLabel" xml:space="preserve"><value>Sustain Level</value></data>
+<data name="NoteVoiceSettingsSustainTooltip" xml:space="preserve"><value>Volume level while the sound persists (0-1).</value></data>
+<data name="NoteVoiceSettingsReleaseLabel" xml:space="preserve"><value>Release (s)</value></data>
+<data name="NoteVoiceSettingsReleaseTooltip" xml:space="preserve"><value>Time in seconds for the sound to fade after the note is released.</value></data>
+<data name="NoteVoiceSettingsBandlimitedSynthCheckbox" xml:space="preserve"><value>Bandlimited Synthesis (Reduce high-frequency noise)</value></data>
+<data name="NoteVoiceSettingsBandlimitedSynthTooltip" xml:space="preserve"><value>Enabling reduces aliasing noise but slightly increases CPU load.</value></data>
+<data name="NoteVoiceSettingsModelManagementTab" xml:space="preserve"><value>Model Management</value></data>
+<data name="NoteVoiceSettingsModelManagementHeader" xml:space="preserve"><value>Voice Model Management</value></data>
+<data name="NoteVoiceSettingsRenameButton" xml:space="preserve"><value>Rename</value></data>
+<data name="NoteVoiceSettingsDeleteButton" xml:space="preserve"><value>Delete</value></data>
+<data name="RenameModelWindowTitle" xml:space="preserve"><value>Rename Model</value></data>
+<data name="NewModelNamePrompt" xml:space="preserve"><value>Enter the new model name:</value></data>
+<data name="ConfirmDeleteModelMessage" xml:space="preserve"><value>Delete model '{0}'?</value></data>
+<data name="DeleteConfirmationTitle" xml:space="preserve"><value>Confirm Deletion</value></data>
+<data name="InvalidOrExistingModelNameError" xml:space="preserve"><value>Model name is invalid or already exists.</value></data>
+<data name="ErrorTitle" xml:space="preserve"><value>Error</value></data>
+<data name="AudioTabHeader" xml:space="preserve"><value>Audio</value></data>
+<data name="PresetGroupHeader" xml:space="preserve"><value>Presets</value></data>
+<data name="BasicSettingsGroupHeader" xml:space="preserve"><value>Basic Settings</value></data>
+<data name="SampleRateLabel" xml:space="preserve"><value>Sample Rate (Hz)</value></data>
+<data name="SampleRateTooltip" xml:space="preserve"><value>The number of times audio is sampled per second. Higher values improve sound quality but increase CPU load. CD quality is 44100Hz.</value></data>
+<data name="MasterVolumeLabel" xml:space="preserve"><value>Master Volume</value></data>
+<data name="MasterVolumeTooltip" xml:space="preserve"><value>Adjusts the master volume for the entire application. Set within the range of 0 (mute) to 1 (maximum).</value></data>
+<data name="NormalizationGroupHeader" xml:space="preserve"><value>Normalization</value></data>
+<data name="EnableNormalizationCheckbox" xml:space="preserve"><value>Enable Normalization</value></data>
+<data name="EnableNormalizationTooltip" xml:space="preserve"><value>Automatically adjusts the volume to prevent clipping and equalize the overall volume.</value></data>
+<data name="NormalizationThresholdLabel" xml:space="preserve"><value>Threshold</value></data>
+<data name="NormalizationThresholdTooltip" xml:space="preserve"><value>The volume threshold at which normalization activates. Normalization is applied when this value is exceeded.</value></data>
+<data name="NormalizationLevelLabel" xml:space="preserve"><value>Level</value></data>
+<data name="NormalizationLevelTooltip" xml:space="preserve"><value>The target volume level after normalization.</value></data>
+<data name="GlobalFadeOutGroupHeader" xml:space="preserve"><value>Global Fade-Out</value></data>
+<data name="EnableGlobalFadeOutCheckbox" xml:space="preserve"><value>Enable fade-out for final audio</value></data>
+<data name="EnableGlobalFadeOutTooltip" xml:space="preserve"><value>Smoothly fades out the sound at the end of playback to prevent abrupt cutoffs.</value></data>
+<data name="FadeOutTimeLabel" xml:space="preserve"><value>Fade-out Time (s)</value></data>
+<data name="FadeOutTimeTooltip" xml:space="preserve"><value>The duration of the fade-out in seconds.</value></data>
+<data name="PresetSaveButton" xml:space="preserve"><value>Save</value></data>
+<data name="PresetDeleteButton" xml:space="preserve"><value>Delete</value></data>
+<data name="PerformanceTabHeader" xml:space="preserve"><value>Performance</value></data>
+<data name="RenderingSettingsGroupHeader" xml:space="preserve"><value>Rendering Settings</value></data>
+<data name="RenderingModeLabel" xml:space="preserve"><value>Rendering Mode</value></data>
+<data name="RenderingModeTooltip" xml:space="preserve"><value>Selects the audio rendering method. Realtime mode has lower latency but may slightly reduce quality. GPU mode requires a compatible graphics card and may incur data transfer overhead.</value></data>
+<data name="BasicSettingsGroupHeaderPerformance" xml:space="preserve"><value>Basic Settings</value></data>
+<data name="BufferSizeLabel" xml:space="preserve"><value>Buffer Size</value></data>
+<data name="BufferSizeTooltip" xml:space="preserve"><value>The number of audio samples processed at once. Smaller values reduce latency but increase CPU load and may cause dropouts.</value></data>
+<data name="MaxPolyphonyLabel" xml:space="preserve"><value>Max Polyphony</value></data>
+<data name="MaxPolyphonyTooltip" xml:space="preserve"><value>The maximum number of notes that can be played simultaneously. Exceeding this value may cause older notes to stop sounding.</value></data>
+<data name="MaxThreadsLabel" xml:space="preserve"><value>Max Threads</value></data>
+<data name="MaxThreadsTooltip" xml:space="preserve"><value>The maximum number of CPU threads used for audio processing. Typically</value></data>
+<data name="InitialSyncDurationLabel" xml:space="preserve"><value>Initial Load Time (s)</value></data>
+<data name="InitialSyncDurationTooltip" xml:space="preserve"><value>The playback duration (in seconds) loaded synchronously when the file is opened. Longer times increase initial wait but reduce processing during playback.</value></data>
+<data name="GpuAccelerationGroupHeader" xml:space="preserve"><value>GPU Acceleration (Experimental)</value></data>
+<data name="GpuAccelerationTooltip" xml:space="preserve"><value>Experimental feature. Uses the GPU to accelerate parts of the audio processing. Requires a compatible graphics card.</value></data>
+<data name="InitializeGpuOnStartupCheckbox" xml:space="preserve"><value>Initialize GPU device on startup</value></data>
+<data name="InitializeGpuOnStartupTooltip" xml:space="preserve"><value>If enabled</value></data>
+<data name="GpuSynthesisCheckbox" xml:space="preserve"><value>Synthesis</value></data>
+<data name="GpuSynthesisTooltip" xml:space="preserve"><value>Uses the GPU for waveform synthesis processing.</value></data>
+<data name="GpuEqualizerCheckbox" xml:space="preserve"><value>Equalizer</value></data>
+<data name="GpuEqualizerTooltip" xml:space="preserve"><value>Uses the GPU for equalizer processing.</value></data>
+<data name="GpuEffectsChainCheckbox" xml:space="preserve"><value>Effects Chain</value></data>
+<data name="GpuEffectsChainTooltip" xml:space="preserve"><value>Uses the GPU to process multiple effects (reverb</value></data>
+<data name="GpuConvolutionReverbCheckbox" xml:space="preserve"><value>Convolution Reverb</value></data>
+<data name="GpuConvolutionReverbTooltip" xml:space="preserve"><value>Uses the GPU to process high-quality convolution reverb.</value></data>
+<data name="EnableParallelProcessingCheckbox" xml:space="preserve"><value>Enable Parallel Processing (CPU)</value></data>
+<data name="EnableParallelProcessingTooltip" xml:space="preserve"><value>Utilizes CPU multi-cores to execute audio processing per channel in parallel</value></data>
+<data name="MidiTabHeader" xml:space="preserve"><value>MIDI</value></data>
+<data name="PlaybackSettingsGroupHeader" xml:space="preserve"><value>Playback Settings</value></data>
+<data name="DefaultTempoLabel" xml:space="preserve"><value>Default Tempo</value></data>
+<data name="DefaultTempoTooltip" xml:space="preserve"><value>The default tempo used if the MIDI file does not contain tempo information. Specified in microseconds per quarter note (e.g., 120BPM = 500000).</value></data>
+<data name="PitchBendRangeLabel" xml:space="preserve"><value>Pitch Bend Range</value></data>
+<data name="PitchBendRangeTooltip" xml:space="preserve"><value>Sets the range of pitch bend in semitones. For example, setting it to 2 allows pitch bending within a range of ±2 semitones.</value></data>
+<data name="MinVelocityLabel" xml:space="preserve"><value>Min Velocity</value></data>
+<data name="MinVelocityTooltip" xml:space="preserve"><value>The minimum velocity for notes to be processed. Notes with lower velocity will be ignored. Useful for removing unwanted low-volume notes.</value></data>
+<data name="ProcessingSettingsGroupHeader" xml:space="preserve"><value>Processing Settings</value></data>
+<data name="ProcessControlChangesCheckbox" xml:space="preserve"><value>Process Control Changes</value></data>
+<data name="ProcessControlChangesTooltip" xml:space="preserve"><value>Processes Control Change messages such as volume and pan.</value></data>
+<data name="ProcessPitchBendCheckbox" xml:space="preserve"><value>Process Pitch Bend</value></data>
+<data name="ProcessPitchBendTooltip" xml:space="preserve"><value>Processes Pitch Bend messages to smoothly change the pitch.</value></data>
+<data name="ProcessProgramChangesCheckbox" xml:space="preserve"><value>Process Program Changes</value></data>
+<data name="ProcessProgramChangesTooltip" xml:space="preserve"><value>Processes Program Change messages to switch instrument sounds.</value></data>
+<data name="ExclusionSettingsGroupHeader" xml:space="preserve"><value>Exclusion Settings</value></data>
+<data name="ExcludedChannelsLabel" xml:space="preserve"><value>Excluded Channels (comma separated)</value></data>
+<data name="ExcludedChannelsTooltip" xml:space="preserve"><value>MIDI channels specified here will be ignored during playback (comma separated).</value></data>
+<data name="ExcludedTracksLabel" xml:space="preserve"><value>Excluded Tracks (comma separated)</value></data>
+<data name="ExcludedTracksTooltip" xml:space="preserve"><value>Tracks specified here will be ignored during playback (comma separated).</value></data>
+<data name="SfzTabHeader" xml:space="preserve"><value>SFZ</value></data>
+<data name="EnableSfzCheckbox" xml:space="preserve"><value>Enable SFZ (Prioritized over SoundFont)</value></data>
+<data name="EnableSfzTooltip" xml:space="preserve"><value>Plays MIDI using SFZ format sampler instruments. If enabled</value></data>
+<data name="SfzSettingsGroupHeader" xml:space="preserve"><value>Settings (Double-click to edit)</value></data>
+<data name="SfzSearchPathLabel" xml:space="preserve"><value>SFZ Search Folder:</value></data>
+<data name="SfzSearchPathTooltip" xml:space="preserve"><value>Specify the path to the folder to search for SFZ files.</value></data>
+<data name="SfzListStatusHeader" xml:space="preserve"><value>Status</value></data>
+<data name="SfzListFilePathHeader" xml:space="preserve"><value>SFZ File Path</value></data>
+<data name="SfzListProgramNumberHeader" xml:space="preserve"><value>Program Number</value></data>
+<data name="SoundFontTabHeader" xml:space="preserve"><value>SoundFont</value></data>
+<data name="EnableSoundFontCheckbox" xml:space="preserve"><value>Enable SoundFont</value></data>
+<data name="EnableSoundFontTooltip" xml:space="preserve"><value>Plays MIDI using SoundFont (.sf2) files.</value></data>
+<data name="SoundFontBasicSettingsGroupHeader" xml:space="preserve"><value>Basic Settings</value></data>
+<data name="UseDefaultSoundFontCheckbox" xml:space="preserve"><value>Use default SoundFont</value></data>
+<data name="UseDefaultSoundFontTooltip" xml:space="preserve"><value>Uses the default SoundFont (GeneralUser-GS.sf2) included with the plugin.</value></data>
+<data name="FallbackToSynthesisCheckbox" xml:space="preserve"><value>Fallback to synthesis if SoundFont is not found</value></data>
+<data name="FallbackToSynthesisTooltip" xml:space="preserve"><value>Switches to playback with the built-in synthesizer if a suitable SoundFont is not found.</value></data>
+<data name="SoundFontDirectoryLabel" xml:space="preserve"><value>SoundFont Directory</value></data>
+<data name="SoundFontDirectoryTooltip" xml:space="preserve"><value>The path to the directory containing user-added SoundFont files.</value></data>
+<data name="PreferredSoundFontLabel" xml:space="preserve"><value>Preferred SoundFont Filename</value></data>
+<data name="PreferredSoundFontTooltip" xml:space="preserve"><value>Specify the SoundFont filename to prioritize even if it doesn't match the rules.</value></data>
+<data name="SoundFontLayersGroupHeader" xml:space="preserve"><value>SoundFont Layers (Used stacked, prioritized from top)</value></data>
+<data name="LayerUpButtonTooltip" xml:space="preserve"><value>Moves the layer up.</value></data>
+<data name="LayerDownButtonTooltip" xml:space="preserve"><value>Moves the layer down.</value></data>
+<data name="RemoveLayerButtonTooltip" xml:space="preserve"><value>Removes the selected layer.</value></data>
+<data name="AddLayerButton" xml:space="preserve"><value>Add to Layer</value></data>
+<data name="SoundFontListGroupHeader" xml:space="preserve"><value>Available SoundFonts and Rules (Double-click to edit)</value></data>
+<data name="SoundFontListStatusHeader" xml:space="preserve"><value>Status</value></data>
+<data name="SoundFontListFileNameHeader" xml:space="preserve"><value>SoundFont File</value></data>
+<data name="SoundFontListMinDurationHeader" xml:space="preserve"><value>Min Duration(s)</value></data>
+<data name="SoundFontListMaxDurationHeader" xml:space="preserve"><value>Max Duration(s)</value></data>
+<data name="SoundFontListMinTracksHeader" xml:space="preserve"><value>Min Tracks</value></data>
+<data name="SoundFontListMaxTracksHeader" xml:space="preserve"><value>Max Tracks</value></data>
+<data name="SoundFontListRequiredProgramsHeader" xml:space="preserve"><value>Required Programs</value></data>
+<data name="SynthesisTabHeader" xml:space="preserve"><value>Synthesis</value></data>
+<data name="SynthesisBasicSettingsGroupHeader" xml:space="preserve"><value>Basic Settings</value></data>
+<data name="DefaultWaveformLabel" xml:space="preserve"><value>Default Waveform</value></data>
+<data name="DefaultWaveformTooltip" xml:space="preserve"><value>Select the basic waveform type for the timbre.</value></data>
+<data name="WavetableDirectoryLabel" xml:space="preserve"><value>Wavetable Folder</value></data>
+<data name="WavetableDirectoryTooltip" xml:space="preserve"><value>Folder to place user-defined WAV files.</value></data>
+<data name="A4FrequencyLabel" xml:space="preserve"><value>A4 Frequency (Hz)</value></data>
+<data name="A4FrequencyTooltip" xml:space="preserve"><value>Sets the frequency of the reference note A4 (La). The modern standard is 440Hz</value></data>
+<data name="MinFrequencyLabel" xml:space="preserve"><value>Min Frequency (Hz)</value></data>
+<data name="MinFrequencyTooltip" xml:space="preserve"><value>The lower limit of the frequency of the generated audio. Frequencies below this will be clipped.</value></data>
+<data name="MaxFrequencyLabel" xml:space="preserve"><value>Max Frequency (Hz)</value></data>
+<data name="MaxFrequencyTooltip" xml:space="preserve"><value>The upper limit of the frequency of the generated audio. Frequencies above this will be clipped.</value></data>
+<data name="EnvelopeScaleLabel" xml:space="preserve"><value>Envelope Scale</value></data>
+<data name="EnvelopeScaleTooltip" xml:space="preserve"><value>Adjusts the time scale of the ADSR envelope (attack</value></data>
+<data name="DefaultEnvelopeGroupHeader" xml:space="preserve"><value>Default Envelope</value></data>
+<data name="DefaultEnvelopeTooltip" xml:space="preserve"><value>Sets the default values for the temporal change of sound (ADSR).</value></data>
+<data name="AttackLabel" xml:space="preserve"><value>Attack</value></data>
+<data name="AttackTooltip" xml:space="preserve"><value>Time (in seconds) from the start of the sound until it reaches maximum volume.</value></data>
+<data name="DecayLabel" xml:space="preserve"><value>Decay</value></data>
+<data name="DecayTooltip" xml:space="preserve"><value>Time (in seconds) to decay from maximum volume to the sustain level.</value></data>
+<data name="SustainLabel" xml:space="preserve"><value>Sustain</value></data>
+<data name="SustainTooltip" xml:space="preserve"><value>The volume level while the note is held (0-1).</value></data>
+<data name="ReleaseLabel" xml:space="preserve"><value>Release</value></data>
+<data name="ReleaseTooltip" xml:space="preserve"><value>Time (in seconds) for the sound to fade out after the note is released.</value></data>
+<data name="FmSourceGroupHeader" xml:space="preserve"><value>FM Source</value></data>
+<data name="FmSourceTooltip" xml:space="preserve"><value>Settings related to FM synthesis method.</value></data>
+<data name="ModulatorFrequencyLabel" xml:space="preserve"><value>Modulator Frequency (Hz)</value></data>
+<data name="ModulatorFrequencyTooltip" xml:space="preserve"><value>The frequency of the modulating wave in FM synthesis. Makes the timbre more complex.</value></data>
+<data name="ModulationIndexLabel" xml:space="preserve"><value>Modulation Index</value></data>
+<data name="ModulationIndexTooltip" xml:space="preserve"><value>The depth of modulation in FM synthesis. Larger values result in more complex and metallic timbres.</value></data>
+<data name="QualityNoiseReductionGroupHeader" xml:space="preserve"><value>Quality/Noise Reduction</value></data>
+<data name="EnableBandlimitedSynthesisCheckbox" xml:space="preserve"><value>Enable Bandlimited Synthesis (Reduce Aliasing)</value></data>
+<data name="EnableBandlimitedSynthesisTooltip" xml:space="preserve"><value>Enables techniques to reduce aliasing (folding noise) during waveform generation. Improves sound quality but slightly increases CPU load.</value></data>
+<data name="EnableAntiPopCheckbox" xml:space="preserve"><value>Enable Anti-Pop (Reduce Click Noise)</value></data>
+<data name="EnableAntiPopTooltip" xml:space="preserve"><value>Applies short fades at the start and end of notes to reduce 'pop' noises.</value></data>
+<data name="AntiPopAttackLabel" xml:space="preserve"><value>Attack (s)</value></data>
+<data name="AntiPopReleaseLabel" xml:space="preserve"><value>Release (s)</value></data>
+<data name="EnableNoteCrossfadeCheckbox" xml:space="preserve"><value>Enable Note Crossfade</value></data>
+<data name="EnableNoteCrossfadeTooltip" xml:space="preserve"><value>Smoothes transitions between notes to reduce noise.</value></data>
+<data name="CrossfadeTimeLabel" xml:space="preserve"><value>Crossfade Time(s)</value></data>
+<data name="EffectsTabHeader" xml:space="preserve"><value>Effects</value></data>
+<data name="EffectsTabTooltip" xml:space="preserve"><value>Configure various effects to adjust audio quality.</value></data>
+<data name="EnableEffectsCheckbox" xml:space="preserve"><value>Enable Effects</value></data>
+<data name="EnableEffectsTooltip" xml:space="preserve"><value>Toggles all audio effects on/off.</value></data>
+<data name="CompressorGroupHeader" xml:space="preserve"><value>Compressor</value></data>
+<data name="CompressorTooltip" xml:space="preserve"><value>An effect that suppresses volume variations and increases sound pressure.</value></data>
+<data name="EnableCompressorCheckbox" xml:space="preserve"><value>Enable Compressor</value></data>
+<data name="CompressorThresholdLabel" xml:space="preserve"><value>Threshold</value></data>
+<data name="CompressorThresholdTooltip" xml:space="preserve"><value>The volume threshold at which the compressor starts working.</value></data>
+<data name="CompressorRatioLabel" xml:space="preserve"><value>Ratio</value></data>
+<data name="CompressorRatioTooltip" xml:space="preserve"><value>The ratio at which sound exceeding the threshold is compressed. E.g.</value></data>
+<data name="CompressorAttackLabel" xml:space="preserve"><value>Attack (s)</value></data>
+<data name="CompressorAttackTooltip" xml:space="preserve"><value>The time (in seconds) it takes for the compressor to start working.</value></data>
+<data name="CompressorReleaseLabel" xml:space="preserve"><value>Release (s)</value></data>
+<data name="CompressorReleaseTooltip" xml:space="preserve"><value>The time (in seconds) it takes for the compressor to release.</value></data>
+<data name="AlgorithmicReverbGroupHeader" xml:space="preserve"><value>Algorithmic Reverb</value></data>
+<data name="AlgorithmicReverbTooltip" xml:space="preserve"><value>A high-quality reverb that generates reverberation through calculations.</value></data>
+<data name="EnableAlgorithmicReverbCheckbox" xml:space="preserve"><value>Enable Algorithmic Reverb</value></data>
+<data name="ReverbRoomSizeLabel" xml:space="preserve"><value>Room Size</value></data>
+<data name="ReverbDampingLabel" xml:space="preserve"><value>Damping</value></data>
+<data name="ReverbWetLevelLabel" xml:space="preserve"><value>Wet</value></data>
+<data name="ReverbDryLevelLabel" xml:space="preserve"><value>Dry</value></data>
+<data name="ReverbWidthLabel" xml:space="preserve"><value>Width</value></data>
+<data name="ConvolutionReverbGroupHeader" xml:space="preserve"><value>Convolution Reverb</value></data>
+<data name="ConvolutionReverbTooltip" xml:space="preserve"><value>Uses an Impulse Response (IR) file to reproduce realistic reverberation.</value></data>
+<data name="EnableConvolutionReverbCheckbox" xml:space="preserve"><value>Enable Convolution Reverb</value></data>
+<data name="IrFilePathLabel" xml:space="preserve"><value>IR File Path</value></data>
+<data name="BrowseButton" xml:space="preserve"><value>Browse...</value></data>
+<data name="MaxIrDurationLabel" xml:space="preserve"><value>Max Load Time (s)</value></data>
+<data name="MaxIrDurationTooltip" xml:space="preserve"><value>Specify the maximum load time for the impulse response file in seconds.</value></data>
+<data name="DistortionGroupHeader" xml:space="preserve"><value>Distortion</value></data>
+<data name="DistortionTooltip" xml:space="preserve"><value>Distorts the sound to create a powerful sound.</value></data>
+<data name="EnableDistortionCheckbox" xml:space="preserve"><value>Enable Distortion</value></data>
+<data name="DistortionTypeLabel" xml:space="preserve"><value>Type</value></data>
+<data name="DistortionDriveLabel" xml:space="preserve"><value>Drive</value></data>
+<data name="DistortionMixLabel" xml:space="preserve"><value>Mix</value></data>
+<data name="BitCrusherGroupHeader" xml:space="preserve"><value>Bit Crusher</value></data>
+<data name="BitCrusherTooltip" xml:space="preserve"><value>Intentionally degrades sound quality to create a retro sound.</value></data>
+<data name="EnableBitCrusherCheckbox" xml:space="preserve"><value>Enable Bit Crusher</value></data>
+<data name="BitDepthLabel" xml:space="preserve"><value>Bit Depth</value></data>
+<data name="RateReductionLabel" xml:space="preserve"><value>Rate Reduction</value></data>
+<data name="PingPongDelayGroupHeader" xml:space="preserve"><value>Ping Pong Delay</value></data>
+<data name="PingPongDelayTooltip" xml:space="preserve"><value>A delay that creates an echo effect alternating between left and right channels.</value></data>
+<data name="EnablePingPongDelayCheckbox" xml:space="preserve"><value>Enable Ping Pong Delay</value></data>
+<data name="DelayTimeLabel" xml:space="preserve"><value>Delay Time (s)</value></data>
+<data name="DelayTimeTooltip" xml:space="preserve"><value>The interval of the echo (in seconds).</value></data>
+<data name="FeedbackLabel" xml:space="preserve"><value>Feedback</value></data>
+<data name="FeedbackTooltip" xml:space="preserve"><value>The number of times the echo repeats.</value></data>
+<data name="MixLabel" xml:space="preserve"><value>Mix</value></data>
+<data name="MixTooltip" xml:space="preserve"><value>The balance between the original sound (dry) and the effect sound (wet).</value></data>
+<data name="ChorusGroupHeader" xml:space="preserve"><value>Chorus</value></data>
+<data name="ChorusTooltip" xml:space="preserve"><value>Adds thickness and width to the sound by slightly detuning and layering it.</value></data>
+<data name="EnableChorusCheckbox" xml:space="preserve"><value>Enable Chorus</value></data>
+<data name="ChorusDelayLabel" xml:space="preserve"><value>Delay (s)</value></data>
+<data name="ChorusDelayTooltip" xml:space="preserve"><value>The delay time (in seconds) of the layered sound against the original sound.</value></data>
+<data name="ChorusDepthLabel" xml:space="preserve"><value>Depth</value></data>
+<data name="ChorusDepthTooltip" xml:space="preserve"><value>The depth of the sound modulation.</value></data>
+<data name="ChorusRateLabel" xml:space="preserve"><value>Rate (Hz)</value></data>
+<data name="ChorusRateTooltip" xml:space="preserve"><value>The speed of the sound modulation (in Hz).</value></data>
+<data name="ChorusStrengthLabel" xml:space="preserve"><value>Strength</value></data>
+<data name="ChorusStrengthTooltip" xml:space="preserve"><value>The strength of the chorus sound relative to the original sound.</value></data>
+<data name="PhaserGroupHeader" xml:space="preserve"><value>Phaser</value></data>
+<data name="PhaserTooltip" xml:space="preserve"><value>An effect that creates a unique swirling sound by shifting the phase of the sound.</value></data>
+<data name="EnablePhaserCheckbox" xml:space="preserve"><value>Enable Phaser</value></data>
+<data name="PhaserRateLabel" xml:space="preserve"><value>Rate (Hz)</value></data>
+<data name="PhaserRateTooltip" xml:space="preserve"><value>The speed at which the phase is changed (in Hz).</value></data>
+<data name="PhaserStagesLabel" xml:space="preserve"><value>Stages</value></data>
+<data name="PhaserStagesTooltip" xml:space="preserve"><value>The number of filter stages in the phaser. More stages create a more complex effect.</value></data>
+<data name="PhaserFeedbackLabel" xml:space="preserve"><value>Feedback</value></data>
+<data name="PhaserFeedbackTooltip" xml:space="preserve"><value>The amount of the effect sound fed back into the input. Emphasizes the effect.</value></data>
+<data name="FlangerGroupHeader" xml:space="preserve"><value>Flanger</value></data>
+<data name="FlangerTooltip" xml:space="preserve"><value>Similar to chorus</value></data>
+<data name="EnableFlangerCheckbox" xml:space="preserve"><value>Enable Flanger</value></data>
+<data name="FlangerDelayLabel" xml:space="preserve"><value>Delay (s)</value></data>
+<data name="FlangerDelayTooltip" xml:space="preserve"><value>Delay time (in seconds).</value></data>
+<data name="FlangerRateLabel" xml:space="preserve"><value>Rate (Hz)</value></data>
+<data name="FlangerRateTooltip" xml:space="preserve"><value>The speed of the swirl (in Hz).</value></data>
+<data name="FlangerDepthLabel" xml:space="preserve"><value>Depth</value></data>
+<data name="FlangerDepthTooltip" xml:space="preserve"><value>The depth of the swirl.</value></data>
+<data name="LimiterGroupHeader" xml:space="preserve"><value>Limiter</value></data>
+<data name="LimiterTooltip" xml:space="preserve"><value>Limits the volume from exceeding a certain threshold</value></data>
+<data name="EnableLimiterCheckbox" xml:space="preserve"><value>Enable Limiter</value></data>
+<data name="LimiterThresholdLabel" xml:space="preserve"><value>Threshold</value></data>
+<data name="LimiterThresholdTooltip" xml:space="preserve"><value>The upper limit to restrict the volume.</value></data>
+<data name="EqualizerGroupHeader" xml:space="preserve"><value>Equalizer</value></data>
+<data name="EqualizerTooltip" xml:space="preserve"><value>Adjusts sound quality by boosting or cutting specific frequency bands.</value></data>
+<data name="EnableEqualizerCheckbox" xml:space="preserve"><value>Enable Equalizer</value></data>
+<data name="EqBassGainLabel" xml:space="preserve"><value>Bass Gain</value></data>
+<data name="EqBassGainTooltip" xml:space="preserve"><value>Adjusts the gain (volume) of the bass range.</value></data>
+<data name="EqMidGainLabel" xml:space="preserve"><value>Mid Gain</value></data>
+<data name="EqMidGainTooltip" xml:space="preserve"><value>Adjusts the gain (volume) of the mid range.</value></data>
+<data name="EqTrebleGainLabel" xml:space="preserve"><value>Treble Gain</value></data>
+<data name="EqTrebleGainTooltip" xml:space="preserve"><value>Adjusts the gain (volume) of the treble range.</value></data>
+<data name="OtherEffectsGroupHeader" xml:space="preserve"><value>Other</value></data>
+<data name="EnableDcOffsetRemovalCheckbox" xml:space="preserve"><value>Enable DC Offset Removal</value></data>
+<data name="EnableDcOffsetRemovalTooltip" xml:space="preserve"><value>Removes the direct current component (DC offset) from the audio signal. Prevents unwanted noise and distortion.</value></data>
+<data name="InstrumentTabHeader" xml:space="preserve"><value>Instruments</value></data>
+<data name="InstrumentTabTooltip" xml:space="preserve"><value>Configure timbre settings according to MIDI program numbers.</value></data>
+<data name="InstrumentPresetTabHeader" xml:space="preserve"><value>Preset</value></data>
+<data name="InstrumentPresetTabTooltip" xml:space="preserve"><value>Assign timbre settings to a range of MIDI program numbers.</value></data>
+<data name="AddButton" xml:space="preserve"><value>Add</value></data>
+<data name="DeleteButton" xml:space="preserve"><value>Delete</value></data>
+<data name="AddInstrumentPresetTooltip" xml:space="preserve"><value>Adds a new instrument preset.</value></data>
+<data name="RemoveInstrumentPresetTooltip" xml:space="preserve"><value>Deletes the selected preset.</value></data>
+<data name="HeaderName" xml:space="preserve"><value>Name</value></data>
+<data name="HeaderStart" xml:space="preserve"><value>Start</value></data>
+<data name="HeaderEnd" xml:space="preserve"><value>End</value></data>
+<data name="HeaderWaveform" xml:space="preserve"><value>Waveform</value></data>
+<data name="HeaderAttack" xml:space="preserve"><value>Attack</value></data>
+<data name="HeaderDecay" xml:space="preserve"><value>Decay</value></data>
+<data name="HeaderSustain" xml:space="preserve"><value>Sustain</value></data>
+<data name="HeaderRelease" xml:space="preserve"><value>Release</value></data>
+<data name="HeaderVolume" xml:space="preserve"><value>Volume</value></data>
+<data name="HeaderFilter" xml:space="preserve"><value>Filter</value></data>
+<data name="HeaderCutoff" xml:space="preserve"><value>Cutoff</value></data>
+<data name="HeaderResonance" xml:space="preserve"><value>Resonance</value></data>
+<data name="HeaderFilterLfo" xml:space="preserve"><value>Filter LFO</value></data>
+<data name="HeaderFLfoRate" xml:space="preserve"><value>F-LFO Rate</value></data>
+<data name="HeaderFLfoDepth" xml:space="preserve"><value>F-LFO Depth</value></data>
+<data name="InstrumentCustomTabHeader" xml:space="preserve"><value>Custom</value></data>
+<data name="InstrumentCustomTabTooltip" xml:space="preserve"><value>Assign individual timbre settings to specific MIDI program numbers. Set to -1 for percussion channel (10).</value></data>
+<data name="AddCustomInstrumentTooltip" xml:space="preserve"><value>Adds a new custom instrument.</value></data>
+<data name="RemoveCustomInstrumentTooltip" xml:space="preserve"><value>Deletes the selected custom instrument.</value></data>
+<data name="HeaderProgram" xml:space="preserve"><value>Program</value></data>
+<data name="HeaderWavetableFile" xml:space="preserve"><value>Wavetable File</value></data>
+<data name="HeaderFLfoWaveform" xml:space="preserve"><value>F-LFO Wave</value></data>
+<data name="HeaderPLfoWaveform" xml:space="preserve"><value>P-LFO Wave</value></data>
+<data name="HeaderPLfoRate" xml:space="preserve"><value>P-LFO Rate</value></data>
+<data name="HeaderPLfoDepth" xml:space="preserve"><value>P-LFO Depth</value></data>
+<data name="HeaderALfoWaveform" xml:space="preserve"><value>A-LFO Wave</value></data>
+<data name="HeaderALfoRate" xml:space="preserve"><value>A-LFO Rate</value></data>
+<data name="HeaderALfoDepth" xml:space="preserve"><value>A-LFO Depth</value></data>
+<data name="DebugTabHeader" xml:space="preserve"><value>Debug</value></data>
+<data name="DebugTabTooltip" xml:space="preserve"><value>Settings for debugging to help investigate issues.</value></data>
+<data name="LoggingGroupHeader" xml:space="preserve"><value>Logging</value></data>
+<data name="EnableLoggingCheckbox" xml:space="preserve"><value>Enable Logging</value></data>
+<data name="EnableLoggingTooltip" xml:space="preserve"><value>Outputs plugin operation logs to a file. Useful for investigating issues.</value></data>
+<data name="VerboseLoggingCheckbox" xml:space="preserve"><value>Enable Verbose Logging</value></data>
+<data name="VerboseLoggingTooltip" xml:space="preserve"><value>Outputs more detailed logs.</value></data>
+<data name="LogFilePathLabel" xml:space="preserve"><value>Log File Path</value></data>
+<data name="LogFilePathTooltip" xml:space="preserve"><value>Specify the output path for the log file.</value></data>
+<data name="MaxLogSizeLabel" xml:space="preserve"><value>Max Log Size (KB)</value></data>
+<data name="MaxLogSizeTooltip" xml:space="preserve"><value>Specify the maximum log file size in KB. Older logs are deleted when this limit is exceeded.</value></data>
+<data name="LogLevelLabel" xml:space="preserve"><value>Log Level</value></data>
+<data name="LogLevelTooltip" xml:space="preserve"><value>Set the detail level of the logs to output. Set in the range 1 (errors only) to 5 (all).</value></data>
+<data name="LogViewerHeader" xml:space="preserve"><value>Log Viewer</value></data>
+<data name="ClearLogButton" xml:space="preserve"><value>Clear</value></data>
+<data name="ApiIntegrationGroupHeader" xml:space="preserve"><value>API Integration</value></data>
+<data name="EnableNamedPipeApiCheckbox" xml:space="preserve"><value>Enable Named Pipe API (for external integration)</value></data>
+<data name="EnableNamedPipeApiTooltip" xml:space="preserve"><value>When enabled</value></data>
+<data name="ExperimentalFeaturesGroupHeader" xml:space="preserve"><value>Experimental Features</value></data>
+<data name="ShowMidiInfoWindowCheckbox" xml:space="preserve"><value>Show MIDI info window when adding MIDI file</value></data>
+<data name="ShowMidiInfoWindowTooltip" xml:space="preserve"><value>If enabled</value></data>
+<data name="OpenMidiEditorCheckbox" xml:space="preserve"><value>Open MIDI editor when adding MIDI file</value></data>
+<data name="OpenMidiEditorTooltip" xml:space="preserve"><value>If enabled</value></data>
+<data name="ShowReleaseNotesTooltip" xml:space="preserve"><value>Show release notes.</value></data>
+<data name="OpenPluginDirectoryTooltip" xml:space="preserve"><value>Open the plugins folder.</value></data>
+<data name="RefreshFilesTooltip" xml:space="preserve"><value>Update the SFZ and SoundFont file lists.</value></data>
+<data name="ReloadConfigTooltip" xml:space="preserve"><value>Reloads the current settings from the file. Unsaved changes will be discarded.</value></data>
+<data name="Key_VersionChecking" xml:space="preserve"><value>Getting version information...</value></data>
+<data name="Key_VersionCurrent" xml:space="preserve"><value>Current Version: {0}</value></data>
+<data name="Key_VersionNewAvailable" xml:space="preserve"><value>新しいバージョンが利用可能です: {0}</value></data>
+<data name="Key_VersionUpToDate" xml:space="preserve"><value>Your version is up to date.</value></data>
+<data name="Key_VersionCheckFailed" xml:space="preserve"><value>Could not retrieve update information.</value></data>
+<data name="MidiWriterHeader" xml:space="preserve"><value>MIDI Conversion Settings</value></data>
+<data name="MidiWriterQuantizeLabel" xml:space="preserve"><value>Quantize Resolution</value></data>
+<data name="MidiWriterQuantizeTooltip" xml:space="preserve"><value>Which note value to align MIDI event timing to. 'None' disables quantization.</value></data>
+<data name="MidiWriterPitchAlgoLabel" xml:space="preserve"><value>Pitch Detection Algorithm</value></data>
+<data name="MidiWriterPitchAlgoTooltip" xml:space="preserve"><value>Method to detect pitch from audio. YIN is more accurate but takes longer to process.</value></data>
+<data name="MidiWriterPitchSensitivityLabel" xml:space="preserve"><value>Pitch Sensitivity</value></data>
+<data name="MidiWriterPitchSensitivityTooltip" xml:space="preserve"><value>How much pitch stability is required. Higher values detect more notes. (0.0-1.0)</value></data>
+<data name="MidiWriterFftSizeLabel" xml:space="preserve"><value>FFT Size</value></data>
+<data name="MidiWriterFftSizeTooltip" xml:space="preserve"><value>Number of samples for frequency analysis. Larger values increase frequency resolution but decrease time resolution.</value></data>
+<data name="MidiWriterMinNoteDurationLabel" xml:space="preserve"><value>Min Note Duration (ms)</value></data>
+<data name="MidiWriterMinNoteDurationTooltip" xml:space="preserve"><value>Minimum length (ms) of detected MIDI notes. Excludes notes that are too short.</value></data>
+<data name="MidiWriterVelocitySensitivityLabel" xml:space="preserve"><value>Velocity Sensitivity</value></data>
+<data name="MidiWriterVelocitySensitivityTooltip" xml:space="preserve"><value>Degree to which volume changes are reflected in MIDI velocity. Higher values emphasize volume changes. (0.0-1.0)</value></data>
+<data name="MidiWriterNotesHeader" xml:space="preserve"><value>Notes</value></data>
+<data name="MidiWriterNote1" xml:space="preserve"><value>• This feature is experimental. Accuracy depends heavily on the audio content and settings.</value></data>
+<data name="MidiWriterNote2" xml:space="preserve"><value>• Monophonic instruments or voices are converted more accurately than chords or complex sources.</value></data>
+<data name="MidiWriterNote3" xml:space="preserve"><value>• Processing time increases proportionally to the audio length and FFT size.</value></data>
+<data name="MidiWriterConfigLoadError" xml:space="preserve"><value>Failed to load configuration view: {0}</value></data>
+<data name="UtauModelName" xml:space="preserve"><value>UTAU Voice</value></data>
+<data name="NewUtauModelName" xml:space="preserve"><value>New UTAU Model</value></data>
+<data name="DefaultUtauModelName" xml:space="preserve"><value>Default UTAU</value></data>
+<data name="UtauSettings" xml:space="preserve"><value>UTAU Settings</value></data>
+<data name="AddUtauFolder" xml:space="preserve"><value>Add UTAU Voice Folder</value></data>
+<data name="RemoveUtauFolder" xml:space="preserve"><value>Remove Selected Folder</value></data>
+<data name="UtauVoiceBaseFolders" xml:space="preserve"><value>UTAU Voice Base Folders</value></data>
+<data name="SelectUtauFolderTitle" xml:space="preserve"><value>Select the folder containing UTAU voices</value></data>
+<data name="RefreshUtauVoices" xml:space="preserve"><value>Refresh UTAU Voice List</value></data>
+<data name="NewSFModelName" xml:space="preserve"><value>New SF Model</value></data>
+<data name="NewSynthModelName" xml:space="preserve"><value>New Synth Model</value></data>
+<data name="Loading" xml:space="preserve"><value>Loading...</value></data>
+</root>

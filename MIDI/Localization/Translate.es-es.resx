@@ -1,0 +1,449 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
+<data name="PluginName" xml:space="preserve"><value>MIDI Import/Edit</value></data>
+<data name="PluginWriterName" xml:space="preserve"><value>MIDI Export</value></data>
+<data name="PluginToolName" xml:space="preserve"><value>MIDI Editor</value></data>
+<data name="NoteVoicePluginName" xml:space="preserve"><value>Síntesis de Notación de Notas</value></data>
+<data name="NoteVoiceSettingsName" xml:space="preserve"><value>Configuración de Síntesis de Notación de Notas</value></data>
+<data name="NoteVoiceSpeakerEngineName" xml:space="preserve"><value>Sintetizador de Notación de Notas</value></data>
+<data name="KanjiToYomiNotSupported" xml:space="preserve"><value>La conversión de Kanji a Yomi no es compatible.</value></data>
+<data name="DefaultSynthModelName" xml:space="preserve"><value>DefaultSynth</value></data>
+<data name="DefaultSoundFontModelName" xml:space="preserve"><value>DefaultSoundFont</value></data>
+<data name="CreateNewModelWindowTitle" xml:space="preserve"><value>Crear Nuevo Modelo</value></data>
+<data name="ModelNameLabel" xml:space="preserve"><value>Nombre del Modelo:</value></data>
+<data name="ModelTypeLabel" xml:space="preserve"><value>Tipo de Modelo:</value></data>
+<data name="InternalSynthRadioButton" xml:space="preserve"><value>Sintetizador Interno</value></data>
+<data name="SoundFontRadioButton" xml:space="preserve"><value>SoundFont</value></data>
+<data name="CreateButton" xml:space="preserve"><value>Crear</value></data>
+<data name="CancelButton" xml:space="preserve"><value>Cancelar</value></data>
+<data name="OkButton" xml:space="preserve"><value>Aceptar</value></data>
+<data name="NoteVoiceSettingsSampleRateLabel" xml:space="preserve"><value>Tasa de Muestreo (Hz)</value></data>
+<data name="NoteVoiceSettingsModelSelectionHeader" xml:space="preserve"><value>Selección de Modelo de Voz</value></data>
+<data name="NoteVoiceSettingsNewButton" xml:space="preserve"><value>Nuevo</value></data>
+<data name="NoteVoiceSettingsSaveButton" xml:space="preserve"><value>Guardar</value></data>
+<data name="NoteVoiceSettingsSoundFontLayerSettingsHeader" xml:space="preserve"><value>Configuración de Capas de SoundFont</value></data>
+<data name="NoteVoiceSettingsAddLayerButton" xml:space="preserve"><value>Añadir Capa</value></data>
+<data name="NoteVoiceSettingsBrowseAddButton" xml:space="preserve"><value>Explorar y Añadir...</value></data>
+<data name="NoteVoiceSettingsUpdateFileListTooltip" xml:space="preserve"><value>Actualizar Lista de Archivos</value></data>
+<data name="NoteVoiceSettingsMoveLayerUpTooltip" xml:space="preserve"><value>Mover Arriba</value></data>
+<data name="NoteVoiceSettingsMoveLayerDownTooltip" xml:space="preserve"><value>Mover Abajo</value></data>
+<data name="NoteVoiceSettingsDeleteLayerTooltip" xml:space="preserve"><value>Eliminar</value></data>
+<data name="NoteVoiceSettingsInternalSynthSettingsHeader" xml:space="preserve"><value>Configuración del Sintetizador Interno</value></data>
+<data name="NoteVoiceSettingsDefaultWaveformLabel" xml:space="preserve"><value>Forma de Onda Predeterminada</value></data>
+<data name="NoteVoiceSettingsDefaultWaveformTooltip" xml:space="preserve"><value>Esta es la forma de onda básica para el timbre.</value></data>
+<data name="NoteVoiceSettingsAttackLabel" xml:space="preserve"><value>Ataque (s)</value></data>
+<data name="NoteVoiceSettingsAttackTooltip" xml:space="preserve"><value>Tiempo en segundos para que el sonido alcance el volumen máximo.</value></data>
+<data name="NoteVoiceSettingsDecayLabel" xml:space="preserve"><value>Decaimiento (s)</value></data>
+<data name="NoteVoiceSettingsDecayTooltip" xml:space="preserve"><value>Tiempo en segundos para decaer desde el volumen máximo hasta el nivel de sostenido.</value></data>
+<data name="NoteVoiceSettingsSustainLabel" xml:space="preserve"><value>Nivel de Sostenido</value></data>
+<data name="NoteVoiceSettingsSustainTooltip" xml:space="preserve"><value>Nivel de volumen mientras persiste el sonido (0-1).</value></data>
+<data name="NoteVoiceSettingsReleaseLabel" xml:space="preserve"><value>Liberación (s)</value></data>
+<data name="NoteVoiceSettingsReleaseTooltip" xml:space="preserve"><value>Tiempo en segundos para que el sonido se desvanezca después de soltar la nota.</value></data>
+<data name="NoteVoiceSettingsBandlimitedSynthCheckbox" xml:space="preserve"><value>Síntesis de Banda Limitada (Reduce el ruido de alta frecuencia)</value></data>
+<data name="NoteVoiceSettingsBandlimitedSynthTooltip" xml:space="preserve"><value>Habilitarlo reduce el ruido de aliasing pero aumenta ligeramente la carga de la CPU.</value></data>
+<data name="NoteVoiceSettingsModelManagementTab" xml:space="preserve"><value>Gestión de Modelos</value></data>
+<data name="NoteVoiceSettingsModelManagementHeader" xml:space="preserve"><value>Gestión de Modelos de Voz</value></data>
+<data name="NoteVoiceSettingsRenameButton" xml:space="preserve"><value>Renombrar</value></data>
+<data name="NoteVoiceSettingsDeleteButton" xml:space="preserve"><value>Eliminar</value></data>
+<data name="RenameModelWindowTitle" xml:space="preserve"><value>Renombrar Modelo</value></data>
+<data name="NewModelNamePrompt" xml:space="preserve"><value>Introduzca el nuevo nombre del modelo:</value></data>
+<data name="ConfirmDeleteModelMessage" xml:space="preserve"><value>¿Eliminar modelo '{0}'?</value></data>
+<data name="DeleteConfirmationTitle" xml:space="preserve"><value>Confirmar Eliminación</value></data>
+<data name="InvalidOrExistingModelNameError" xml:space="preserve"><value>El nombre del modelo no es válido o ya existe.</value></data>
+<data name="ErrorTitle" xml:space="preserve"><value>Error</value></data>
+<data name="AudioTabHeader" xml:space="preserve"><value>Audio</value></data>
+<data name="PresetGroupHeader" xml:space="preserve"><value>Preajustes</value></data>
+<data name="BasicSettingsGroupHeader" xml:space="preserve"><value>Configuración Básica</value></data>
+<data name="SampleRateLabel" xml:space="preserve"><value>Tasa de Muestreo (Hz)</value></data>
+<data name="SampleRateTooltip" xml:space="preserve"><value>El número de veces que se muestrea el audio por segundo. Los valores más altos mejoran la calidad del sonido pero aumentan la carga de la CPU. La calidad de CD es de 44100 Hz.</value></data>
+<data name="MasterVolumeLabel" xml:space="preserve"><value>Volumen Maestro</value></data>
+<data name="MasterVolumeTooltip" xml:space="preserve"><value>Ajusta el volumen maestro para toda la aplicación. Establezca dentro del rango de 0 (silencio) a 1 (máximo).</value></data>
+<data name="NormalizationGroupHeader" xml:space="preserve"><value>Normalización</value></data>
+<data name="EnableNormalizationCheckbox" xml:space="preserve"><value>Habilitar Normalización</value></data>
+<data name="EnableNormalizationTooltip" xml:space="preserve"><value>Ajusta automáticamente el volumen para evitar el recorte y ecualizar el volumen general.</value></data>
+<data name="NormalizationThresholdLabel" xml:space="preserve"><value>Umbral</value></data>
+<data name="NormalizationThresholdTooltip" xml:space="preserve"><value>El umbral de volumen al que se activa la normalización. La normalización se aplica cuando se supera este valor.</value></data>
+<data name="NormalizationLevelLabel" xml:space="preserve"><value>Nivel</value></data>
+<data name="NormalizationLevelTooltip" xml:space="preserve"><value>El nivel de volumen objetivo después de la normalización.</value></data>
+<data name="GlobalFadeOutGroupHeader" xml:space="preserve"><value>Fundido de Salida Global</value></data>
+<data name="EnableGlobalFadeOutCheckbox" xml:space="preserve"><value>Habilitar fundido de salida para el audio final</value></data>
+<data name="EnableGlobalFadeOutTooltip" xml:space="preserve"><value>Desvanece suavemente el sonido al final de la reproducción para evitar cortes abruptos.</value></data>
+<data name="FadeOutTimeLabel" xml:space="preserve"><value>Tiempo de Fundido (s)</value></data>
+<data name="FadeOutTimeTooltip" xml:space="preserve"><value>La duración del fundido de salida en segundos.</value></data>
+<data name="PresetSaveButton" xml:space="preserve"><value>Guardar</value></data>
+<data name="PresetDeleteButton" xml:space="preserve"><value>Eliminar</value></data>
+<data name="PerformanceTabHeader" xml:space="preserve"><value>Rendimiento</value></data>
+<data name="RenderingSettingsGroupHeader" xml:space="preserve"><value>Configuración de Renderizado</value></data>
+<data name="RenderingModeLabel" xml:space="preserve"><value>Modo de Renderizado</value></data>
+<data name="RenderingModeTooltip" xml:space="preserve"><value>Selecciona el método de renderizado de audio. El modo en tiempo real tiene menor latencia pero puede reducir ligeramente la calidad. El modo GPU requiere una tarjeta gráfica compatible y puede incurrir en sobrecarga de transferencia de datos.</value></data>
+<data name="BasicSettingsGroupHeaderPerformance" xml:space="preserve"><value>Configuración Básica</value></data>
+<data name="BufferSizeLabel" xml:space="preserve"><value>Tamaño del Búfer</value></data>
+<data name="BufferSizeTooltip" xml:space="preserve"><value>El número de muestras de audio procesadas a la vez. Los valores más pequeños reducen la latencia pero aumentan la carga de la CPU y pueden causar interrupciones.</value></data>
+<data name="MaxPolyphonyLabel" xml:space="preserve"><value>Polifonía Máxima</value></data>
+<data name="MaxPolyphonyTooltip" xml:space="preserve"><value>El número máximo de notas que se pueden reproducir simultáneamente. Superar este valor puede hacer que las notas más antiguas dejen de sonar.</value></data>
+<data name="MaxThreadsLabel" xml:space="preserve"><value>Máximo de Hilos</value></data>
+<data name="MaxThreadsTooltip" xml:space="preserve"><value>오디오 처리에 사용되는 최대 CPU 스레드 수입니다. 일반적으로 CPU 코어 수와 일치시키는 것이 효과적입니다.</value></data>
+<data name="InitialSyncDurationLabel" xml:space="preserve"><value>Tiempo de Carga Inicial (s)</value></data>
+<data name="InitialSyncDurationTooltip" xml:space="preserve"><value>La duración de la reproducción (en segundos) cargada sincrónicamente al abrir el archivo. Tiempos más largos aumentan la espera inicial pero reducen el procesamiento durante la reproducción.</value></data>
+<data name="GpuAccelerationGroupHeader" xml:space="preserve"><value>Aceleración de GPU (Experimental)</value></data>
+<data name="GpuAccelerationTooltip" xml:space="preserve"><value>Función experimental. Utiliza la GPU para acelerar partes del procesamiento de audio. Requiere una tarjeta gráfica compatible.</value></data>
+<data name="InitializeGpuOnStartupCheckbox" xml:space="preserve"><value>Inicializar dispositivo GPU al inicio</value></data>
+<data name="InitializeGpuOnStartupTooltip" xml:space="preserve"><value>如果启用，则在YMM4启动时初始化GPU设备。如果禁用，则在首次加载MIDI文件时进行初始化，这可能需要更长时间。</value></data>
+<data name="GpuSynthesisCheckbox" xml:space="preserve"><value>Síntesis</value></data>
+<data name="GpuSynthesisTooltip" xml:space="preserve"><value>Utiliza la GPU para el procesamiento de síntesis de formas de onda.</value></data>
+<data name="GpuEqualizerCheckbox" xml:space="preserve"><value>Ecualizador</value></data>
+<data name="GpuEqualizerTooltip" xml:space="preserve"><value>Utiliza la GPU para el procesamiento del ecualizador.</value></data>
+<data name="GpuEffectsChainCheckbox" xml:space="preserve"><value>Cadena de Efectos</value></data>
+<data name="GpuEffectsChainTooltip" xml:space="preserve"><value>使用GPU統一處理多個效果（混響、壓縮等）。</value></data>
+<data name="GpuConvolutionReverbCheckbox" xml:space="preserve"><value>Reverberación de Convolución</value></data>
+<data name="GpuConvolutionReverbTooltip" xml:space="preserve"><value>Utiliza la GPU para procesar reverberación de convolución de alta calidad.</value></data>
+<data name="EnableParallelProcessingCheckbox" xml:space="preserve"><value>Habilitar Procesamiento Paralelo (CPU)</value></data>
+<data name="EnableParallelProcessingTooltip" xml:space="preserve"><value>CPU 멀티 코어를 활용하여 채널별 오디오 처리를 병렬로 실행하여 렌더링 속도를 높입니다.</value></data>
+<data name="MidiTabHeader" xml:space="preserve"><value>MIDI</value></data>
+<data name="PlaybackSettingsGroupHeader" xml:space="preserve"><value>Configuración de Reproducción</value></data>
+<data name="DefaultTempoLabel" xml:space="preserve"><value>Tempo Predeterminado</value></data>
+<data name="DefaultTempoTooltip" xml:space="preserve"><value>El tempo predeterminado utilizado si el archivo MIDI no contiene información de tempo. Especificado en microsegundos por negra (p. ej., 120 BPM = 500000).</value></data>
+<data name="PitchBendRangeLabel" xml:space="preserve"><value>Rango de Inflexión de Tono</value></data>
+<data name="PitchBendRangeTooltip" xml:space="preserve"><value>Establece el rango de inflexión de tono en semitonos. Por ejemplo, establecerlo en 2 permite la inflexión de tono dentro de un rango de ±2 semitonos.</value></data>
+<data name="MinVelocityLabel" xml:space="preserve"><value>Velocidad Mínima</value></data>
+<data name="MinVelocityTooltip" xml:space="preserve"><value>La velocidad mínima para procesar las notas. Las notas con menor velocidad serán ignoradas. Útil para eliminar notas no deseadas de bajo volumen.</value></data>
+<data name="ProcessingSettingsGroupHeader" xml:space="preserve"><value>Configuración de Procesamiento</value></data>
+<data name="ProcessControlChangesCheckbox" xml:space="preserve"><value>Procesar Cambios de Control</value></data>
+<data name="ProcessControlChangesTooltip" xml:space="preserve"><value>Procesa mensajes de Cambio de Control como volumen y panorama.</value></data>
+<data name="ProcessPitchBendCheckbox" xml:space="preserve"><value>Procesar Inflexión de Tono</value></data>
+<data name="ProcessPitchBendTooltip" xml:space="preserve"><value>Procesa mensajes de Inflexión de Tono para cambiar suavemente el tono.</value></data>
+<data name="ProcessProgramChangesCheckbox" xml:space="preserve"><value>Procesar Cambios de Programa</value></data>
+<data name="ProcessProgramChangesTooltip" xml:space="preserve"><value>Procesa mensajes de Cambio de Programa para cambiar los sonidos de los instrumentos.</value></data>
+<data name="ExclusionSettingsGroupHeader" xml:space="preserve"><value>Configuración de Exclusión</value></data>
+<data name="ExcludedChannelsLabel" xml:space="preserve"><value>Canales Excluidos (separados por coma)</value></data>
+<data name="ExcludedChannelsTooltip" xml:space="preserve"><value>Los canales MIDI especificados aquí serán ignorados durante la reproducción (separados por coma).</value></data>
+<data name="ExcludedTracksLabel" xml:space="preserve"><value>Pistas Excluidas (separadas por coma)</value></data>
+<data name="ExcludedTracksTooltip" xml:space="preserve"><value>Las pistas especificadas aquí serán ignoradas durante la reproducción (separadas por coma).</value></data>
+<data name="SfzTabHeader" xml:space="preserve"><value>SFZ</value></data>
+<data name="EnableSfzCheckbox" xml:space="preserve"><value>Habilitar SFZ (Priorizado sobre SoundFont)</value></data>
+<data name="EnableSfzTooltip" xml:space="preserve"><value>SFZ 형식 샘플러 악기를 사용하여 MIDI를 재생합니다. 활성화된 경우 SoundFont보다 우선 적용됩니다.</value></data>
+<data name="SfzSettingsGroupHeader" xml:space="preserve"><value>Configuración (Doble clic para editar)</value></data>
+<data name="SfzSearchPathLabel" xml:space="preserve"><value>Carpeta de Búsqueda SFZ:</value></data>
+<data name="SfzSearchPathTooltip" xml:space="preserve"><value>Especifique la ruta a la carpeta para buscar archivos SFZ.</value></data>
+<data name="SfzListStatusHeader" xml:space="preserve"><value>Estado</value></data>
+<data name="SfzListFilePathHeader" xml:space="preserve"><value>Ruta del Archivo SFZ</value></data>
+<data name="SfzListProgramNumberHeader" xml:space="preserve"><value>Número de Programa</value></data>
+<data name="SoundFontTabHeader" xml:space="preserve"><value>SoundFont</value></data>
+<data name="EnableSoundFontCheckbox" xml:space="preserve"><value>Habilitar SoundFont</value></data>
+<data name="EnableSoundFontTooltip" xml:space="preserve"><value>Reproduce MIDI utilizando archivos SoundFont (.sf2).</value></data>
+<data name="SoundFontBasicSettingsGroupHeader" xml:space="preserve"><value>Configuración Básica</value></data>
+<data name="UseDefaultSoundFontCheckbox" xml:space="preserve"><value>Usar SoundFont predeterminado</value></data>
+<data name="UseDefaultSoundFontTooltip" xml:space="preserve"><value>Utiliza el SoundFont predeterminado (GeneralUser-GS.sf2) incluido con el complemento.</value></data>
+<data name="FallbackToSynthesisCheckbox" xml:space="preserve"><value>Retroceder a la síntesis si no se encuentra SoundFont</value></data>
+<data name="FallbackToSynthesisTooltip" xml:space="preserve"><value>Cambia a la reproducción con el sintetizador incorporado si no se encuentra un SoundFont adecuado.</value></data>
+<data name="SoundFontDirectoryLabel" xml:space="preserve"><value>Directorio de SoundFont</value></data>
+<data name="SoundFontDirectoryTooltip" xml:space="preserve"><value>La ruta al directorio que contiene los archivos SoundFont agregados por el usuario.</value></data>
+<data name="PreferredSoundFontLabel" xml:space="preserve"><value>Nombre de Archivo SoundFont Preferido</value></data>
+<data name="PreferredSoundFontTooltip" xml:space="preserve"><value>Especifique el nombre de archivo SoundFont para priorizar incluso si no coincide con las reglas.</value></data>
+<data name="SoundFontLayersGroupHeader" xml:space="preserve"><value>위에서부터 우선 적용)</value></data>
+<data name="LayerUpButtonTooltip" xml:space="preserve"><value>Mueve la capa hacia arriba.</value></data>
+<data name="LayerDownButtonTooltip" xml:space="preserve"><value>Mueve la capa hacia abajo.</value></data>
+<data name="RemoveLayerButtonTooltip" xml:space="preserve"><value>Elimina la capa seleccionada.</value></data>
+<data name="AddLayerButton" xml:space="preserve"><value>Añadir a Capa</value></data>
+<data name="SoundFontListGroupHeader" xml:space="preserve"><value>SoundFonts y Reglas Disponibles (Doble clic para editar)</value></data>
+<data name="SoundFontListStatusHeader" xml:space="preserve"><value>Estado</value></data>
+<data name="SoundFontListFileNameHeader" xml:space="preserve"><value>Archivo SoundFont</value></data>
+<data name="SoundFontListMinDurationHeader" xml:space="preserve"><value>Duración Mín.(s)</value></data>
+<data name="SoundFontListMaxDurationHeader" xml:space="preserve"><value>Duración Máx.(s)</value></data>
+<data name="SoundFontListMinTracksHeader" xml:space="preserve"><value>Pistas Mín.</value></data>
+<data name="SoundFontListMaxTracksHeader" xml:space="preserve"><value>Pistas Máx.</value></data>
+<data name="SoundFontListRequiredProgramsHeader" xml:space="preserve"><value>Programas Requeridos</value></data>
+<data name="SynthesisTabHeader" xml:space="preserve"><value>Síntesis</value></data>
+<data name="SynthesisBasicSettingsGroupHeader" xml:space="preserve"><value>Configuración Básica</value></data>
+<data name="DefaultWaveformLabel" xml:space="preserve"><value>Forma de Onda Predeterminada</value></data>
+<data name="DefaultWaveformTooltip" xml:space="preserve"><value>Seleccione el tipo de forma de onda básica para el timbre.</value></data>
+<data name="WavetableDirectoryLabel" xml:space="preserve"><value>Carpeta Wavetable</value></data>
+<data name="WavetableDirectoryTooltip" xml:space="preserve"><value>Carpeta para colocar archivos WAV definidos por el usuario.</value></data>
+<data name="A4FrequencyLabel" xml:space="preserve"><value>Frecuencia A4 (Hz)</value></data>
+<data name="A4FrequencyTooltip" xml:space="preserve"><value>設定參考音A4（La）的頻率。現代標準為440Hz，但在古樂等領域會使用不同的值。</value></data>
+<data name="MinFrequencyLabel" xml:space="preserve"><value>Frecuencia Mínima (Hz)</value></data>
+<data name="MinFrequencyTooltip" xml:space="preserve"><value>El límite inferior de la frecuencia del audio generado. Las frecuencias por debajo de este límite serán recortadas.</value></data>
+<data name="MaxFrequencyLabel" xml:space="preserve"><value>Frecuencia Máxima (Hz)</value></data>
+<data name="MaxFrequencyTooltip" xml:space="preserve"><value>El límite superior de la frecuencia del audio generado. Las frecuencias por encima de este límite serán recortadas.</value></data>
+<data name="EnvelopeScaleLabel" xml:space="preserve"><value>Escala de Envolvente</value></data>
+<data name="EnvelopeScaleTooltip" xml:space="preserve"><value>smaller values make it shorter.</value></data>
+<data name="DefaultEnvelopeGroupHeader" xml:space="preserve"><value>Envolvente Predeterminada</value></data>
+<data name="DefaultEnvelopeTooltip" xml:space="preserve"><value>Establece los valores predeterminados para el cambio temporal del sonido (ADSR).</value></data>
+<data name="AttackLabel" xml:space="preserve"><value>Ataque</value></data>
+<data name="AttackTooltip" xml:space="preserve"><value>Tiempo (en segundos) desde el inicio del sonido hasta que alcanza el volumen máximo.</value></data>
+<data name="DecayLabel" xml:space="preserve"><value>Decaimiento</value></data>
+<data name="DecayTooltip" xml:space="preserve"><value>Tiempo (en segundos) para decaer desde el volumen máximo hasta el nivel de sostenido.</value></data>
+<data name="SustainLabel" xml:space="preserve"><value>Sostenido</value></data>
+<data name="SustainTooltip" xml:space="preserve"><value>El nivel de volumen mientras se mantiene la nota (0-1).</value></data>
+<data name="ReleaseLabel" xml:space="preserve"><value>Liberación</value></data>
+<data name="ReleaseTooltip" xml:space="preserve"><value>Tiempo (en segundos) para que el sonido se desvanezca después de soltar la nota.</value></data>
+<data name="FmSourceGroupHeader" xml:space="preserve"><value>Fuente FM</value></data>
+<data name="FmSourceTooltip" xml:space="preserve"><value>Configuraciones relacionadas con el método de síntesis FM.</value></data>
+<data name="ModulatorFrequencyLabel" xml:space="preserve"><value>Frecuencia del Modulador (Hz)</value></data>
+<data name="ModulatorFrequencyTooltip" xml:space="preserve"><value>La frecuencia de la onda moduladora en la síntesis FM. Hace que el timbre sea más complejo.</value></data>
+<data name="ModulationIndexLabel" xml:space="preserve"><value>Índice de Modulación</value></data>
+<data name="ModulationIndexTooltip" xml:space="preserve"><value>La profundidad de la modulación en la síntesis FM. Valores mayores dan como resultado timbres más complejos y metálicos.</value></data>
+<data name="QualityNoiseReductionGroupHeader" xml:space="preserve"><value>Calidad/Reducción de Ruido</value></data>
+<data name="EnableBandlimitedSynthesisCheckbox" xml:space="preserve"><value>Habilitar Síntesis de Banda Limitada (Reducir Aliasing)</value></data>
+<data name="EnableBandlimitedSynthesisTooltip" xml:space="preserve"><value>Habilita técnicas para reducir el aliasing (ruido de plegado) durante la generación de formas de onda. Mejora la calidad del sonido pero aumenta ligeramente la carga de la CPU.</value></data>
+<data name="EnableAntiPopCheckbox" xml:space="preserve"><value>Habilitar Anti-Pop (Reducir Ruido de Clic)</value></data>
+<data name="EnableAntiPopTooltip" xml:space="preserve"><value>Aplica fundidos cortos al inicio y final de las notas para reducir ruidos de 'pop'.</value></data>
+<data name="AntiPopAttackLabel" xml:space="preserve"><value>Ataque (s)</value></data>
+<data name="AntiPopReleaseLabel" xml:space="preserve"><value>Liberación (s)</value></data>
+<data name="EnableNoteCrossfadeCheckbox" xml:space="preserve"><value>Habilitar Fundido Cruzado de Notas</value></data>
+<data name="EnableNoteCrossfadeTooltip" xml:space="preserve"><value>Suaviza las transiciones entre notas para reducir el ruido.</value></data>
+<data name="CrossfadeTimeLabel" xml:space="preserve"><value>Tiempo de Fundido(s)</value></data>
+<data name="EffectsTabHeader" xml:space="preserve"><value>Efectos</value></data>
+<data name="EffectsTabTooltip" xml:space="preserve"><value>Configura varios efectos para ajustar la calidad del audio.</value></data>
+<data name="EnableEffectsCheckbox" xml:space="preserve"><value>Habilitar Efectos</value></data>
+<data name="EnableEffectsTooltip" xml:space="preserve"><value>Activa/desactiva todos los efectos de audio.</value></data>
+<data name="CompressorGroupHeader" xml:space="preserve"><value>Compresor</value></data>
+<data name="CompressorTooltip" xml:space="preserve"><value>Un efecto que suprime las variaciones de volumen y aumenta la presión sonora.</value></data>
+<data name="EnableCompressorCheckbox" xml:space="preserve"><value>Habilitar Compresor</value></data>
+<data name="CompressorThresholdLabel" xml:space="preserve"><value>Umbral</value></data>
+<data name="CompressorThresholdTooltip" xml:space="preserve"><value>El umbral de volumen al que el compresor comienza a funcionar.</value></data>
+<data name="CompressorRatioLabel" xml:space="preserve"><value>Ratio</value></data>
+<data name="CompressorRatioTooltip" xml:space="preserve"><value>超過閾值的聲音被壓縮的比例。例如4:1，超過閾值4dB的聲音將被壓縮到超過閾值1dB。</value></data>
+<data name="CompressorAttackLabel" xml:space="preserve"><value>Ataque (s)</value></data>
+<data name="CompressorAttackTooltip" xml:space="preserve"><value>El tiempo (en segundos) que tarda el compresor en empezar a funcionar.</value></data>
+<data name="CompressorReleaseLabel" xml:space="preserve"><value>Liberación (s)</value></data>
+<data name="CompressorReleaseTooltip" xml:space="preserve"><value>El tiempo (en segundos) que tarda el compresor en liberarse.</value></data>
+<data name="AlgorithmicReverbGroupHeader" xml:space="preserve"><value>Reverberación Algorítmica</value></data>
+<data name="AlgorithmicReverbTooltip" xml:space="preserve"><value>Una reverberación de alta calidad que genera reverberación mediante cálculos.</value></data>
+<data name="EnableAlgorithmicReverbCheckbox" xml:space="preserve"><value>Habilitar Reverberación Algorítmica</value></data>
+<data name="ReverbRoomSizeLabel" xml:space="preserve"><value>Tamaño de Sala</value></data>
+<data name="ReverbDampingLabel" xml:space="preserve"><value>Amortiguación</value></data>
+<data name="ReverbWetLevelLabel" xml:space="preserve"><value>Wet</value></data>
+<data name="ReverbDryLevelLabel" xml:space="preserve"><value>Dry</value></data>
+<data name="ReverbWidthLabel" xml:space="preserve"><value>Anchura</value></data>
+<data name="ConvolutionReverbGroupHeader" xml:space="preserve"><value>Reverberación de Convolución</value></data>
+<data name="ConvolutionReverbTooltip" xml:space="preserve"><value>Utiliza un archivo de Respuesta a Impulso (IR) para reproducir una reverberación realista.</value></data>
+<data name="EnableConvolutionReverbCheckbox" xml:space="preserve"><value>Habilitar Reverberación de Convolución</value></data>
+<data name="IrFilePathLabel" xml:space="preserve"><value>Ruta Archivo IR</value></data>
+<data name="BrowseButton" xml:space="preserve"><value>Explorar...</value></data>
+<data name="MaxIrDurationLabel" xml:space="preserve"><value>Tiempo Máx. Carga (s)</value></data>
+<data name="MaxIrDurationTooltip" xml:space="preserve"><value>Especifique el tiempo máximo de carga para el archivo de respuesta a impulso en segundos.</value></data>
+<data name="DistortionGroupHeader" xml:space="preserve"><value>Distorsión</value></data>
+<data name="DistortionTooltip" xml:space="preserve"><value>Distorsiona el sonido para crear un sonido potente.</value></data>
+<data name="EnableDistortionCheckbox" xml:space="preserve"><value>Habilitar Distorsión</value></data>
+<data name="DistortionTypeLabel" xml:space="preserve"><value>Tipo</value></data>
+<data name="DistortionDriveLabel" xml:space="preserve"><value>Drive</value></data>
+<data name="DistortionMixLabel" xml:space="preserve"><value>Mezcla</value></data>
+<data name="BitCrusherGroupHeader" xml:space="preserve"><value>Bit Crusher</value></data>
+<data name="BitCrusherTooltip" xml:space="preserve"><value>Degrada intencionalmente la calidad del sonido para crear un sonido retro.</value></data>
+<data name="EnableBitCrusherCheckbox" xml:space="preserve"><value>Habilitar Bit Crusher</value></data>
+<data name="BitDepthLabel" xml:space="preserve"><value>Profundidad de Bits</value></data>
+<data name="RateReductionLabel" xml:space="preserve"><value>Reducción de Tasa</value></data>
+<data name="PingPongDelayGroupHeader" xml:space="preserve"><value>Delay Ping Pong</value></data>
+<data name="PingPongDelayTooltip" xml:space="preserve"><value>Un retardo que crea un efecto de eco alternando entre los canales izquierdo y derecho.</value></data>
+<data name="EnablePingPongDelayCheckbox" xml:space="preserve"><value>Habilitar Delay Ping Pong</value></data>
+<data name="DelayTimeLabel" xml:space="preserve"><value>Tiempo de Delay (s)</value></data>
+<data name="DelayTimeTooltip" xml:space="preserve"><value>El intervalo del eco (en segundos).</value></data>
+<data name="FeedbackLabel" xml:space="preserve"><value>Retroalimentación</value></data>
+<data name="FeedbackTooltip" xml:space="preserve"><value>El número de veces que se repite el eco.</value></data>
+<data name="MixLabel" xml:space="preserve"><value>Mezcla</value></data>
+<data name="MixTooltip" xml:space="preserve"><value>El equilibrio entre el sonido original (seco) y el sonido del efecto (húmedo).</value></data>
+<data name="ChorusGroupHeader" xml:space="preserve"><value>Chorus</value></data>
+<data name="ChorusTooltip" xml:space="preserve"><value>Añade grosor y amplitud al sonido desafinándolo ligeramente y superponiéndolo.</value></data>
+<data name="EnableChorusCheckbox" xml:space="preserve"><value>Habilitar Chorus</value></data>
+<data name="ChorusDelayLabel" xml:space="preserve"><value>Delay (s)</value></data>
+<data name="ChorusDelayTooltip" xml:space="preserve"><value>El tiempo de retardo (en segundos) del sonido superpuesto contra el sonido original.</value></data>
+<data name="ChorusDepthLabel" xml:space="preserve"><value>Profundidad</value></data>
+<data name="ChorusDepthTooltip" xml:space="preserve"><value>La profundidad de la modulación del sonido.</value></data>
+<data name="ChorusRateLabel" xml:space="preserve"><value>Tasa (Hz)</value></data>
+<data name="ChorusRateTooltip" xml:space="preserve"><value>La velocidad de la modulación del sonido (en Hz).</value></data>
+<data name="ChorusStrengthLabel" xml:space="preserve"><value>Fuerza</value></data>
+<data name="ChorusStrengthTooltip" xml:space="preserve"><value>La fuerza del sonido del chorus en relación con el sonido original.</value></data>
+<data name="PhaserGroupHeader" xml:space="preserve"><value>Phaser</value></data>
+<data name="PhaserTooltip" xml:space="preserve"><value>Un efecto que crea un sonido giratorio único al desplazar la fase del sonido.</value></data>
+<data name="EnablePhaserCheckbox" xml:space="preserve"><value>Habilitar Phaser</value></data>
+<data name="PhaserRateLabel" xml:space="preserve"><value>Tasa (Hz)</value></data>
+<data name="PhaserRateTooltip" xml:space="preserve"><value>La velocidad a la que se cambia la fase (en Hz).</value></data>
+<data name="PhaserStagesLabel" xml:space="preserve"><value>Etapas</value></data>
+<data name="PhaserStagesTooltip" xml:space="preserve"><value>El número de etapas de filtro en el phaser. Más etapas crean un efecto más complejo.</value></data>
+<data name="PhaserFeedbackLabel" xml:space="preserve"><value>Retroalimentación</value></data>
+<data name="PhaserFeedbackTooltip" xml:space="preserve"><value>La cantidad de sonido del efecto retroalimentado a la entrada. Enfatiza el efecto.</value></data>
+<data name="FlangerGroupHeader" xml:space="preserve"><value>Flanger</value></data>
+<data name="FlangerTooltip" xml:space="preserve"><value>類似於合唱，但使用更短、週期性的延遲來創造金屬般的旋轉聲音。</value></data>
+<data name="EnableFlangerCheckbox" xml:space="preserve"><value>Habilitar Flanger</value></data>
+<data name="FlangerDelayLabel" xml:space="preserve"><value>Delay (s)</value></data>
+<data name="FlangerDelayTooltip" xml:space="preserve"><value>Tiempo de retardo (en segundos).</value></data>
+<data name="FlangerRateLabel" xml:space="preserve"><value>Tasa (Hz)</value></data>
+<data name="FlangerRateTooltip" xml:space="preserve"><value>La velocidad del remolino (en Hz).</value></data>
+<data name="FlangerDepthLabel" xml:space="preserve"><value>Profundidad</value></data>
+<data name="FlangerDepthTooltip" xml:space="preserve"><value>La profundidad del remolino.</value></data>
+<data name="LimiterGroupHeader" xml:space="preserve"><value>Limitador</value></data>
+<data name="LimiterTooltip" xml:space="preserve"><value>볼륨이 특정 임계값을 초과하지 않도록 제한하여 클리핑을 방지합니다.</value></data>
+<data name="EnableLimiterCheckbox" xml:space="preserve"><value>Habilitar Limitador</value></data>
+<data name="LimiterThresholdLabel" xml:space="preserve"><value>Umbral</value></data>
+<data name="LimiterThresholdTooltip" xml:space="preserve"><value>El límite superior para restringir el volumen.</value></data>
+<data name="EqualizerGroupHeader" xml:space="preserve"><value>Ecualizador</value></data>
+<data name="EqualizerTooltip" xml:space="preserve"><value>Ajusta la calidad del sonido realzando o atenuando bandas de frecuencia específicas.</value></data>
+<data name="EnableEqualizerCheckbox" xml:space="preserve"><value>Habilitar Ecualizador</value></data>
+<data name="EqBassGainLabel" xml:space="preserve"><value>Ganancia de Graves</value></data>
+<data name="EqBassGainTooltip" xml:space="preserve"><value>Ajusta la ganancia (volumen) del rango de graves.</value></data>
+<data name="EqMidGainLabel" xml:space="preserve"><value>Ganancia de Medios</value></data>
+<data name="EqMidGainTooltip" xml:space="preserve"><value>Ajusta la ganancia (volumen) del rango medio.</value></data>
+<data name="EqTrebleGainLabel" xml:space="preserve"><value>Ganancia de Agudos</value></data>
+<data name="EqTrebleGainTooltip" xml:space="preserve"><value>Ajusta la ganancia (volumen) del rango de agudos.</value></data>
+<data name="OtherEffectsGroupHeader" xml:space="preserve"><value>Otros</value></data>
+<data name="EnableDcOffsetRemovalCheckbox" xml:space="preserve"><value>Habilitar Eliminación de Desplazamiento DC</value></data>
+<data name="EnableDcOffsetRemovalTooltip" xml:space="preserve"><value>Elimina el componente de corriente continua (desplazamiento DC) de la señal de audio. Previene ruidos y distorsiones no deseadas.</value></data>
+<data name="InstrumentTabHeader" xml:space="preserve"><value>Instrumentos</value></data>
+<data name="InstrumentTabTooltip" xml:space="preserve"><value>Configura los ajustes de timbre según los números de programa MIDI.</value></data>
+<data name="InstrumentPresetTabHeader" xml:space="preserve"><value>Preajuste</value></data>
+<data name="InstrumentPresetTabTooltip" xml:space="preserve"><value>Asigna configuraciones de timbre a un rango de números de programa MIDI.</value></data>
+<data name="AddButton" xml:space="preserve"><value>Añadir</value></data>
+<data name="DeleteButton" xml:space="preserve"><value>Eliminar</value></data>
+<data name="AddInstrumentPresetTooltip" xml:space="preserve"><value>Añade un nuevo preajuste de instrumento.</value></data>
+<data name="RemoveInstrumentPresetTooltip" xml:space="preserve"><value>Elimina el preajuste seleccionado.</value></data>
+<data name="HeaderName" xml:space="preserve"><value>Nombre</value></data>
+<data name="HeaderStart" xml:space="preserve"><value>Inicio</value></data>
+<data name="HeaderEnd" xml:space="preserve"><value>Fin</value></data>
+<data name="HeaderWaveform" xml:space="preserve"><value>Forma de onda</value></data>
+<data name="HeaderAttack" xml:space="preserve"><value>Ataque</value></data>
+<data name="HeaderDecay" xml:space="preserve"><value>Decaimiento</value></data>
+<data name="HeaderSustain" xml:space="preserve"><value>Sostenido</value></data>
+<data name="HeaderRelease" xml:space="preserve"><value>Liberación</value></data>
+<data name="HeaderVolume" xml:space="preserve"><value>Volumen</value></data>
+<data name="HeaderFilter" xml:space="preserve"><value>Filtro</value></data>
+<data name="HeaderCutoff" xml:space="preserve"><value>Corte</value></data>
+<data name="HeaderResonance" xml:space="preserve"><value>Resonancia</value></data>
+<data name="HeaderFilterLfo" xml:space="preserve"><value>Filtro LFO</value></data>
+<data name="HeaderFLfoRate" xml:space="preserve"><value>Tasa F-LFO</value></data>
+<data name="HeaderFLfoDepth" xml:space="preserve"><value>Prof. F-LFO</value></data>
+<data name="InstrumentCustomTabHeader" xml:space="preserve"><value>Personalizado</value></data>
+<data name="InstrumentCustomTabTooltip" xml:space="preserve"><value>Asigna configuraciones de timbre individuales a números de programa MIDI específicos. Establece -1 para el canal de percusión (10).</value></data>
+<data name="AddCustomInstrumentTooltip" xml:space="preserve"><value>Añade un nuevo instrumento personalizado.</value></data>
+<data name="RemoveCustomInstrumentTooltip" xml:space="preserve"><value>Elimina el instrumento personalizado seleccionado.</value></data>
+<data name="HeaderProgram" xml:space="preserve"><value>Programa</value></data>
+<data name="HeaderWavetableFile" xml:space="preserve"><value>Archivo Wavetable</value></data>
+<data name="HeaderFLfoWaveform" xml:space="preserve"><value>Onda F-LFO</value></data>
+<data name="HeaderPLfoWaveform" xml:space="preserve"><value>Onda P-LFO</value></data>
+<data name="HeaderPLfoRate" xml:space="preserve"><value>Tasa P-LFO</value></data>
+<data name="HeaderPLfoDepth" xml:space="preserve"><value>Prof. P-LFO</value></data>
+<data name="HeaderALfoWaveform" xml:space="preserve"><value>Onda A-LFO</value></data>
+<data name="HeaderALfoRate" xml:space="preserve"><value>Tasa A-LFO</value></data>
+<data name="HeaderALfoDepth" xml:space="preserve"><value>Prof. A-LFO</value></data>
+<data name="DebugTabHeader" xml:space="preserve"><value>Depuración</value></data>
+<data name="DebugTabTooltip" xml:space="preserve"><value>Configuración de depuración para ayudar a investigar problemas.</value></data>
+<data name="LoggingGroupHeader" xml:space="preserve"><value>Registro</value></data>
+<data name="EnableLoggingCheckbox" xml:space="preserve"><value>Habilitar Registro</value></data>
+<data name="EnableLoggingTooltip" xml:space="preserve"><value>Exporta los registros de operación del complemento a un archivo. Útil para investigar problemas.</value></data>
+<data name="VerboseLoggingCheckbox" xml:space="preserve"><value>Habilitar Registro Detallado</value></data>
+<data name="VerboseLoggingTooltip" xml:space="preserve"><value>Genera registros más detallados.</value></data>
+<data name="LogFilePathLabel" xml:space="preserve"><value>Ruta Archivo de Registro</value></data>
+<data name="LogFilePathTooltip" xml:space="preserve"><value>Especifique la ruta de salida para el archivo de registro.</value></data>
+<data name="MaxLogSizeLabel" xml:space="preserve"><value>Tamaño Máx. Registro (KB)</value></data>
+<data name="MaxLogSizeTooltip" xml:space="preserve"><value>Especifique el tamaño máximo del archivo de registro en KB. Los registros antiguos se eliminan cuando se supera este límite.</value></data>
+<data name="LogLevelLabel" xml:space="preserve"><value>Nivel de Registro</value></data>
+<data name="LogLevelTooltip" xml:space="preserve"><value>Establece el nivel de detalle de los registros a generar. Rango de 1 (solo errores) a 5 (todo).</value></data>
+<data name="LogViewerHeader" xml:space="preserve"><value>Visor de Registros</value></data>
+<data name="ClearLogButton" xml:space="preserve"><value>Limpiar</value></data>
+<data name="ApiIntegrationGroupHeader" xml:space="preserve"><value>Integración API</value></data>
+<data name="EnableNamedPipeApiCheckbox" xml:space="preserve"><value>Habilitar API de Tubería Nombrada (para integración externa)</value></data>
+<data name="EnableNamedPipeApiTooltip" xml:space="preserve"><value>활성화하면 외부 애플리케이션에서 플러그인 기능에 액세스할 수 있습니다. 변경 후 YMM4를 다시 시작해야 합니다.</value></data>
+<data name="ExperimentalFeaturesGroupHeader" xml:space="preserve"><value>Funciones Experimentales</value></data>
+<data name="ShowMidiInfoWindowCheckbox" xml:space="preserve"><value>Mostrar ventana de información MIDI al añadir archivo MIDI</value></data>
+<data name="ShowMidiInfoWindowTooltip" xml:space="preserve"><value>활성화된 경우 MIDI 파일을 타임라인에 추가할 때 해당 파일의 내부 MIDI 정보를 표시하는 창이 자동으로 열립니다. 디버깅 및 상세 정보 확인에 유용합니다。</value></data>
+<data name="OpenMidiEditorCheckbox" xml:space="preserve"><value>Abrir editor MIDI al añadir archivo MIDI</value></data>
+<data name="OpenMidiEditorTooltip" xml:space="preserve"><value>활성화된 경우 MIDI 파일을 타임라인에 추가할 때 MIDI 편집기 창이 자동으로 열립니다.</value></data>
+<data name="ShowReleaseNotesTooltip" xml:space="preserve"><value>Mostrar notas de la versión.</value></data>
+<data name="OpenPluginDirectoryTooltip" xml:space="preserve"><value>Abrir la carpeta de complementos.</value></data>
+<data name="RefreshFilesTooltip" xml:space="preserve"><value>Actualizar las listas de archivos SFZ y SoundFont.</value></data>
+<data name="ReloadConfigTooltip" xml:space="preserve"><value>Recarga la configuración actual desde el archivo. Los cambios no guardados se descartarán.</value></data>
+<data name="Key_VersionChecking" xml:space="preserve"><value>Obteniendo información de la versión...</value></data>
+<data name="Key_VersionCurrent" xml:space="preserve"><value>Versión Actual: {0}</value></data>
+<data name="Key_VersionNewAvailable" xml:space="preserve"><value>새 버전 사용 가능: {0}</value></data>
+<data name="Key_VersionUpToDate" xml:space="preserve"><value>Su versión está actualizada.</value></data>
+<data name="Key_VersionCheckFailed" xml:space="preserve"><value>No se pudo recuperar la información de actualización.</value></data>
+<data name="MidiWriterHeader" xml:space="preserve"><value>MIDI Conversion Settings</value></data>
+<data name="MidiWriterQuantizeLabel" xml:space="preserve"><value>Quantize Resolution</value></data>
+<data name="MidiWriterQuantizeTooltip" xml:space="preserve"><value>Which note value to align MIDI event timing to. 'None' disables quantization.</value></data>
+<data name="MidiWriterPitchAlgoLabel" xml:space="preserve"><value>Pitch Detection Algorithm</value></data>
+<data name="MidiWriterPitchAlgoTooltip" xml:space="preserve"><value>Method to detect pitch from audio. YIN is more accurate but takes longer to process.</value></data>
+<data name="MidiWriterPitchSensitivityLabel" xml:space="preserve"><value>Pitch Sensitivity</value></data>
+<data name="MidiWriterPitchSensitivityTooltip" xml:space="preserve"><value>How much pitch stability is required. Higher values detect more notes. (0.0-1.0)</value></data>
+<data name="MidiWriterFftSizeLabel" xml:space="preserve"><value>FFT Size</value></data>
+<data name="MidiWriterFftSizeTooltip" xml:space="preserve"><value>Number of samples for frequency analysis. Larger values increase frequency resolution but decrease time resolution.</value></data>
+<data name="MidiWriterMinNoteDurationLabel" xml:space="preserve"><value>Min Note Duration (ms)</value></data>
+<data name="MidiWriterMinNoteDurationTooltip" xml:space="preserve"><value>Minimum length (ms) of detected MIDI notes. Excludes notes that are too short.</value></data>
+<data name="MidiWriterVelocitySensitivityLabel" xml:space="preserve"><value>Velocity Sensitivity</value></data>
+<data name="MidiWriterVelocitySensitivityTooltip" xml:space="preserve"><value>Degree to which volume changes are reflected in MIDI velocity. Higher values emphasize volume changes. (0.0-1.0)</value></data>
+<data name="MidiWriterNotesHeader" xml:space="preserve"><value>Notes</value></data>
+<data name="MidiWriterNote1" xml:space="preserve"><value>• This feature is experimental. Accuracy depends heavily on the audio content and settings.</value></data>
+<data name="MidiWriterNote2" xml:space="preserve"><value>• Monophonic instruments or voices are converted more accurately than chords or complex sources.</value></data>
+<data name="MidiWriterNote3" xml:space="preserve"><value>• Processing time increases proportionally to the audio length and FFT size.</value></data>
+<data name="MidiWriterConfigLoadError" xml:space="preserve"><value>Failed to load configuration view: {0}</value></data>
+<data name="UtauModelName" xml:space="preserve"><value>UTAU Voice</value></data>
+<data name="NewUtauModelName" xml:space="preserve"><value>New UTAU Model</value></data>
+<data name="DefaultUtauModelName" xml:space="preserve"><value>Default UTAU</value></data>
+<data name="UtauSettings" xml:space="preserve"><value>UTAU Settings</value></data>
+<data name="AddUtauFolder" xml:space="preserve"><value>Add UTAU Voice Folder</value></data>
+<data name="RemoveUtauFolder" xml:space="preserve"><value>Remove Selected Folder</value></data>
+<data name="UtauVoiceBaseFolders" xml:space="preserve"><value>UTAU Voice Base Folders</value></data>
+<data name="SelectUtauFolderTitle" xml:space="preserve"><value>Select the folder containing UTAU voices</value></data>
+<data name="RefreshUtauVoices" xml:space="preserve"><value>Refresh UTAU Voice List</value></data>
+<data name="NewSFModelName" xml:space="preserve"><value>New SF Model</value></data>
+<data name="NewSynthModelName" xml:space="preserve"><value>New Synth Model</value></data>
+<data name="Loading" xml:space="preserve"><value>Cargando...</value></data>
+</root>

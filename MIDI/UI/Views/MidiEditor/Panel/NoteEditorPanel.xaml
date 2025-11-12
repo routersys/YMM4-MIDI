@@ -1,0 +1,477 @@
+﻿<UserControl x:Class="MIDI.UI.Views.MidiEditor.Panel.NoteEditorPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MIDI.UI.Views.MidiEditor.Panel"
+             xmlns:converters="clr-namespace:MIDI.UI.Views.MidiEditor.Converters"
+             xmlns:models="clr-namespace:MIDI.Configuration.Models"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=local:NoteEditorPanel}"
+             d:DesignHeight="450" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/MidiEditorResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <converters:AllTrueToVisibleMultiConverter x:Key="AllTrueToVisibleMultiConverter"/>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:NullToBooleanConverter x:Key="NullToBooleanConverter"/>
+            <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
+            <Style x:Key="NoteExpanderStyle" TargetType="Expander" BasedOn="{StaticResource EditorGroupExpanderStyle}">
+                <Setter Property="Visibility" Value="Visible"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding DataContext.SelectedFlag, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullToBooleanConverter}}" Value="True">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding DataContext.IsMultipleNotesSelected, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="TimePartButtonStyle" TargetType="RepeatButton">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                <Setter Property="Width" Value="Auto"/>
+                <Setter Property="Height" Value="24"/>
+                <Setter Property="Padding" Value="4"/>
+                <Setter Property="Margin" Value="1"/>
+                <Setter Property="Template" Value="{StaticResource ToolButtonTemplate}"/>
+            </Style>
+
+            <Style x:Key="TimePartTextBoxStyle" TargetType="TextBox">
+                <Setter Property="TextAlignment" Value="Center"/>
+                <Setter Property="Height" Value="32"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+            </Style>
+
+            <Style x:Key="TimeDisplayToggleStyle" TargetType="ToggleButton">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" Opacity="0.8">
+                                <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Opacity" Value="1.0"/>
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                    <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                    <Setter TargetName="Bd" Property="Opacity" Value="1.0"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="5" DataContextChanged="NoteEditor_DataContextChanged">
+            <Expander Header="フラグ設定" IsExpanded="True">
+                <Expander.Style>
+                    <Style TargetType="Expander" BasedOn="{StaticResource EditorGroupExpanderStyle}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext.SelectedFlag, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullToBooleanConverter}}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Expander.Style>
+                <Grid Margin="10" DataContext="{Binding DataContext.SelectedFlag, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="70"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="名前" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" Height="32" Margin="5" VerticalContentAlignment="Center"/>
+
+                    <TextBlock Text="時間" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+                        <ToggleButton x:Name="FlagTimeEditToggle" Style="{StaticResource TimeDisplayToggleStyle}" HorizontalAlignment="Stretch" Height="32">
+                            <TextBlock Text="{Binding Time, Mode=OneWay, StringFormat={}{0:mm\\:ss\\.fff}}" ToolTip="クリックして編集" VerticalAlignment="Center" Margin="5,0"/>
+                        </ToggleButton>
+                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="5" Margin="0,5,0,0" Visibility="{Binding IsChecked, ElementName=FlagTimeEditToggle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Border.Background>
+                                <SolidColorBrush Color="{Binding DataContext.SelectedFlagColor, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue=Transparent}"/>
+                            </Border.Background>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <RepeatButton Command="{Binding IncrementTimeMinutesCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                    <TextBox Text="{Binding TimeMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                    <RepeatButton Command="{Binding DecrementTimeMinutesCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text=":" VerticalAlignment="Center" Margin="2,0" FontWeight="Bold"/>
+                                <StackPanel Grid.Column="2">
+                                    <RepeatButton Command="{Binding IncrementTimeSecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                    <TextBox Text="{Binding TimeSeconds, UpdateSourceTrigger=PropertyChanged, StringFormat=D2}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                    <RepeatButton Command="{Binding DecrementTimeSecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                </StackPanel>
+                                <TextBlock Grid.Column="3" Text="." VerticalAlignment="Center" Margin="2,0" FontWeight="Bold"/>
+                                <StackPanel Grid.Column="4">
+                                    <RepeatButton Command="{Binding IncrementTimeMillisecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                    <TextBox Text="{Binding TimeMilliseconds, UpdateSourceTrigger=PropertyChanged, StringFormat=D3}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                    <RepeatButton Command="{Binding DecrementTimeMillisecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock Text="Tick" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <TextBox Text="{Binding Ticks, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Height="32" Margin="5" VerticalContentAlignment="Center"/>
+
+                    <Button Grid.Row="3" Grid.ColumnSpan="2" Content="最寄りのBPM変更にスナップ" Command="{Binding DataContext.SnapFlagToNearestTempoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="5" Style="{StaticResource RichButtonStyle}"/>
+                </Grid>
+            </Expander>
+
+            <Expander Header="複数ノートの編集" IsExpanded="True" DataContext="{Binding DataContext.MultiNoteEditor, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                <Expander.Style>
+                    <Style TargetType="Expander" BasedOn="{StaticResource EditorGroupExpanderStyle}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext.IsMultipleNotesSelected, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Expander.Style>
+                <StackPanel Margin="10">
+                    <GroupBox Header="長さの相対変更" Margin="0,0,0,10">
+                        <StackPanel>
+                            <StackPanel Margin="5">
+                                <TextBlock Text="時間で変更:" />
+                                <ToggleButton x:Name="MultiDurationEditToggle" Style="{StaticResource TimeDisplayToggleStyle}" HorizontalAlignment="Stretch" Height="32">
+                                    <TextBlock Text="{Binding DurationChange, Mode=OneWay, StringFormat={}{0:mm\\:ss\\.fff}}" ToolTip="クリックして編集" VerticalAlignment="Center" Margin="5,0"/>
+                                </ToggleButton>
+                                <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="5" Margin="0,5,0,0" Visibility="{Binding IsChecked, ElementName=MultiDurationEditToggle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <RepeatButton Command="{Binding IncrementDurationMinutesCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                                <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                            </RepeatButton>
+                                            <TextBox Text="{Binding DurationChangeMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                            <RepeatButton Command="{Binding DecrementDurationMinutesCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                                <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                            </RepeatButton>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text=":" VerticalAlignment="Center" Margin="2,0" FontWeight="Bold"/>
+                                        <StackPanel Grid.Column="2">
+                                            <RepeatButton Command="{Binding IncrementDurationSecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                                <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                            </RepeatButton>
+                                            <TextBox Text="{Binding DurationChangeSeconds, UpdateSourceTrigger=PropertyChanged, StringFormat=D2}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                            <RepeatButton Command="{Binding DecrementDurationSecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                                <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                            </RepeatButton>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="3" Text="." VerticalAlignment="Center" Margin="2,0" FontWeight="Bold"/>
+                                        <StackPanel Grid.Column="4">
+                                            <RepeatButton Command="{Binding IncrementDurationMillisecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                                <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                            </RepeatButton>
+                                            <TextBox Text="{Binding DurationChangeMilliseconds, UpdateSourceTrigger=PropertyChanged, StringFormat=D3}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                            <RepeatButton Command="{Binding DecrementDurationMillisecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                                <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                            </RepeatButton>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Margin="5">
+                                <TextBlock Text="Tickで変更:" />
+                                <TextBox Text="{Binding DurationChangeTicks, UpdateSourceTrigger=PropertyChanged}" Height="32" VerticalContentAlignment="Center"/>
+                            </StackPanel>
+                            <Button Content="長さ変更を適用" Command="{Binding ApplyDurationChangeCommand}" Style="{StaticResource RichButtonStyle}" Margin="5"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="ベロシティ一括変更" Margin="0,0,0,10">
+                        <StackPanel Margin="5">
+                            <Slider Value="{Binding VelocityChange, Mode=TwoWay}" Minimum="-127" Maximum="127" IsSnapToTickEnabled="True" TickFrequency="1" />
+                            <Button Content="ベロシティ変更を適用" Command="{Binding ApplyVelocityChangeCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="チャンネル一括変更" Margin="0,0,0,10">
+                        <StackPanel Margin="5">
+                            <Slider Value="{Binding ChannelChange, Mode=TwoWay}" Minimum="1" Maximum="16" IsSnapToTickEnabled="True" TickFrequency="1" />
+                            <Button Content="チャンネル変更を適用" Command="{Binding ApplyChannelChangeCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="一括操作" Margin="0,0,0,10">
+                        <StackPanel Margin="5">
+                            <Button Content="レガート" Command="{Binding ApplyLegatoCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,0,0,5"/>
+                            <TextBlock Text="スタッカート強度(%)"/>
+                            <Slider Value="{Binding StaccatoPercentage, Mode=TwoWay}" Minimum="0" Maximum="100" IsSnapToTickEnabled="True" TickFrequency="1" />
+                            <Button Content="スタッカート" Command="{Binding ApplyStaccatoCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                </StackPanel>
+            </Expander>
+
+            <Expander Header="基本" IsExpanded="True" Style="{StaticResource NoteExpanderStyle}" DataContext="{Binding DataContext.SelectedNote, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                <Grid Margin="10" IsEnabled="{Binding Path=., Converter={StaticResource NullToBooleanConverter}, FallbackValue=False}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="70"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="ノート" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <TextBox Text="{Binding NoteName, Mode=OneWay}" Grid.Row="0" Grid.Column="1" IsReadOnly="True" Height="32" Margin="5" VerticalContentAlignment="Center"/>
+
+                    <TextBlock Text="ノート番号"  Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <Grid Grid.Row="1" Grid.Column="1" Margin="5" Style="{StaticResource EditableSliderStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider Value="{Binding NoteNumber, Mode=TwoWay}" Minimum="0" Maximum="127" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center" Style="{StaticResource RichSliderStyle}"/>
+                            <Grid Grid.Column="1" MinWidth="35">
+                                <TextBlock Text="{Binding NoteNumber}" VerticalAlignment="Center" HorizontalAlignment="Right" MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" ToolTip="ダブルクリックして編集"/>
+                                <TextBox Text="{Binding NoteNumber, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" LostFocus="TextBox_LostFocus" KeyDown="TextBox_KeyDown" MinWidth="35" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+
+                    <TextBlock Text="チャンネル" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <Grid Grid.Row="2" Grid.Column="1" Margin="5" Style="{StaticResource EditableSliderStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider Value="{Binding Channel, Mode=TwoWay}" Minimum="1" Maximum="16" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center" Style="{StaticResource RichSliderStyle}"/>
+                            <Grid Grid.Column="1" MinWidth="35">
+                                <TextBlock Text="{Binding Channel}" VerticalAlignment="Center" HorizontalAlignment="Right" MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" ToolTip="ダブルクリックして編集"/>
+                                <TextBox Text="{Binding Channel, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" LostFocus="TextBox_LostFocus" KeyDown="TextBox_KeyDown" MinWidth="35" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+
+                    <TextBlock Text="ベロシティ" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <Grid Grid.Row="3" Grid.Column="1" Margin="5" Style="{StaticResource EditableSliderStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider Value="{Binding Velocity, Mode=TwoWay}" Minimum="0" Maximum="127" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center" Style="{StaticResource RichSliderStyle}"/>
+                            <Grid Grid.Column="1" MinWidth="35">
+                                <TextBlock Text="{Binding Velocity}" VerticalAlignment="Center" HorizontalAlignment="Right" MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" ToolTip="ダブルクリックして編集"/>
+                                <TextBox Text="{Binding Velocity, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" LostFocus="TextBox_LostFocus" KeyDown="TextBox_KeyDown" MinWidth="35" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Expander>
+
+            <Expander Header="タイミング" IsExpanded="True" Style="{StaticResource NoteExpanderStyle}" DataContext="{Binding DataContext.SelectedNote, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                <Grid Margin="10" IsEnabled="{Binding Path=., Converter={StaticResource NullToBooleanConverter}, FallbackValue=False}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="70"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="開始時間" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="5">
+                        <ToggleButton x:Name="StartTimeEditToggle" Style="{StaticResource TimeDisplayToggleStyle}" HorizontalAlignment="Stretch" Height="32">
+                            <TextBlock Text="{Binding StartTime, Mode=OneWay, StringFormat={}{0:mm\\:ss\\.fff}}" ToolTip="クリックして編集" VerticalAlignment="Center" Margin="5,0"/>
+                        </ToggleButton>
+                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="5" Margin="0,5,0,0" Visibility="{Binding IsChecked, ElementName=StartTimeEditToggle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <RepeatButton Command="{Binding IncrementStartTimeMinutesCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                    <TextBox Text="{Binding StartTimeMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                    <RepeatButton Command="{Binding DecrementStartTimeMinutesCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text=":" VerticalAlignment="Center" Margin="2,0" FontWeight="Bold"/>
+                                <StackPanel Grid.Column="2">
+                                    <RepeatButton Command="{Binding IncrementStartTimeSecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                    <TextBox Text="{Binding StartTimeSeconds, UpdateSourceTrigger=PropertyChanged, StringFormat=D2}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                    <RepeatButton Command="{Binding DecrementStartTimeSecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                </StackPanel>
+                                <TextBlock Grid.Column="3" Text="." VerticalAlignment="Center" Margin="2,0" FontWeight="Bold"/>
+                                <StackPanel Grid.Column="4">
+                                    <RepeatButton Command="{Binding IncrementStartTimeMillisecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                    <TextBox Text="{Binding StartTimeMilliseconds, UpdateSourceTrigger=PropertyChanged, StringFormat=D3}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                    <RepeatButton Command="{Binding DecrementStartTimeMillisecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock Text="開始(Tick)" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <TextBox Text="{Binding StartTicks, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Height="32" Margin="5" VerticalContentAlignment="Center"/>
+
+                    <TextBlock Text="長さ" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="5">
+                        <ToggleButton x:Name="DurationEditToggle" Style="{StaticResource TimeDisplayToggleStyle}" HorizontalAlignment="Stretch" Height="32">
+                            <TextBlock Text="{Binding DurationInSeconds, Mode=OneWay, StringFormat={}{0:F3}s}" ToolTip="クリックして編集" VerticalAlignment="Center" Margin="5,0"/>
+                        </ToggleButton>
+                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="5" Margin="0,5,0,0" Visibility="{Binding IsChecked, ElementName=DurationEditToggle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <RepeatButton Command="{Binding IncrementDurationMinutesCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                    <TextBox Text="{Binding DurationMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                    <RepeatButton Command="{Binding DecrementDurationMinutesCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text=":" VerticalAlignment="Center" Margin="2,0" FontWeight="Bold"/>
+                                <StackPanel Grid.Column="2">
+                                    <RepeatButton Command="{Binding IncrementDurationSecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                    <TextBox Text="{Binding DurationSeconds, UpdateSourceTrigger=PropertyChanged, StringFormat=D2}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                    <RepeatButton Command="{Binding DecrementDurationSecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                </StackPanel>
+                                <TextBlock Grid.Column="3" Text="." VerticalAlignment="Center" Margin="2,0" FontWeight="Bold"/>
+                                <StackPanel Grid.Column="4">
+                                    <RepeatButton Command="{Binding IncrementDurationMillisecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 4,0 L 8,4 L 0,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                    <TextBox Text="{Binding DurationMilliseconds, UpdateSourceTrigger=PropertyChanged, StringFormat=D3}" Style="{StaticResource TimePartTextBoxStyle}"/>
+                                    <RepeatButton Command="{Binding DecrementDurationMillisecondsCommand}" Style="{StaticResource TimePartButtonStyle}">
+                                        <Path Data="M 0,0 L 8,0 L 4,4 Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RepeatButton}}" Stretch="Fill" Width="8" Height="8"/>
+                                    </RepeatButton>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock Text="長さ(Tick)" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <TextBox Text="{Binding DurationTicks, Mode=TwoWay,  UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Height="32" Margin="5" VerticalContentAlignment="Center"/>
+                </Grid>
+            </Expander>
+
+            <Expander Header="ピッチ" IsExpanded="True" DataContext="{Binding DataContext.SelectedNote, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                <Expander.Style>
+                    <Style TargetType="Expander" BasedOn="{StaticResource EditorGroupExpanderStyle}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding DataContext.SelectedFlag, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}" />
+                                    <Condition Binding="{Binding DataContext.TuningSystem, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="{x:Static models:TuningSystemType.Microtonal}" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Visibility" Value="Visible" />
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Expander.Style>
+                <Grid Margin="10" IsEnabled="{Binding Path=., Converter={StaticResource NullToBooleanConverter}, FallbackValue=False}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="70"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Cents" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+                    <Grid Grid.Column="1" Margin="5" Style="{StaticResource EditableSliderStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider Value="{Binding CentOffset, Mode=TwoWay}" Minimum="-50" Maximum="50" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center" Style="{StaticResource RichSliderStyle}"/>
+                            <Grid Grid.Column="1" MinWidth="35">
+                                <TextBlock Text="{Binding CentOffset}" VerticalAlignment="Center" HorizontalAlignment="Right" MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" ToolTip="ダブルクリックして編集"/>
+                                <TextBox Text="{Binding CentOffset, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" LostFocus="TextBox_LostFocus" KeyDown="TextBox_KeyDown" MinWidth="35" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Expander>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

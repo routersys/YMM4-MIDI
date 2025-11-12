@@ -1,0 +1,76 @@
+﻿<Window x:Class="MIDI.UI.Views.MidiEditor.Modals.VelocityDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MIDI.UI.ViewModels.MidiEditor.Modals"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=local:VelocityViewModel, IsDesignTimeCreatable=True}"
+        Title="ベロシティの変更" Width="400" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+        Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+        ResizeMode="NoResize" Topmost="True">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/MidiEditorResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <RadioButton GroupName="VelocityMode" Content="固定値に設定" IsChecked="{Binding IsFixedValueMode}" Margin="5"/>
+        <Grid Grid.Row="1" IsEnabled="{Binding IsFixedValueMode}" Margin="25,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Slider Value="{Binding FixedValue}" Minimum="1" Maximum="127" IsSnapToTickEnabled="True" TickFrequency="1"/>
+            <Grid Grid.Column="1" MinWidth="35">
+                <TextBlock Text="{Binding FixedValue}" VerticalAlignment="Center" HorizontalAlignment="Right" MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" ToolTip="ダブルクリックして編集"/>
+                <TextBox Text="{Binding FixedValue, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" LostFocus="TextBox_LostFocus" KeyDown="TextBox_KeyDown" MinWidth="35" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+            </Grid>
+        </Grid>
+
+        <RadioButton Grid.Row="2" GroupName="VelocityMode" Content="徐々に変化" IsChecked="{Binding IsRampMode}" Margin="5"/>
+        <Grid Grid.Row="3" IsEnabled="{Binding IsRampMode}" Margin="25,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Content="開始:" VerticalAlignment="Center"/>
+            <Slider Grid.Row="0" Grid.Column="1" Value="{Binding RampStartValue}" Minimum="1" Maximum="127" IsSnapToTickEnabled="True" TickFrequency="1" Margin="5"/>
+            <Grid Grid.Row="0" Grid.Column="2" MinWidth="35">
+                <TextBlock Text="{Binding RampStartValue}" VerticalAlignment="Center" HorizontalAlignment="Right" MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" ToolTip="ダブルクリックして編集"/>
+                <TextBox Text="{Binding RampStartValue, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" LostFocus="TextBox_LostFocus" KeyDown="TextBox_KeyDown" MinWidth="35" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+            </Grid>
+            <Label Grid.Row="0" Grid.Column="3" Content="終了:" VerticalAlignment="Center"/>
+            <Slider Grid.Row="0" Grid.Column="4" Value="{Binding RampEndValue}" Minimum="1" Maximum="127" IsSnapToTickEnabled="True" TickFrequency="1" Margin="5"/>
+            <Grid Grid.Row="0" Grid.Column="5" MinWidth="35">
+                <TextBlock Text="{Binding RampEndValue}" VerticalAlignment="Center" HorizontalAlignment="Right" MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" ToolTip="ダブルクリックして編集"/>
+                <TextBox Text="{Binding RampEndValue, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" LostFocus="TextBox_LostFocus" KeyDown="TextBox_KeyDown" MinWidth="35" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+            </Grid>
+        </Grid>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button Content="キャンセル" IsCancel="True" Style="{StaticResource RichButtonStyle}" Margin="0,0,5,0"/>
+            <Button Content="OK" IsDefault="True" Click="OkButton_Click" Style="{StaticResource RichButtonStyle}"/>
+        </StackPanel>
+    </Grid>
+</Window>
