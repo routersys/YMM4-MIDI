@@ -1124,7 +1124,6 @@ namespace MIDI.UI.ViewModels
             return new Int32Rect(newX, newY, newWidth, newHeight);
         }
 
-
         private void RenderRect(Int32Rect rect)
         {
             if (PianoRollBitmap == null || _midiFile == null) return;
@@ -1140,6 +1139,8 @@ namespace MIDI.UI.ViewModels
                 (int)Math.Ceiling(wpfRect.Width),
                 (int)Math.Ceiling(wpfRect.Height)
             );
+
+            if (rect.Width <= 0 || rect.Height <= 0) return;
 
             try
             {
