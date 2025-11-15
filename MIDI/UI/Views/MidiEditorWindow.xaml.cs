@@ -478,9 +478,7 @@ namespace MIDI.UI.Views
                 }
                 else
                 {
-                    var noteUnderCursor = vm.AllNotes.FirstOrDefault(n =>
-                        currentPosition.X >= n.X && currentPosition.X <= n.X + n.Width &&
-                        currentPosition.Y >= n.Y && currentPosition.Y <= n.Y + n.Height);
+                    var noteUnderCursor = vm.HitTestNote(currentPosition);
 
                     var mode = vm.MouseHandler.GetDragModeForPosition(currentPosition, noteUnderCursor);
                     switch (mode)

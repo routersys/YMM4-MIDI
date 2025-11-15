@@ -30,6 +30,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using NAudioMidi = NAudio.Midi;
 using MessagePack;
+using System.Runtime.InteropServices;
+using System.Collections.Concurrent;
 
 namespace MIDI.UI.ViewModels
 {
@@ -70,7 +72,6 @@ namespace MIDI.UI.ViewModels
         private HashSet<int> _currentlyLitKeys = new HashSet<int>();
         public Dictionary<int, PianoKeyViewModel> PianoKeysMap { get; } = new Dictionary<int, PianoKeyViewModel>();
 
-        private readonly DispatcherTimer _scrollTimer;
         private double _horizontalOffset, _viewportWidth, _verticalOffset, _viewportHeight;
         private readonly DispatcherTimer _seekDelayTimer;
 
@@ -89,14 +90,12 @@ namespace MIDI.UI.ViewModels
         public MidiEditorSettings EditorSettings => MidiEditorSettings.Default;
 
         public ObservableCollection<NoteViewModel> AllNotes { get; } = new ObservableCollection<NoteViewModel>();
-        public ObservableCollection<NoteViewModel> VisibleNotes { get; } = new ObservableCollection<NoteViewModel>();
         public ObservableCollection<NoteViewModel> SelectedNotes { get; } = new ObservableCollection<NoteViewModel>();
+        public ObservableCollection<NoteViewModel> EditingNotes { get; } = new ObservableCollection<NoteViewModel>();
         private List<NoteViewModel> _clipboard = new List<NoteViewModel>();
 
         public ObservableCollection<PianoKeyViewModel> PianoKeys { get; } = new ObservableCollection<PianoKeyViewModel>();
         public ObservableCollection<TimeRulerViewModel> TimeRuler { get; } = new ObservableCollection<TimeRulerViewModel>();
-        public ObservableCollection<GridLineViewModel> GridLines { get; } = new ObservableCollection<GridLineViewModel>();
-        public ObservableCollection<GridLineViewModel> HorizontalLines { get; } = new ObservableCollection<GridLineViewModel>();
         public ObservableCollection<TempoEventViewModel> TempoEvents { get; } = new ObservableCollection<TempoEventViewModel>();
         public ObservableCollection<ControlChangeEventViewModel> ControlChangeEvents { get; } = new ObservableCollection<ControlChangeEventViewModel>();
         public Array ControllerTypes => Enum.GetValues(typeof(NAudioMidi.MidiController));
@@ -391,7 +390,7 @@ namespace MIDI.UI.ViewModels
                     MidiEditorSettings.Default.Save();
                     OnPropertyChanged();
                     RefreshPianoKeys();
-                    UpdateHorizontalLines();
+                    RequestRedraw(true);
                 }
             }
         }
@@ -405,17 +404,12 @@ namespace MIDI.UI.ViewModels
             {
                 if (SetField(ref _horizontalZoom, value))
                 {
-                    OnPropertyChanged(nameof(PianoRollWidth));
+                    UpdatePianoRollSize();
                     OnPropertyChanged(nameof(PlaybackCursorPosition));
-                    foreach (var note in AllNotes)
-                    {
-                        note.UpdateHorizontal();
-                    }
                     foreach (var flag in Flags)
                     {
                         flag.OnPropertyChanged(nameof(FlagViewModel.X));
                     }
-                    UpdateVisibleNotes();
                     if (!IsSliderDragging)
                     {
                         UpdateTimeRuler();
@@ -423,6 +417,7 @@ namespace MIDI.UI.ViewModels
                     OnPropertyChanged(nameof(LoopStartX));
                     OnPropertyChanged(nameof(LoopDurationWidth));
                     OnPropertyChanged(nameof(IsZoomed));
+                    RequestRedraw(true);
                 }
             }
         }
@@ -433,14 +428,9 @@ namespace MIDI.UI.ViewModels
             {
                 if (SetField(ref _verticalZoom, value))
                 {
-                    OnPropertyChanged(nameof(PianoRollHeight));
-                    foreach (var note in AllNotes)
-                    {
-                        note.UpdateVertical();
-                    }
-                    UpdateVisibleNotes();
-                    UpdateHorizontalLines();
+                    UpdatePianoRollSize();
                     OnPropertyChanged(nameof(IsZoomed));
+                    RequestRedraw(true);
                 }
             }
         }
@@ -532,14 +522,9 @@ namespace MIDI.UI.ViewModels
             set => _midiInputService.SelectedMidiInputDevice = value;
         }
 
-        public double PianoRollWidth
-        {
-            get
-            {
-                if (_midiFile == null) return 3000;
-                return Math.Max(3000, MaxTime.TotalSeconds * HorizontalZoom);
-            }
-        }
+        public double PianoRollWidth { get; private set; } = 3000;
+        public double PianoRollHeight { get; private set; } = 2560;
+
 
         public int MaxNoteNumber => TuningSystem switch
         {
@@ -553,8 +538,26 @@ namespace MIDI.UI.ViewModels
             _ => 1.0,
         };
 
+        public double NoteHeight => 20.0 * VerticalZoom / KeyYScale;
 
-        public double PianoRollHeight => (MaxNoteNumber + 1) * 20.0 * VerticalZoom / KeyYScale;
+
+        private void UpdatePianoRollSize()
+        {
+            if (_midiFile == null)
+            {
+                PianoRollWidth = 3000;
+            }
+            else
+            {
+                PianoRollWidth = Math.Max(3000, MaxTime.TotalSeconds * HorizontalZoom);
+            }
+            PianoRollHeight = (MaxNoteNumber + 1) * 20.0 * VerticalZoom / KeyYScale;
+
+            OnPropertyChanged(nameof(PianoRollWidth));
+            OnPropertyChanged(nameof(PianoRollHeight));
+
+            InitializeBitmap();
+        }
 
 
         public double PlaybackCursorPosition => _playbackService.GetInterpolatedTime().TotalSeconds * HorizontalZoom;
@@ -594,6 +597,7 @@ namespace MIDI.UI.ViewModels
                     MidiEditorSettings.Default.Save();
                     OnPropertyChanged();
                     UpdateTimeRuler();
+                    RequestRedraw(true);
                 }
             }
         }
@@ -633,9 +637,46 @@ namespace MIDI.UI.ViewModels
             set => SetField(ref _selectionStatusText, value);
         }
 
+        private bool _isColorizedByChannel = false;
+        public bool IsColorizedByChannel => _isColorizedByChannel;
+
+        private WriteableBitmap? _pianoRollBitmap;
+        public WriteableBitmap? PianoRollBitmap
+        {
+            get => _pianoRollBitmap;
+            set => SetField(ref _pianoRollBitmap, value);
+        }
+
+        private readonly object _renderLock = new object();
+        private readonly ConcurrentQueue<Rect> _dirtyRects = new ConcurrentQueue<Rect>();
+        private readonly DispatcherTimer _renderTimer;
+        private bool _fullRedrawRequested = true;
+        private Int32Rect _visibleRect;
+
+        private Color _gridColor;
+        private Color _horizontalLineColor;
+        private Color _backgroundColor;
+
+        private const int CHUNK_SIZE = 256;
+        private Dictionary<(int, int), WriteableBitmap> _bitmapChunks = new Dictionary<(int, int), WriteableBitmap>();
+        private Dictionary<(int, int), bool> _chunkDirtyFlags = new Dictionary<(int, int), bool>();
+        private readonly object _chunkLock = new object();
+        private readonly TaskScheduler _renderScheduler;
 
         public MidiEditorViewModel(string? filePath)
         {
+            var renderThread = new Thread(() =>
+            {
+                Dispatcher.Run();
+            })
+            {
+                Name = "RenderThread",
+                IsBackground = true
+            };
+            renderThread.Start();
+            _renderScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+
             _filePath = filePath ?? "ファイルが選択されていません";
 
             MidiEditorSettings.Default.Note.PropertyChanged += Editor_Note_PropertyChanged;
@@ -695,8 +736,12 @@ namespace MIDI.UI.ViewModels
             {
                 if (note != null && !note.IsSelected && !isCtrlPressed)
                 {
-                    foreach (var n in AllNotes) n.IsSelected = false;
+                    var oldSelections = SelectedNotes.ToList();
                     SelectedNotes.Clear();
+                    foreach (var n in oldSelections)
+                    {
+                        n.IsSelected = false;
+                    }
                 }
 
 
@@ -713,6 +758,7 @@ namespace MIDI.UI.ViewModels
                     }
                 }
                 SelectedNote = SelectedNotes.FirstOrDefault();
+                (DeleteNoteCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 (DeleteNoteCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 (DeleteSelectedNotesCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 (QuantizeCommand as RelayCommand)?.RaiseCanExecuteChanged();
@@ -752,12 +798,6 @@ namespace MIDI.UI.ViewModels
             };
             _zoomTimer.Tick += OnZoomTimerTick;
 
-            _scrollTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
-            _scrollTimer.Tick += (s, e) => {
-                _scrollTimer.Stop();
-                UpdateVisibleNotes();
-            };
-
             _seekDelayTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
             _seekDelayTimer.Tick += (s, e) => {
                 _seekDelayTimer.Stop();
@@ -767,6 +807,16 @@ namespace MIDI.UI.ViewModels
             _backupTimer = new DispatcherTimer();
             _backupTimer.Tick += OnBackupTimerTick;
             UpdateBackupTimer();
+
+            _renderTimer = new DispatcherTimer(DispatcherPriority.Render)
+            {
+                Interval = TimeSpan.FromMilliseconds(16)
+            };
+            _renderTimer.Tick += RenderTimer_Tick;
+            _renderTimer.Start();
+
+            UpdateColors();
+            InitializeBitmap();
 
             NewCommand = new RelayCommand(_ => CreateNewFile());
             LoadMidiCommand = new RelayCommand(_ => LoadMidiFile());
@@ -927,6 +977,397 @@ namespace MIDI.UI.ViewModels
             LoadSoundFonts();
         }
 
+        private void UpdateColors()
+        {
+            var res = Application.Current.Resources;
+            _backgroundColor = ((SolidColorBrush)res[SystemColors.WindowBrushKey]).Color;
+            _gridColor = ((SolidColorBrush)res[SystemColors.ControlDarkBrushKey]).Color;
+            _horizontalLineColor = ((SolidColorBrush)res[SystemColors.ControlDarkBrushKey]).Color;
+        }
+
+        private void InitializeBitmap()
+        {
+            lock (_renderLock)
+            {
+                int width = (int)Math.Ceiling(PianoRollWidth);
+                int height = (int)Math.Ceiling(PianoRollHeight);
+
+                if (width <= 0 || height <= 0)
+                {
+                    width = 3000;
+                    height = 2560;
+                }
+
+                if (PianoRollBitmap == null || PianoRollBitmap.PixelWidth != width || PianoRollBitmap.PixelHeight != height)
+                {
+                    PianoRollBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Pbgra32, null);
+                }
+
+                _fullRedrawRequested = true;
+                _dirtyRects.Clear();
+                RequestRedraw(true);
+            }
+        }
+
+        private void RenderTimer_Tick(object? sender, EventArgs e)
+        {
+            if (PianoRollBitmap == null) return;
+
+            bool needsFullRedraw;
+            lock (_renderLock)
+            {
+                needsFullRedraw = _fullRedrawRequested;
+                _fullRedrawRequested = false;
+            }
+
+            if (needsFullRedraw)
+            {
+                UpdateVisibleRect();
+                var preloadRect = GetPreloadRect(_visibleRect);
+                RenderRect(preloadRect);
+            }
+            else
+            {
+                var dirtyRects = new List<Rect>();
+                while (_dirtyRects.TryDequeue(out var rect))
+                {
+                    dirtyRects.Add(rect);
+                }
+
+                if (dirtyRects.Any())
+                {
+                    Rect combinedRect = dirtyRects[0];
+                    for (int i = 1; i < dirtyRects.Count; i++)
+                    {
+                        combinedRect.Union(dirtyRects[i]);
+                    }
+
+                    Int32Rect intRect = new Int32Rect(
+                        (int)Math.Floor(combinedRect.X),
+                        (int)Math.Floor(combinedRect.Y),
+                        (int)Math.Ceiling(combinedRect.Width),
+                        (int)Math.Ceiling(combinedRect.Height)
+                    );
+                    RenderRect(intRect);
+                }
+            }
+        }
+
+        private Rect GetNoteRectWPF(NoteViewModel note)
+        {
+            double x = note.StartTime.TotalSeconds * HorizontalZoom;
+            double y = (MaxNoteNumber - note.NoteNumber - 1) * 20.0 * VerticalZoom / KeyYScale + (note.CentOffset / 100.0 * 20.0 * VerticalZoom / KeyYScale);
+            double width = Math.Max(1.0, note.Duration.TotalSeconds * HorizontalZoom);
+            double height = 20.0 * VerticalZoom / KeyYScale;
+
+            return new Rect(x, y, width, height);
+        }
+
+        private Int32Rect GetNoteRect(NoteViewModel note)
+        {
+            Rect rect = GetNoteRectWPF(note);
+            return new Int32Rect(
+                (int)Math.Floor(rect.X),
+                (int)Math.Floor(rect.Y),
+                (int)Math.Ceiling(rect.Width),
+                (int)Math.Ceiling(rect.Height)
+            );
+        }
+
+        public void RequestNoteRedraw(NoteViewModel note)
+        {
+            Rect rect = GetNoteRectWPF(note);
+            rect = new Rect(rect.X - 2, rect.Y - 2, rect.Width + 4, rect.Height + 4);
+            _dirtyRects.Enqueue(rect);
+        }
+
+        private void RequestRedraw(bool fullRedraw)
+        {
+            lock (_renderLock)
+            {
+                _fullRedrawRequested = _fullRedrawRequested || fullRedraw;
+            }
+        }
+
+        private Int32Rect GetPreloadRect(Int32Rect visible)
+        {
+            int preloadWidth = (int)_viewportWidth;
+            int newX = Math.Max(0, visible.X - preloadWidth);
+            int newWidth = visible.Width + 2 * preloadWidth;
+
+            if (newX + newWidth > PianoRollWidth)
+            {
+                newWidth = (int)PianoRollWidth - newX;
+            }
+
+            int newY = 0;
+            int newHeight = (int)PianoRollHeight;
+
+            return new Int32Rect(newX, newY, newWidth, newHeight);
+        }
+
+
+        private void RenderRect(Int32Rect rect)
+        {
+            if (PianoRollBitmap == null || _midiFile == null) return;
+
+            Rect wpfRect = new Rect(rect.X, rect.Y, rect.Width, rect.Height);
+            wpfRect.Intersect(new Rect(0, 0, PianoRollBitmap.PixelWidth, PianoRollBitmap.PixelHeight));
+
+            if (wpfRect.IsEmpty) return;
+
+            rect = new Int32Rect(
+                (int)Math.Floor(wpfRect.X),
+                (int)Math.Floor(wpfRect.Y),
+                (int)Math.Ceiling(wpfRect.Width),
+                (int)Math.Ceiling(wpfRect.Height)
+            );
+
+            try
+            {
+                PianoRollBitmap.Lock();
+                unsafe
+                {
+                    IntPtr pBackBuffer = PianoRollBitmap.BackBuffer;
+                    int stride = PianoRollBitmap.BackBufferStride;
+
+                    byte* pBits = (byte*)pBackBuffer.ToPointer();
+
+                    DrawBackground(pBits, stride, rect);
+                    DrawGrid(pBits, stride, rect);
+                    DrawNotes(pBits, stride, rect);
+                }
+                PianoRollBitmap.AddDirtyRect(rect);
+            }
+            finally
+            {
+                PianoRollBitmap.Unlock();
+            }
+        }
+
+        private unsafe void DrawBackground(byte* pBits, int stride, Int32Rect rect)
+        {
+            int b = _backgroundColor.B;
+            int g = _backgroundColor.G;
+            int r = _backgroundColor.R;
+            int a = _backgroundColor.A;
+
+            for (int y = rect.Y; y < rect.Y + rect.Height; y++)
+            {
+                int* pRow = (int*)(pBits + y * stride) + rect.X;
+                for (int x = 0; x < rect.Width; x++)
+                {
+                    *pRow = (a << 24) | (r << 16) | (g << 8) | b;
+                    pRow++;
+                }
+            }
+        }
+
+        private unsafe void DrawGrid(byte* pBits, int stride, Int32Rect rect)
+        {
+            if (_midiFile == null) return;
+
+            int gridR = _gridColor.R;
+            int gridG = _gridColor.G;
+            int gridB = _gridColor.B;
+            int gridA = _gridColor.A;
+            int gridColorInt = (gridA << 24) | (gridR << 16) | (gridG << 8) | gridB;
+
+            var tempoMap = MidiProcessor.ExtractTempoMap(_midiFile, MidiConfiguration.Default);
+            double ticksPerGrid = GetTicksPerGrid();
+            if (ticksPerGrid <= 0) return;
+
+            long startTicks = TimeToTicks(TimeSpan.FromSeconds(rect.X / HorizontalZoom));
+            long endTicks = TimeToTicks(TimeSpan.FromSeconds((rect.X + rect.Width) / HorizontalZoom));
+
+            long startGridLine = (long)Math.Floor(startTicks / ticksPerGrid);
+
+            for (long ticks = startGridLine * (long)ticksPerGrid; ; ticks += (long)ticksPerGrid)
+            {
+                if (ticks < 0) continue;
+                var time = MidiProcessor.TicksToTimeSpan(ticks, _midiFile.DeltaTicksPerQuarterNote, tempoMap);
+                int x = (int)(time.TotalSeconds * HorizontalZoom);
+
+                if (x > rect.X + rect.Width) break;
+                if (x >= rect.X)
+                {
+                    for (int y = rect.Y; y < rect.Y + rect.Height; y++)
+                    {
+                        if ((y / 2) % 2 == 0)
+                        {
+                            int* pPixel = (int*)(pBits + y * stride + x * 4);
+                            *pPixel = gridColorInt;
+                        }
+                    }
+                }
+            }
+
+            int hLineR = _horizontalLineColor.R;
+            int hLineG = _horizontalLineColor.G;
+            int hLineB = _horizontalLineColor.B;
+            int hLineA = _horizontalLineColor.A;
+            int hLineColorInt = (hLineA << 24) | (hLineR << 16) | (hLineG << 8) | hLineB;
+
+            double noteHeight = 20.0 * VerticalZoom / KeyYScale;
+            int startNote = MaxNoteNumber - (int)Math.Floor((rect.Y + rect.Height) / noteHeight);
+            int endNote = MaxNoteNumber - (int)Math.Floor(rect.Y / noteHeight);
+
+            for (int i = startNote; i <= endNote; i++)
+            {
+                int y = (int)((MaxNoteNumber - i) * noteHeight);
+                if (y >= rect.Y && y < rect.Y + rect.Height)
+                {
+                    int* pRow = (int*)(pBits + y * stride) + rect.X;
+                    for (int x = 0; x < rect.Width; x++)
+                    {
+                        *pRow = hLineColorInt;
+                        pRow++;
+                    }
+                }
+            }
+        }
+
+        private unsafe void DrawNotes(byte* pBits, int stride, Int32Rect rect)
+        {
+            var minVisibleTime = TimeSpan.FromSeconds(rect.X / HorizontalZoom);
+            var maxVisibleTime = TimeSpan.FromSeconds((rect.X + rect.Width) / HorizontalZoom);
+
+            double noteHeight = 20.0 * VerticalZoom / KeyYScale;
+            int minVisibleNote = MaxNoteNumber - (int)Math.Floor((rect.Y + rect.Height) / noteHeight);
+            int maxVisibleNote = MaxNoteNumber - (int)Math.Floor(rect.Y / noteHeight);
+
+            var notesToDraw = AllNotes.Where(n =>
+                n.StartTime < maxVisibleTime &&
+                (n.StartTime + n.Duration) > minVisibleTime &&
+                n.NoteNumber >= minVisibleNote && n.NoteNumber <= maxVisibleNote
+            ).ToList();
+
+            Color selectedColor = MidiEditorSettings.Default.Note.SelectedNoteColor;
+            byte selR = selectedColor.R;
+            byte selG = selectedColor.G;
+            byte selB = selectedColor.B;
+            byte selA = selectedColor.A;
+
+            foreach (var note in notesToDraw)
+            {
+                if (note.IsEditing) continue;
+
+                Color fillColor;
+                if (note.IsSelected)
+                    fillColor = selectedColor;
+                else
+                    fillColor = note.Color;
+
+                byte r = fillColor.R;
+                byte g = fillColor.G;
+                byte b = fillColor.B;
+                byte a = fillColor.A;
+
+                Rect noteRectWPF = GetNoteRectWPF(note);
+                noteRectWPF.Intersect(new Rect(rect.X, rect.Y, rect.Width, rect.Height));
+                if (noteRectWPF.IsEmpty) continue;
+
+                Int32Rect noteRect = new Int32Rect(
+                    (int)Math.Floor(noteRectWPF.X),
+                    (int)Math.Floor(noteRectWPF.Y),
+                    (int)Math.Ceiling(noteRectWPF.Width),
+                    (int)Math.Ceiling(noteRectWPF.Height)
+                );
+
+                Color strokeColor;
+                int strokeThickness;
+
+                if (note.IsSelected)
+                {
+                    strokeColor = Colors.Orange;
+                    strokeThickness = 2;
+                }
+                else
+                {
+                    strokeColor = Color.FromRgb(53, 122, 189);
+                    strokeThickness = 1;
+                }
+                int strokeColorInt = (strokeColor.A << 24) | (strokeColor.R << 16) | (strokeColor.G << 8) | strokeColor.B;
+                int fillColorInt = (a << 24) | (r << 16) | (g << 8) | b;
+
+
+                for (int y = noteRect.Y; y < noteRect.Y + noteRect.Height; y++)
+                {
+                    int* pRow = (int*)(pBits + y * stride) + noteRect.X;
+                    for (int x = noteRect.X; x < noteRect.X + noteRect.Width; x++)
+                    {
+                        if (x < noteRect.X + strokeThickness || x >= noteRect.X + noteRect.Width - strokeThickness ||
+                            y < noteRect.Y + strokeThickness || y >= noteRect.Y + noteRect.Height - strokeThickness)
+                        {
+                            *pRow = strokeColorInt;
+                        }
+                        else
+                        {
+                            *pRow = fillColorInt;
+                        }
+                        pRow++;
+                    }
+                }
+            }
+        }
+
+        public NoteViewModel? HitTestNote(Point position)
+        {
+            if (_midiFile == null) return null;
+
+            var time = PositionToTime(position.X);
+            var noteNumber = MaxNoteNumber - (int)Math.Floor(position.Y / (20.0 * VerticalZoom / KeyYScale)) - 1;
+
+            if (noteNumber < 0 || noteNumber > MaxNoteNumber) return null;
+
+            return AllNotes.FirstOrDefault(n =>
+                n.NoteNumber == noteNumber &&
+                n.StartTime <= time &&
+                (n.StartTime + n.Duration) >= time
+            );
+        }
+
+        public List<NoteViewModel> HitTestNotes(Rect rect)
+        {
+            var minTime = PositionToTime(rect.Left);
+            var maxTime = PositionToTime(rect.Right);
+            var minNote = MaxNoteNumber - (int)Math.Floor(rect.Bottom / (20.0 * VerticalZoom / KeyYScale)) - 1;
+            var maxNote = MaxNoteNumber - (int)Math.Floor(rect.Top / (20.0 * VerticalZoom / KeyYScale)) - 1;
+
+            return AllNotes.Where(n =>
+                n.StartTime < maxTime &&
+                (n.StartTime + n.Duration) > minTime &&
+                n.NoteNumber >= minNote &&
+                n.NoteNumber <= maxNote
+            ).ToList();
+        }
+
+        public void UpdateContextMenuState(Point position)
+        {
+            RightClickPosition = position;
+            NoteUnderCursor = HitTestNote(position);
+
+            if (NoteUnderCursor != null && !SelectedNotes.Contains(NoteUnderCursor))
+            {
+                foreach (var note in SelectedNotes)
+                {
+                    note.IsSelected = false;
+                }
+                SelectedNotes.Clear();
+                NoteUnderCursor.IsSelected = true;
+                SelectedNotes.Add(NoteUnderCursor);
+                SelectedNote = NoteUnderCursor;
+            }
+
+            UpdateMergeSplitState();
+
+            OnPropertyChanged(nameof(CanAddNote));
+            OnPropertyChanged(nameof(CanDeleteNote));
+            (AddNoteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (DeleteNoteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        }
+
+
         private void OnBackupTimerTick(object? sender, EventArgs e)
         {
             if (MidiEditorSettings.Default.Backup.EnableAutoBackup)
@@ -1021,6 +1462,7 @@ namespace MIDI.UI.ViewModels
                 foreach (var note in SelectedNotes)
                 {
                     note.OnPropertyChanged(nameof(NoteViewModel.FillBrush));
+                    RequestNoteRedraw(note);
                 }
             }
         }
@@ -1152,8 +1594,12 @@ namespace MIDI.UI.ViewModels
         {
             if (clearNotes)
             {
-                foreach (var note in SelectedNotes.ToList()) note.IsSelected = false;
+                var oldSelections = SelectedNotes.ToList();
                 SelectedNotes.Clear();
+                foreach (var note in oldSelections)
+                {
+                    note.IsSelected = false;
+                }
                 SelectedNote = null;
             }
 
@@ -1347,6 +1793,7 @@ namespace MIDI.UI.ViewModels
                 note.RecalculateTimes(newTempoMap);
             }
             UpdateTimeRuler();
+            RequestRedraw(true);
         }
         private void SortAndRefreshCCTrack()
         {
@@ -1424,7 +1871,7 @@ namespace MIDI.UI.ViewModels
                 PianoKeys.Add(keyVM);
                 PianoKeysMap[i] = keyVM;
             }
-            OnPropertyChanged(nameof(PianoRollHeight));
+            UpdatePianoRollSize();
         }
 
 
@@ -1525,7 +1972,6 @@ namespace MIDI.UI.ViewModels
                 AllNotes.Clear();
                 SelectedNotes.Clear();
                 SelectedNote = null;
-                VisibleNotes.Clear();
                 TempoEvents.Clear();
                 ControlChangeEvents.Clear();
                 Flags.Clear();
@@ -1543,14 +1989,12 @@ namespace MIDI.UI.ViewModels
                 StatusText = "新規ファイル作成完了";
 
                 UpdatePlaybackMidiData();
-                OnPropertyChanged(nameof(FileName));
-                OnPropertyChanged(nameof(PianoRollWidth));
-                OnPropertyChanged(nameof(PianoRollHeight));
+                UpdatePianoRollSize();
                 UpdateTimeRuler();
-                UpdateHorizontalLines();
                 RenderThumbnail();
                 IsMidiFileLoaded = true;
                 NotesLoaded?.Invoke();
+                RequestRedraw(true);
 
                 (CloseMidiCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 (SaveCommand as RelayCommand)?.RaiseCanExecuteChanged();
@@ -1567,6 +2011,11 @@ namespace MIDI.UI.ViewModels
             }
         }
 
+        private void UpdateVisibleRect()
+        {
+            _visibleRect = new Int32Rect((int)_horizontalOffset, (int)_verticalOffset, (int)_viewportWidth, (int)_viewportHeight);
+        }
+
         public void OnScrollChanged(double horizontalOffset, double viewportWidth, double verticalOffset, double viewportHeight)
         {
             _horizontalOffset = horizontalOffset;
@@ -1577,50 +2026,7 @@ namespace MIDI.UI.ViewModels
             VerticalScrollOffset = verticalOffset;
             OnPropertyChanged(nameof(VerticalScrollOffset));
 
-            _scrollTimer.Stop();
-            _scrollTimer.Start();
-        }
-
-        private void UpdateVisibleNotes()
-        {
-            if (_midiFile == null || _viewportWidth <= 0 || _viewportHeight <= 0) return;
-
-            var visibleStartTime = TimeSpan.FromSeconds(_horizontalOffset / HorizontalZoom);
-            var visibleEndTime = TimeSpan.FromSeconds((_horizontalOffset + _viewportWidth) / HorizontalZoom);
-            var visibleDuration = visibleEndTime - visibleStartTime;
-
-            var visibleStartNoteRange = (MaxNoteNumber - 1 - (_verticalOffset + _viewportHeight) / (20.0 * VerticalZoom / KeyYScale));
-            var visibleEndNoteRange = (MaxNoteNumber - 1 - _verticalOffset / (20.0 * VerticalZoom / KeyYScale));
-            var verticalNoteCountInView = visibleEndNoteRange - visibleStartNoteRange;
-
-            var bufferedStartTime = visibleStartTime - visibleDuration;
-            var bufferedEndTime = visibleEndTime + visibleDuration;
-
-            var bufferedStartNote = (int)Math.Max(0, Math.Floor(visibleStartNoteRange - verticalNoteCountInView));
-            var bufferedEndNote = (int)Math.Min(MaxNoteNumber, Math.Ceiling(visibleEndNoteRange + verticalNoteCountInView));
-
-            var newVisibleNotes = AllNotes.AsParallel().Where(n =>
-                (n.StartTime + n.Duration) > bufferedStartTime && n.StartTime < bufferedEndTime &&
-                n.NoteNumber >= bufferedStartNote && n.NoteNumber <= bufferedEndNote
-            ).ToList();
-
-            var currentVisibleNotesSet = new HashSet<NoteViewModel>(VisibleNotes);
-            var newVisibleNotesSet = new HashSet<NoteViewModel>(newVisibleNotes);
-
-            var notesToRemove = currentVisibleNotesSet.Except(newVisibleNotesSet).ToList();
-            var notesToAdd = newVisibleNotesSet.Except(currentVisibleNotesSet).ToList();
-
-            Application.Current.Dispatcher.Invoke(() => {
-                foreach (var note in notesToRemove)
-                {
-                    VisibleNotes.Remove(note);
-                }
-
-                foreach (var note in notesToAdd)
-                {
-                    VisibleNotes.Add(note);
-                }
-            });
+            RequestRedraw(true);
         }
 
         private void OpenDisplaySettings()
@@ -1711,8 +2117,7 @@ namespace MIDI.UI.ViewModels
             _zoomTimer.Stop();
             OnPropertyChanged(nameof(HorizontalZoom));
             OnPropertyChanged(nameof(VerticalZoom));
-            OnPropertyChanged(nameof(PianoRollWidth));
-            OnPropertyChanged(nameof(PianoRollHeight));
+            UpdatePianoRollSize();
             OnPropertyChanged(nameof(PlaybackCursorPosition));
             UpdateTimeRuler();
         }
@@ -1893,16 +2298,15 @@ namespace MIDI.UI.ViewModels
                 }
 
 
-                UpdateVisibleNotes();
                 OnPropertyChanged(nameof(FileName));
-                OnPropertyChanged(nameof(PianoRollWidth));
-                OnPropertyChanged(nameof(PianoRollHeight));
+                UpdatePianoRollSize();
                 OnPropertyChanged(nameof(MaxTime));
                 UpdateTimeRuler();
-                UpdateHorizontalLines();
                 RenderThumbnail();
                 IsMidiFileLoaded = true;
                 NotesLoaded?.Invoke();
+                RequestRedraw(true);
+
                 (CloseMidiCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 (SaveCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 (SaveAsCommand as RelayCommand)?.RaiseCanExecuteChanged();
@@ -2041,7 +2445,6 @@ namespace MIDI.UI.ViewModels
         private void UpdateTimeRuler()
         {
             TimeRuler.Clear();
-            GridLines.Clear();
             if (_midiFile == null) return;
 
             var tempoMap = MidiProcessor.ExtractTempoMap(_midiFile, MidiConfiguration.Default);
@@ -2051,18 +2454,6 @@ namespace MIDI.UI.ViewModels
 
             var totalDuration = MidiProcessor.TicksToTimeSpan(totalTicks, _midiFile.DeltaTicksPerQuarterNote, tempoMap);
             var pianoRollWidth = Math.Max(3000, totalDuration.TotalSeconds * HorizontalZoom);
-
-            var ticksPerGrid = GetTicksPerGrid();
-            if (ticksPerGrid <= 0) return;
-
-            for (long ticks = 0; ; ticks += (long)Math.Max(1, ticksPerGrid))
-            {
-                var time = MidiProcessor.TicksToTimeSpan(ticks, _midiFile.DeltaTicksPerQuarterNote, tempoMap);
-                var x = time.TotalSeconds * HorizontalZoom;
-                if (x > pianoRollWidth + HorizontalZoom * 2) break;
-                GridLines.Add(new GridLineViewModel(x, 0));
-                if (ticks > totalTicks + TicksPerBar) break;
-            }
 
             double intervalSeconds = TimeRulerInterval;
             if (intervalSeconds <= 0) intervalSeconds = 1.0;
@@ -2091,16 +2482,6 @@ namespace MIDI.UI.ViewModels
             }
 
             OnPropertyChanged(nameof(PianoRollWidth));
-        }
-
-        private void UpdateHorizontalLines()
-        {
-            HorizontalLines.Clear();
-            for (int i = 0; i <= MaxNoteNumber; i++)
-            {
-                var y = (MaxNoteNumber - i) * 20.0 * VerticalZoom / KeyYScale;
-                HorizontalLines.Add(new GridLineViewModel(0, y));
-            }
         }
 
         private void SaveFile()
@@ -2228,7 +2609,7 @@ namespace MIDI.UI.ViewModels
             var sortedNotes = AllNotes.OrderBy(n => n.StartTicks).ToList();
             AllNotes.Clear();
             foreach (var n in sortedNotes) AllNotes.Add(n);
-            UpdateVisibleNotes();
+            RequestNoteRedraw(noteViewModel);
             UpdatePlaybackMidiData();
         }
         internal void SortMidiEvents()
@@ -2274,7 +2655,6 @@ namespace MIDI.UI.ViewModels
             });
         }
 
-
         internal void RemoveNoteInternal(NoteViewModel noteViewModel)
         {
             if (_midiFile == null) return;
@@ -2292,12 +2672,17 @@ namespace MIDI.UI.ViewModels
             }
 
             AllNotes.Remove(noteViewModel);
-            VisibleNotes.Remove(noteViewModel);
+
+            noteViewModel.IsSelected = false;
+            noteViewModel.IsEditing = false;
+
+            SelectedNotes.Remove(noteViewModel);
             if (SelectedNote == noteViewModel)
             {
                 SelectedNote = null;
             }
-            SelectedNotes.Remove(noteViewModel);
+
+            RequestNoteRedraw(noteViewModel);
             UpdatePlaybackMidiData();
         }
 
@@ -2352,33 +2737,6 @@ namespace MIDI.UI.ViewModels
             _playbackService.StopPianoKey(noteNumber);
             var keyVM = PianoKeys.FirstOrDefault(k => k.NoteNumber == noteNumber);
             if (keyVM != null) keyVM.IsKeyboardPlaying = false;
-        }
-
-        public void UpdateContextMenuState(Point position)
-        {
-            RightClickPosition = position;
-            NoteUnderCursor = AllNotes.FirstOrDefault(n =>
-                position.X >= n.X && position.X <= n.X + n.Width &&
-                position.Y >= n.Y && position.Y <= n.Y + n.Height);
-
-            if (NoteUnderCursor != null && !SelectedNotes.Contains(NoteUnderCursor))
-            {
-                foreach (var note in SelectedNotes)
-                {
-                    note.IsSelected = false;
-                }
-                SelectedNotes.Clear();
-                NoteUnderCursor.IsSelected = true;
-                SelectedNotes.Add(NoteUnderCursor);
-                SelectedNote = NoteUnderCursor;
-            }
-
-            UpdateMergeSplitState();
-
-            OnPropertyChanged(nameof(CanAddNote));
-            OnPropertyChanged(nameof(CanDeleteNote));
-            (AddNoteCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            (DeleteNoteCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
         private void UpdateMergeSplitState()
@@ -2548,7 +2906,7 @@ namespace MIDI.UI.ViewModels
             Application.Current.Dispatcher.Invoke(() =>
             {
                 AllNotes.Add(noteViewModel);
-                UpdateVisibleNotes();
+                RequestNoteRedraw(noteViewModel);
             });
         }
 
@@ -2566,7 +2924,7 @@ namespace MIDI.UI.ViewModels
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     AllNotes.Remove(noteViewModel);
-                    UpdateVisibleNotes();
+                    RequestNoteRedraw(noteViewModel);
                 });
                 _recordingNotes.Remove(noteNumber);
                 return;
@@ -2592,7 +2950,7 @@ namespace MIDI.UI.ViewModels
             _midiFile.Events[0].Add(noteOff);
 
             UpdatePlaybackMidiData();
-            UpdateVisibleNotes();
+            RequestNoteRedraw(noteViewModel);
 
             _recordingNotes.Remove(noteNumber);
         }
@@ -2647,12 +3005,9 @@ namespace MIDI.UI.ViewModels
             _midiFile = null;
             _originalMidiFile = null;
             AllNotes.Clear();
-            VisibleNotes.Clear();
             SelectedNotes.Clear();
             SelectedNote = null;
             TimeRuler.Clear();
-            GridLines.Clear();
-            HorizontalLines.Clear();
             Flags.Clear();
             SelectedFlags.Clear();
             TempoEvents.Clear();
@@ -2660,6 +3015,7 @@ namespace MIDI.UI.ViewModels
             _filePath = "ファイルが選択されていません";
             _projectPath = string.Empty;
             IsMidiFileLoaded = false;
+            PianoRollBitmap = null;
             OnPropertyChanged(nameof(FileName));
             (CloseMidiCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (SaveCommand as RelayCommand)?.RaiseCanExecuteChanged();
@@ -3101,6 +3457,8 @@ namespace MIDI.UI.ViewModels
             {
                 note.Color = GetColorForChannel(note.Channel);
             }
+            _isColorizedByChannel = true;
+            RequestRedraw(true);
         }
 
         private void ResetNoteColor(object? obj = null)
@@ -3110,6 +3468,8 @@ namespace MIDI.UI.ViewModels
             {
                 note.Color = defaultColor;
             }
+            _isColorizedByChannel = false;
+            RequestRedraw(true);
         }
 
         private void ChangeDuration(double factor)
@@ -3259,6 +3619,9 @@ namespace MIDI.UI.ViewModels
             _backupTimer.Tick -= OnBackupTimerTick;
             _backupTimer.Stop();
 
+            _renderTimer.Tick -= RenderTimer_Tick;
+            _renderTimer.Stop();
+
             _loadCts.Cancel();
 
             _playbackService.AudioChunkRendered -= OnAudioChunkRendered;
@@ -3269,4 +3632,3 @@ namespace MIDI.UI.ViewModels
         }
     }
 }
-

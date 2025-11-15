@@ -61,6 +61,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
     public class NoteChangeCommand : IUndoableCommand
     {
         private readonly NoteViewModel _note;
+        private readonly MidiEditorViewModel _viewModel;
         private readonly long _oldStartTicks;
         private readonly long _oldDurationTicks;
         private readonly int _oldNoteNumber;
@@ -77,6 +78,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
         public NoteChangeCommand(NoteViewModel note, long oldStartTicks, long oldDurationTicks, int oldNoteNumber, int oldCentOffset, int oldChannel, int oldVelocity, long newStartTicks, long newDurationTicks, int newNoteNumber, int newCentOffset, int newChannel, int newVelocity)
         {
             _note = note;
+            _viewModel = note.GetParentViewModel();
             _oldStartTicks = oldStartTicks;
             _oldDurationTicks = oldDurationTicks;
             _oldNoteNumber = oldNoteNumber;
@@ -93,6 +95,20 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
         public void Execute()
         {
+            var currentStart = _note.StartTicks;
+            var currentDuration = _note.DurationTicks;
+            var currentNoteNum = _note.NoteNumber;
+            var currentCent = _note.CentOffset;
+            var currentChannel = _note.Channel;
+            var currentVel = _note.Velocity;
+
+            _note.NoteNumber = _oldNoteNumber;
+            _note.CentOffset = _oldCentOffset;
+            _note.Channel = _oldChannel;
+            _note.Velocity = _oldVelocity;
+            _note.UpdateNote(_oldStartTicks, _oldDurationTicks);
+            _viewModel.RequestNoteRedraw(_note);
+
             _note.NoteNumber = _newNoteNumber;
             _note.CentOffset = _newCentOffset;
             _note.Channel = _newChannel;
@@ -102,11 +118,13 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
         public void Undo()
         {
+            _viewModel.RequestNoteRedraw(_note);
             _note.NoteNumber = _oldNoteNumber;
             _note.CentOffset = _oldCentOffset;
             _note.Channel = _oldChannel;
             _note.Velocity = _oldVelocity;
             _note.UpdateNote(_oldStartTicks, _oldDurationTicks);
+            _viewModel.RequestNoteRedraw(_note);
         }
     }
 
@@ -123,6 +141,8 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
         public void Execute()
         {
+            _noteViewModel.IsSelected = false;
+            _noteViewModel.IsEditing = false;
             _viewModel.AddNoteInternal(_noteViewModel);
         }
 
@@ -136,11 +156,15 @@ namespace MIDI.UI.ViewModels.MidiEditor
     {
         private readonly MidiEditorViewModel _viewModel;
         private readonly NoteViewModel _noteViewModel;
+        private readonly bool _wasSelected;
+        private readonly bool _wasEditing;
 
         public RemoveNoteCommand(MidiEditorViewModel viewModel, NoteViewModel noteViewModel)
         {
             _viewModel = viewModel;
             _noteViewModel = noteViewModel;
+            _wasSelected = noteViewModel.IsSelected;
+            _wasEditing = noteViewModel.IsEditing;
         }
 
         public void Execute()
@@ -151,6 +175,18 @@ namespace MIDI.UI.ViewModels.MidiEditor
         public void Undo()
         {
             _viewModel.AddNoteInternal(_noteViewModel);
+            if (_wasSelected)
+            {
+                _noteViewModel.IsSelected = true;
+                if (!_viewModel.SelectedNotes.Contains(_noteViewModel))
+                {
+                    _viewModel.SelectedNotes.Add(_noteViewModel);
+                }
+            }
+            if (_wasEditing)
+            {
+                _noteViewModel.IsEditing = true;
+            }
         }
     }
 

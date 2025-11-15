@@ -44,8 +44,11 @@ namespace MIDI.UI.ViewModels.MidiEditor
         {
             if (note != null)
             {
-                if (position.X <= note.X + ResizeHandleWidth) return DragMode.ResizeLeft;
-                if (position.X >= note.X + note.Width - ResizeHandleWidth) return DragMode.ResizeRight;
+                double noteX = _viewModel.TicksToTime(note.StartTicks).TotalSeconds * _viewModel.HorizontalZoom;
+                double noteWidth = _viewModel.TicksToTime(note.DurationTicks).TotalSeconds * _viewModel.HorizontalZoom;
+
+                if (position.X <= noteX + ResizeHandleWidth) return DragMode.ResizeLeft;
+                if (position.X >= noteX + noteWidth - ResizeHandleWidth) return DragMode.ResizeRight;
                 return DragMode.Move;
             }
 
@@ -63,9 +66,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
         {
             if (_viewModel.MidiFile == null) return;
 
-            var noteUnderCursor = _notes.FirstOrDefault(n =>
-                position.X >= n.X && position.X <= n.X + n.Width &&
-                position.Y >= n.Y && position.Y <= n.Y + n.Height);
+            var noteUnderCursor = _viewModel.HitTestNote(position);
 
             var flagUnderCursor = _viewModel.Flags.FirstOrDefault(f => Math.Abs(position.X - f.X) < 10);
 
@@ -251,6 +252,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                                 note.NoteNumber = newNoteNumber;
                             }
                             note.UpdateNote(newStartTicks, originalDurationTicks);
+                            _viewModel.RequestNoteRedraw(note);
                         }
                         break;
                     case DragMode.ResizeRight:
@@ -269,6 +271,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                             }
                             var newDurationTicks = Math.Max(1, newEndTicks - startTicks);
                             noteToResize.UpdateNote(startTicks, newDurationTicks);
+                            _viewModel.RequestNoteRedraw(noteToResize);
                         }
                         break;
                     case DragMode.ResizeLeft:
@@ -293,12 +296,12 @@ namespace MIDI.UI.ViewModels.MidiEditor
                                 newStartTicks = endTicks - 1;
                             }
                             noteToResize.UpdateNote(newStartTicks, newDurationTicks);
+                            _viewModel.RequestNoteRedraw(noteToResize);
                         }
                         break;
                 }
             }
         }
-
 
         public void OnPianoRollMouseUp(MouseButtonEventArgs e)
         {
@@ -335,8 +338,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                     var selectionRect = _viewModel.SelectionRectangle;
                     _viewModel.SelectionRectangle = new Rect();
 
-                    var notesInRect = _notes.Where(n =>
-                        new Rect(n.X, n.Y, n.Width, n.Height).IntersectsWith(selectionRect)).ToList();
+                    var notesInRect = _viewModel.HitTestNotes(selectionRect);
 
                     bool isCtrlPressed = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
                     if (!isCtrlPressed)
@@ -369,15 +371,22 @@ namespace MIDI.UI.ViewModels.MidiEditor
                     if (_viewModel.SelectedNotes.Any())
                     {
                         var commands = new List<IUndoableCommand>();
+                        var notesToFinalize = new List<NoteViewModel>();
+
                         foreach (var note in _viewModel.SelectedNotes)
                         {
                             if (_dragStartNoteData.TryGetValue(note, out var originalData))
                             {
                                 commands.Add(new NoteChangeCommand(note, originalData.startTicks, originalData.durationTicks, originalData.noteNumber, originalData.centOffset, originalData.channel, originalData.velocity, note.StartTicks, note.DurationTicks, note.NoteNumber, note.CentOffset, note.Channel, note.Velocity));
                             }
-                            note.IsEditing = false;
+                            notesToFinalize.Add(note);
                         }
                         _viewModel.ExecuteCompositeNoteChange(commands);
+
+                        foreach (var note in notesToFinalize)
+                        {
+                            note.IsEditing = false;
+                        }
                     }
                 }
 

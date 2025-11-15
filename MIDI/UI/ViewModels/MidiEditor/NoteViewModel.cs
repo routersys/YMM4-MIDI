@@ -27,6 +27,15 @@ namespace MIDI.UI.ViewModels.MidiEditor
                 if (SetField(ref _isEditing, value))
                 {
                     OnPropertyChanged(nameof(FillBrush));
+                    if (value)
+                    {
+                        _parentViewModel.EditingNotes.Add(this);
+                    }
+                    else
+                    {
+                        _parentViewModel.EditingNotes.Remove(this);
+                    }
+                    _parentViewModel.RequestNoteRedraw(this);
                 }
             }
         }
@@ -40,6 +49,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                 if (SetField(ref _isSelected, value))
                 {
                     OnPropertyChanged(nameof(FillBrush));
+                    _parentViewModel.RequestNoteRedraw(this);
                 }
             }
         }
@@ -54,6 +64,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                 {
                     OnPropertyChanged(nameof(Y));
                     OnPropertyChanged(nameof(CentOffsetText));
+                    _parentViewModel.RequestNoteRedraw(this);
                 }
             }
         }
@@ -70,6 +81,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                 if (SetField(ref _color, value))
                 {
                     OnPropertyChanged(nameof(FillBrush));
+                    _parentViewModel.RequestNoteRedraw(this);
                 }
             }
         }
@@ -130,6 +142,8 @@ namespace MIDI.UI.ViewModels.MidiEditor
             RecalculateTimes();
         }
 
+        public MidiEditorViewModel GetParentViewModel() => _parentViewModel;
+
         private int GetMillisecondDelta()
         {
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) return 10;
@@ -183,7 +197,6 @@ namespace MIDI.UI.ViewModels.MidiEditor
             OnPropertyChanged(nameof(DurationMinutes));
             OnPropertyChanged(nameof(DurationSeconds));
             OnPropertyChanged(nameof(DurationMilliseconds));
-            UpdateHorizontal();
         }
 
         public void UpdateHorizontal()
@@ -223,6 +236,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
             {
                 if (_noteOnEvent.NoteNumber != value)
                 {
+                    _parentViewModel.RequestNoteRedraw(this);
                     _noteOnEvent.NoteNumber = value;
                     if (_noteOnEvent.OffEvent != null)
                     {
@@ -231,6 +245,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(Y));
                     OnPropertyChanged(nameof(NoteName));
+                    _parentViewModel.RequestNoteRedraw(this);
                 }
             }
         }
@@ -246,8 +261,19 @@ namespace MIDI.UI.ViewModels.MidiEditor
                     {
                         _noteOnEvent.OffEvent.Channel = value;
                     }
+
+                    if (_parentViewModel.IsColorizedByChannel)
+                    {
+                        Color = _parentViewModel.GetColorForChannel(value);
+                    }
+                    else
+                    {
+                        Color = MidiEditorSettings.Default.Note.NoteColor;
+                    }
+
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(FillBrush));
+                    _parentViewModel.RequestNoteRedraw(this);
                 }
             }
         }

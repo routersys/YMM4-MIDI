@@ -507,7 +507,7 @@
                                         </ScrollViewer>
 
                                         <ScrollViewer Grid.Row="1" Name="PianoRollScrollViewer" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto" ScrollChanged="PianoRollScrollViewer_ScrollChanged" PreviewMouseWheel="PianoRollScrollViewer_PreviewMouseWheel">
-                                            <Grid MouseLeftButtonDown="PianoRoll_MouseDown" MouseMove="PianoRoll_MouseMove" MouseLeftButtonUp="PianoRoll_MouseUp" MouseRightButtonDown="PianoRoll_MouseRightButtonDown">
+                                            <Grid MouseLeftButtonDown="PianoRoll_MouseDown" MouseMove="PianoRoll_MouseMove" MouseLeftButtonUp="PianoRoll_MouseUp" MouseRightButtonDown="PianoRoll_MouseRightButtonDown" Background="Transparent">
                                                 <Grid.ContextMenu>
                                                     <ContextMenu>
                                                         <MenuItem Header="選択">
@@ -560,44 +560,9 @@
                                                     </ContextMenu>
                                                 </Grid.ContextMenu>
 
-                                                <Canvas Width="{Binding PianoRollWidth}" Height="{Binding PianoRollHeight}" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
-                                                    <ItemsControl ItemsSource="{Binding GridLines}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <Canvas />
-                                                            </ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                        <ItemsControl.ItemContainerStyle>
-                                                            <Style TargetType="ContentPresenter">
-                                                                <Setter Property="Canvas.Left" Value="{Binding X}" />
-                                                            </Style>
-                                                        </ItemsControl.ItemContainerStyle>
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Line X1="0" Y1="0" X2="0" Y2="{Binding DataContext.PianoRollHeight, RelativeSource={RelativeSource AncestorType=Canvas}}" StrokeDashArray="2 2" Stroke="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" StrokeThickness="1" />
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                    <ItemsControl ItemsSource="{Binding HorizontalLines}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <Canvas />
-                                                            </ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                        <ItemsControl.ItemContainerStyle>
-                                                            <Style TargetType="ContentPresenter">
-                                                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                                                            </Style>
-                                                        </ItemsControl.ItemContainerStyle>
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Line X1="0" Y1="0" X2="{Binding DataContext.PianoRollWidth, RelativeSource={RelativeSource AncestorType=Canvas}}" Y2="0" Stroke="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" StrokeThickness="0.5" />
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                </Canvas>
+                                                <Image Source="{Binding PianoRollBitmap}" Width="{Binding PianoRollWidth}" Height="{Binding PianoRollHeight}" Stretch="Fill" />
 
-                                                <ItemsControl ItemsSource="{Binding VisibleNotes}">
+                                                <ItemsControl ItemsSource="{Binding EditingNotes}">
                                                     <ItemsControl.ItemsPanel>
                                                         <ItemsPanelTemplate>
                                                             <Canvas />
