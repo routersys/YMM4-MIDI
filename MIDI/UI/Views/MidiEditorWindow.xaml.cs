@@ -93,6 +93,10 @@ namespace MIDI.UI.Views
         {
             _viewModel.CheckForBackup();
 
+            DependencyPropertyDescriptor dp = DependencyPropertyDescriptor.FromProperty(Window.BackgroundProperty, typeof(Window));
+            dp.AddValueChanged(this, OnThemeChanged);
+            OnThemeChanged(null, EventArgs.Empty);
+
             try
             {
                 var directory = Path.GetDirectoryName(AbnormalShutdownFlagPath);
@@ -132,6 +136,21 @@ namespace MIDI.UI.Views
             LayoutInitializer.EnsurePanelsExist(DockingManager);
 
             Dispatcher.BeginInvoke(new Action(InitializeLayoutPanes), DispatcherPriority.ContextIdle);
+        }
+
+        private void OnThemeChanged(object? sender, EventArgs e)
+        {
+            if (this.Background is SolidColorBrush bgBrush)
+            {
+                Color c = bgBrush.Color;
+                double brightness = (c.R * 0.299 + c.G * 0.587 + c.B * 0.114) / 255;
+                bool isDarkMode = brightness < 0.5;
+                _viewModel.ThemeChanged(isDarkMode);
+            }
+            else
+            {
+                _viewModel.ThemeChanged(false);
+            }
         }
 
         private void InitializeLayoutPanes()
@@ -338,6 +357,9 @@ namespace MIDI.UI.Views
 
         private void MidiEditorWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
+            DependencyPropertyDescriptor dp = DependencyPropertyDescriptor.FromProperty(Window.BackgroundProperty, typeof(Window));
+            dp.RemoveValueChanged(this, OnThemeChanged);
+
             try
             {
                 if (File.Exists(AbnormalShutdownFlagPath))

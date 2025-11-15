@@ -657,6 +657,9 @@ namespace MIDI.UI.ViewModels
         private Color _horizontalLineColor;
         private Color _backgroundColor;
 
+        private Color _whiteKeyBackgroundColor;
+        private Color _blackKeyBackgroundColor;
+
         private const int CHUNK_SIZE = 256;
         private Dictionary<(int, int), WriteableBitmap> _bitmapChunks = new Dictionary<(int, int), WriteableBitmap>();
         private Dictionary<(int, int), bool> _chunkDirtyFlags = new Dictionary<(int, int), bool>();
@@ -815,7 +818,6 @@ namespace MIDI.UI.ViewModels
             _renderTimer.Tick += RenderTimer_Tick;
             _renderTimer.Start();
 
-            UpdateColors();
             InitializeBitmap();
 
             NewCommand = new RelayCommand(_ => CreateNewFile());
@@ -977,12 +979,28 @@ namespace MIDI.UI.ViewModels
             LoadSoundFonts();
         }
 
-        private void UpdateColors()
+        public void ThemeChanged(bool isDarkMode)
         {
-            var res = Application.Current.Resources;
-            _backgroundColor = ((SolidColorBrush)res[SystemColors.WindowBrushKey]).Color;
-            _gridColor = ((SolidColorBrush)res[SystemColors.ControlDarkBrushKey]).Color;
-            _horizontalLineColor = ((SolidColorBrush)res[SystemColors.ControlDarkBrushKey]).Color;
+            UpdateColors(isDarkMode);
+            RequestRedraw(true);
+        }
+
+        private void UpdateColors(bool isDarkMode)
+        {
+            if (isDarkMode)
+            {
+                _whiteKeyBackgroundColor = Color.FromRgb(45, 45, 48);
+                _blackKeyBackgroundColor = Color.FromRgb(60, 60, 60);
+                _gridColor = Color.FromRgb(85, 85, 85);
+                _horizontalLineColor = Color.FromRgb(70, 70, 70);
+            }
+            else
+            {
+                _whiteKeyBackgroundColor = Color.FromRgb(255, 255, 255);
+                _blackKeyBackgroundColor = Color.FromRgb(240, 240, 240);
+                _gridColor = Color.FromRgb(221, 221, 221);
+                _horizontalLineColor = Color.FromRgb(230, 230, 230);
+            }
         }
 
         private void InitializeBitmap()
@@ -1147,17 +1165,63 @@ namespace MIDI.UI.ViewModels
 
         private unsafe void DrawBackground(byte* pBits, int stride, Int32Rect rect)
         {
-            int b = _backgroundColor.B;
-            int g = _backgroundColor.G;
-            int r = _backgroundColor.R;
-            int a = _backgroundColor.A;
+            if (PianoRollBitmap == null) return;
+
+            int whiteB = _whiteKeyBackgroundColor.B;
+            int whiteG = _whiteKeyBackgroundColor.G;
+            int whiteR = _whiteKeyBackgroundColor.R;
+            int whiteA = _whiteKeyBackgroundColor.A;
+            int whiteColorInt = (whiteA << 24) | (whiteR << 16) | (whiteG << 8) | whiteB;
+
+            int blackB = _blackKeyBackgroundColor.B;
+            int blackG = _blackKeyBackgroundColor.G;
+            int blackR = _blackKeyBackgroundColor.R;
+            int blackA = _blackKeyBackgroundColor.A;
+            int blackColorInt = (blackA << 24) | (blackR << 16) | (blackG << 8) | blackB;
+
+            double noteHeight = 20.0 * VerticalZoom / KeyYScale;
+            if (noteHeight <= 0) noteHeight = 20;
 
             for (int y = rect.Y; y < rect.Y + rect.Height; y++)
             {
-                int* pRow = (int*)(pBits + y * stride) + rect.X;
-                for (int x = 0; x < rect.Width; x++)
+                if (y >= PianoRollBitmap.PixelHeight) break;
+
+                int noteNumber = MaxNoteNumber - (int)Math.Floor(y / noteHeight) - 1;
+                if (noteNumber < 0 || noteNumber > MaxNoteNumber)
                 {
-                    *pRow = (a << 24) | (r << 16) | (g << 8) | b;
+                    int* pRowOutOfRange = (int*)(pBits + y * stride);
+                    pRowOutOfRange += rect.X;
+                    int* pRowEndOutOfRange = pRowOutOfRange + rect.Width;
+                    if (pRowEndOutOfRange > (int*)(pBits + y * stride) + PianoRollBitmap.PixelWidth)
+                    {
+                        pRowEndOutOfRange = (int*)(pBits + y * stride) + PianoRollBitmap.PixelWidth;
+                    }
+                    while (pRowOutOfRange < pRowEndOutOfRange)
+                    {
+                        *pRowOutOfRange = whiteColorInt;
+                        pRowOutOfRange++;
+                    }
+                    continue;
+                }
+
+                bool isBlackKey = false;
+                if (PianoKeysMap.TryGetValue(noteNumber, out var keyVm))
+                {
+                    isBlackKey = keyVm.IsBlackKey;
+                }
+
+                int colorInt = isBlackKey ? blackColorInt : whiteColorInt;
+
+                int* pRow = (int*)(pBits + y * stride);
+                pRow += rect.X;
+                int* pRowEnd = pRow + rect.Width;
+                if (pRowEnd > (int*)(pBits + y * stride) + PianoRollBitmap.PixelWidth)
+                {
+                    pRowEnd = (int*)(pBits + y * stride) + PianoRollBitmap.PixelWidth;
+                }
+                while (pRow < pRowEnd)
+                {
+                    *pRow = colorInt;
                     pRow++;
                 }
             }
@@ -1165,7 +1229,7 @@ namespace MIDI.UI.ViewModels
 
         private unsafe void DrawGrid(byte* pBits, int stride, Int32Rect rect)
         {
-            if (_midiFile == null) return;
+            if (_midiFile == null || PianoRollBitmap == null) return;
 
             int gridR = _gridColor.R;
             int gridG = _gridColor.G;
@@ -1189,10 +1253,12 @@ namespace MIDI.UI.ViewModels
                 int x = (int)(time.TotalSeconds * HorizontalZoom);
 
                 if (x > rect.X + rect.Width) break;
-                if (x >= rect.X)
+                if (x >= rect.X && x < PianoRollBitmap.PixelWidth)
                 {
                     for (int y = rect.Y; y < rect.Y + rect.Height; y++)
                     {
+                        if (y >= PianoRollBitmap.PixelHeight) break;
+
                         if ((y / 2) % 2 == 0)
                         {
                             int* pPixel = (int*)(pBits + y * stride + x * 4);
@@ -1209,16 +1275,26 @@ namespace MIDI.UI.ViewModels
             int hLineColorInt = (hLineA << 24) | (hLineR << 16) | (hLineG << 8) | hLineB;
 
             double noteHeight = 20.0 * VerticalZoom / KeyYScale;
+            if (noteHeight <= 0) noteHeight = 20;
+
             int startNote = MaxNoteNumber - (int)Math.Floor((rect.Y + rect.Height) / noteHeight);
             int endNote = MaxNoteNumber - (int)Math.Floor(rect.Y / noteHeight);
 
             for (int i = startNote; i <= endNote; i++)
             {
+                if (i < 0 || i > MaxNoteNumber) continue;
+
                 int y = (int)((MaxNoteNumber - i) * noteHeight);
-                if (y >= rect.Y && y < rect.Y + rect.Height)
+                if (y >= rect.Y && y < rect.Y + rect.Height && y < PianoRollBitmap.PixelHeight)
                 {
                     int* pRow = (int*)(pBits + y * stride) + rect.X;
-                    for (int x = 0; x < rect.Width; x++)
+                    int* pRowEnd = pRow + rect.Width;
+                    if (pRowEnd > (int*)(pBits + y * stride) + PianoRollBitmap.PixelWidth)
+                    {
+                        pRowEnd = (int*)(pBits + y * stride) + PianoRollBitmap.PixelWidth;
+                    }
+
+                    while (pRow < pRowEnd)
                     {
                         *pRow = hLineColorInt;
                         pRow++;
