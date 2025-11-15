@@ -60,8 +60,11 @@ namespace MIDI.UI.ViewModels.MidiEditor
             get => _centOffset;
             set
             {
-                if (SetField(ref _centOffset, value))
+                if (_centOffset != value)
                 {
+                    _parentViewModel.RequestNoteRedraw(this);
+                    _centOffset = value;
+                    OnPropertyChanged();
                     OnPropertyChanged(nameof(Y));
                     OnPropertyChanged(nameof(CentOffsetText));
                     _parentViewModel.RequestNoteRedraw(this);
@@ -338,6 +341,8 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
         public void UpdateNote(long newStartTicks, long newDurationTicks)
         {
+            _parentViewModel.RequestNoteRedraw(this);
+
             _noteOnEvent.AbsoluteTime = newStartTicks;
             _noteOnEvent.NoteLength = (int)newDurationTicks;
             if (_noteOnEvent.OffEvent != null)
@@ -351,6 +356,8 @@ namespace MIDI.UI.ViewModels.MidiEditor
             OnPropertyChanged(nameof(Duration));
             OnPropertyChanged(nameof(X));
             OnPropertyChanged(nameof(Width));
+
+            _parentViewModel.RequestNoteRedraw(this);
         }
 
         public TimeSpan StartTime => _startTime;

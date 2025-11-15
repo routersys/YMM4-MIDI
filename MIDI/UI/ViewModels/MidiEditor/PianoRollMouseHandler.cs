@@ -175,7 +175,6 @@ namespace MIDI.UI.ViewModels.MidiEditor
             e.Handled = true;
         }
 
-
         public void OnPianoRollMouseMove(Point position, MouseEventArgs e)
         {
             if (e.LeftButton != MouseButtonState.Pressed || _viewModel.MidiFile == null) return;
@@ -252,7 +251,6 @@ namespace MIDI.UI.ViewModels.MidiEditor
                                 note.NoteNumber = newNoteNumber;
                             }
                             note.UpdateNote(newStartTicks, originalDurationTicks);
-                            _viewModel.RequestNoteRedraw(note);
                         }
                         break;
                     case DragMode.ResizeRight:
@@ -271,7 +269,6 @@ namespace MIDI.UI.ViewModels.MidiEditor
                             }
                             var newDurationTicks = Math.Max(1, newEndTicks - startTicks);
                             noteToResize.UpdateNote(startTicks, newDurationTicks);
-                            _viewModel.RequestNoteRedraw(noteToResize);
                         }
                         break;
                     case DragMode.ResizeLeft:
@@ -296,7 +293,6 @@ namespace MIDI.UI.ViewModels.MidiEditor
                                 newStartTicks = endTicks - 1;
                             }
                             noteToResize.UpdateNote(newStartTicks, newDurationTicks);
-                            _viewModel.RequestNoteRedraw(noteToResize);
                         }
                         break;
                 }
