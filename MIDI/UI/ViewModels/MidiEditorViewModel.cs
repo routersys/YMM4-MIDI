@@ -286,8 +286,43 @@ namespace MIDI.UI.ViewModels
             set => SetField(ref _isMultipleNotesSelected, value);
         }
 
+        private GridLength _pianoKeysWidth = new GridLength(120);
+        private double _lastPianoKeysWidthValue = 120;
+
+        public GridLength PianoKeysWidth
+        {
+            get => _pianoKeysWidth;
+            set
+            {
+                if (SetField(ref _pianoKeysWidth, value))
+                {
+                    if (value.Value > 0)
+                    {
+                        _lastPianoKeysWidthValue = value.Value;
+                    }
+                }
+            }
+        }
+
         private bool _isPianoKeysVisible = true;
-        public bool IsPianoKeysVisible { get => _isPianoKeysVisible; set => SetField(ref _isPianoKeysVisible, value); }
+        public bool IsPianoKeysVisible
+        {
+            get => _isPianoKeysVisible;
+            set
+            {
+                if (SetField(ref _isPianoKeysVisible, value))
+                {
+                    if (value)
+                    {
+                        PianoKeysWidth = new GridLength(_lastPianoKeysWidthValue);
+                    }
+                    else
+                    {
+                        PianoKeysWidth = new GridLength(0);
+                    }
+                }
+            }
+        }
 
         private bool _isPianoRollVisible = true;
         public bool IsPianoRollVisible { get => _isPianoRollVisible; set => SetField(ref _isPianoRollVisible, value); }
@@ -655,7 +690,6 @@ namespace MIDI.UI.ViewModels
 
         private Color _gridColor;
         private Color _horizontalLineColor;
-        private Color _backgroundColor;
 
         private Color _whiteKeyBackgroundColor;
         private Color _blackKeyBackgroundColor;
@@ -1074,7 +1108,7 @@ namespace MIDI.UI.ViewModels
         private Rect GetNoteRectWPF(NoteViewModel note)
         {
             double x = note.StartTime.TotalSeconds * HorizontalZoom;
-            double y = (MaxNoteNumber - note.NoteNumber - 1) * 20.0 * VerticalZoom / KeyYScale + (note.CentOffset / 100.0 * 20.0 * VerticalZoom / KeyYScale);
+            double y = (MaxNoteNumber - note.NoteNumber) * 20.0 * VerticalZoom / KeyYScale + (note.CentOffset / 100.0 * 20.0 * VerticalZoom / KeyYScale);
             double width = Math.Max(1.0, note.Duration.TotalSeconds * HorizontalZoom);
             double height = 20.0 * VerticalZoom / KeyYScale;
 
@@ -1187,7 +1221,7 @@ namespace MIDI.UI.ViewModels
             {
                 if (y >= PianoRollBitmap.PixelHeight) break;
 
-                int noteNumber = MaxNoteNumber - (int)Math.Floor(y / noteHeight) - 1;
+                int noteNumber = MaxNoteNumber - (int)Math.Floor(y / noteHeight);
                 if (noteNumber < 0 || noteNumber > MaxNoteNumber)
                 {
                     int* pRowOutOfRange = (int*)(pBits + y * stride);
@@ -1388,12 +1422,27 @@ namespace MIDI.UI.ViewModels
             }
         }
 
+        public List<NoteViewModel> HitTestNotes(Rect rect)
+        {
+            var minTime = PositionToTime(rect.Left);
+            var maxTime = PositionToTime(rect.Right);
+            var minNote = MaxNoteNumber - (int)Math.Floor(rect.Bottom / NoteHeight);
+            var maxNote = MaxNoteNumber - (int)Math.Floor(rect.Top / NoteHeight);
+
+            return AllNotes.Where(n =>
+                n.StartTime < maxTime &&
+                (n.StartTime + n.Duration) > minTime &&
+                n.NoteNumber >= minNote &&
+                n.NoteNumber <= maxNote
+            ).ToList();
+        }
+
         public NoteViewModel? HitTestNote(Point position)
         {
             if (_midiFile == null) return null;
 
             var time = PositionToTime(position.X);
-            var noteNumber = MaxNoteNumber - (int)Math.Floor(position.Y / (20.0 * VerticalZoom / KeyYScale)) - 1;
+            var noteNumber = MaxNoteNumber - (int)Math.Floor(position.Y / NoteHeight);
 
             if (noteNumber < 0 || noteNumber > MaxNoteNumber) return null;
 
@@ -1402,21 +1451,6 @@ namespace MIDI.UI.ViewModels
                 n.StartTime <= time &&
                 (n.StartTime + n.Duration) >= time
             );
-        }
-
-        public List<NoteViewModel> HitTestNotes(Rect rect)
-        {
-            var minTime = PositionToTime(rect.Left);
-            var maxTime = PositionToTime(rect.Right);
-            var minNote = MaxNoteNumber - (int)Math.Floor(rect.Bottom / (20.0 * VerticalZoom / KeyYScale)) - 1;
-            var maxNote = MaxNoteNumber - (int)Math.Floor(rect.Top / (20.0 * VerticalZoom / KeyYScale)) - 1;
-
-            return AllNotes.Where(n =>
-                n.StartTime < maxTime &&
-                (n.StartTime + n.Duration) > minTime &&
-                n.NoteNumber >= minNote &&
-                n.NoteNumber <= maxNote
-            ).ToList();
         }
 
         public void UpdateContextMenuState(Point position)
@@ -2653,8 +2687,8 @@ namespace MIDI.UI.ViewModels
                 ticks = TimeToTicks(time);
             }
 
-            var noteNumber = MaxNoteNumber - (int)Math.Floor(position.Y / (20.0 * VerticalZoom)) - 1;
-            if (noteNumber < 0 || noteNumber > 127) return;
+            var noteNumber = MaxNoteNumber - (int)Math.Floor(position.Y / NoteHeight);
+            if (noteNumber < 0 || noteNumber > MaxNoteNumber) return;
 
             var durationTicks = (long)GetTicksPerGrid();
             if (durationTicks <= 0) durationTicks = _midiFile.DeltaTicksPerQuarterNote / 4;

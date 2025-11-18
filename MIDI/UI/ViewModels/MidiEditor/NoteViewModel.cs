@@ -453,7 +453,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
 
         public double X => StartTime.TotalSeconds * _parentViewModel.HorizontalZoom;
-        public double Y => (_parentViewModel.MaxNoteNumber - NoteNumber - 1) * 20.0 * _parentViewModel.VerticalZoom / _parentViewModel.KeyYScale + (_centOffset / 100.0 * 20.0 * _parentViewModel.VerticalZoom / _parentViewModel.KeyYScale);
+        public double Y => (_parentViewModel.MaxNoteNumber - NoteNumber) * 20.0 * _parentViewModel.VerticalZoom / _parentViewModel.KeyYScale + (_centOffset / 100.0 * 20.0 * _parentViewModel.VerticalZoom / _parentViewModel.KeyYScale);
         public double Width => Math.Max(1.0, Duration.TotalSeconds * _parentViewModel.HorizontalZoom);
         public double Height => 20.0 * _parentViewModel.VerticalZoom / _parentViewModel.KeyYScale;
     }

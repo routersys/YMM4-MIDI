@@ -327,161 +327,166 @@
                     </avalonDock:DockingManager.Theme>
                     <avalonDockLayout:LayoutRoot>
                         <avalonDockLayout:LayoutPanel Orientation="Horizontal">
-                            <avalonDockLayout:LayoutAnchorablePane DockWidth="120">
-                                <avalonDockLayout:LayoutAnchorable ContentId="pianoKeys" Title="ピアノキー" CanClose="False">
-                                    <ScrollViewer Name="PianoKeysScrollViewer" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled" ScrollChanged="PianoRollScrollViewer_ScrollChanged">
-                                        <ItemsControl ItemsSource="{Binding PianoKeys}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <VirtualizingStackPanel />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid Height="{Binding Height}" PreviewMouseDown="PianoKey_PreviewMouseDown" PreviewMouseUp="PianoKey_PreviewMouseUp" MouseEnter="PianoKey_MouseEnter" MouseLeave="PianoKey_MouseLeave">
-                                                        <Border BorderBrush="#B0B0B0" BorderThickness="0,0,1,1">
-                                                            <Border.Style>
-                                                                <Style TargetType="Border">
-                                                                    <Setter Property="Background">
-                                                                        <Setter.Value>
-                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                <GradientStop Color="#FFFFFF" Offset="0.0" />
-                                                                                <GradientStop Color="#E8E8E8" Offset="1.0" />
-                                                                            </LinearGradientBrush>
-                                                                        </Setter.Value>
-                                                                    </Setter>
-                                                                    <Setter Property="Effect">
-                                                                        <Setter.Value>
-                                                                            <DropShadowEffect ShadowDepth="2" Direction="270" Color="Black" Opacity="0.2" BlurRadius="2" />
-                                                                        </Setter.Value>
-                                                                    </Setter>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding IsBlackKey}" Value="True">
-                                                                            <Setter Property="Background">
-                                                                                <Setter.Value>
-                                                                                    <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                                                                        <GradientStop Color="#555555" Offset="0.0" />
-                                                                                        <GradientStop Color="#222222" Offset="1.0" />
-                                                                                    </LinearGradientBrush>
-                                                                                </Setter.Value>
-                                                                            </Setter>
-                                                                            <Setter Property="Panel.ZIndex" Value="1" />
-                                                                            <Setter Property="Margin" Value="0,0,40,0" />
-                                                                            <Setter Property="BorderThickness" Value="0" />
-                                                                            <Setter Property="Effect">
-                                                                                <Setter.Value>
-                                                                                    <DropShadowEffect ShadowDepth="3" Direction="270" Color="Black" Opacity="0.5" BlurRadius="4" />
-                                                                                </Setter.Value>
-                                                                            </Setter>
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding IsPressed}" Value="True">
-                                                                            <Setter Property="Background">
-                                                                                <Setter.Value>
-                                                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                        <GradientStop Color="#AAAAAA" Offset="0.0" />
-                                                                                        <GradientStop Color="#888888" Offset="1.0" />
-                                                                                    </LinearGradientBrush>
-                                                                                </Setter.Value>
-                                                                            </Setter>
-                                                                            <Setter Property="Effect" Value="{x:Null}" />
-                                                                        </DataTrigger>
-                                                                        <MultiDataTrigger>
-                                                                            <MultiDataTrigger.Conditions>
-                                                                                <Condition Binding="{Binding IsPressed}" Value="True" />
-                                                                                <Condition Binding="{Binding IsBlackKey}" Value="True" />
-                                                                            </MultiDataTrigger.Conditions>
-                                                                            <Setter Property="Background">
-                                                                                <Setter.Value>
-                                                                                    <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                                                                        <GradientStop Color="#333333" Offset="0.0" />
-                                                                                        <GradientStop Color="#111111" Offset="1.0" />
-                                                                                    </LinearGradientBrush>
-                                                                                </Setter.Value>
-                                                                            </Setter>
-                                                                            <Setter Property="Effect" Value="{x:Null}" />
-                                                                        </MultiDataTrigger>
-                                                                        <DataTrigger Binding="{Binding IsKeyboardPlaying}" Value="True">
-                                                                            <Setter Property="Background" Value="OrangeRed" />
-                                                                        </DataTrigger>
-                                                                        <MultiDataTrigger>
-                                                                            <MultiDataTrigger.Conditions>
-                                                                                <Condition Binding="{Binding IsKeyboardPlaying}" Value="True" />
-                                                                                <Condition Binding="{Binding IsBlackKey}" Value="True" />
-                                                                            </MultiDataTrigger.Conditions>
-                                                                            <Setter Property="Background" Value="DarkRed" />
-                                                                        </MultiDataTrigger>
-                                                                        <DataTrigger Binding="{Binding IsPlaying}" Value="True">
-                                                                            <Setter Property="Background" Value="LightGreen" />
-                                                                        </DataTrigger>
-                                                                        <MultiDataTrigger>
-                                                                            <MultiDataTrigger.Conditions>
-                                                                                <Condition Binding="{Binding IsPlaying}" Value="True" />
-                                                                                <Condition Binding="{Binding IsBlackKey}" Value="True" />
-                                                                            </MultiDataTrigger.Conditions>
-                                                                            <Setter Property="Background" Value="DarkGreen" />
-                                                                        </MultiDataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </Border.Style>
-                                                            <Viewbox Stretch="Uniform" StretchDirection="Both">
-                                                                <Grid Width="100" Height="18">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="*" />
-                                                                        <ColumnDefinition Width="*" />
-                                                                    </Grid.ColumnDefinitions>
-                                                                    <TextBlock Text="{Binding NoteName}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0">
-                                                                        <TextBlock.Style>
-                                                                            <Style TargetType="TextBlock">
-                                                                                <Setter Property="Foreground" Value="Black" />
-                                                                                <Style.Triggers>
-                                                                                    <DataTrigger Binding="{Binding IsBlackKey}" Value="True">
-                                                                                        <Setter Property="Foreground" Value="White" />
-                                                                                    </DataTrigger>
-                                                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                                        <Setter Property="Foreground" Value="White" />
-                                                                                    </DataTrigger>
-                                                                                    <DataTrigger Binding="{Binding IsPressed}" Value="True">
-                                                                                        <Setter Property="Foreground" Value="White" />
-                                                                                    </DataTrigger>
-                                                                                    <DataTrigger Binding="{Binding IsKeyboardPlaying}" Value="True">
-                                                                                        <Setter Property="Foreground" Value="White" />
-                                                                                    </DataTrigger>
-                                                                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
-                                                                                        <Setter Property="Foreground" Value="Black" />
-                                                                                    </DataTrigger>
-                                                                                    <MultiDataTrigger>
-                                                                                        <MultiDataTrigger.Conditions>
-                                                                                            <Condition Binding="{Binding IsPlaying}" Value="True" />
-                                                                                            <Condition Binding="{Binding IsBlackKey}" Value="True" />
-                                                                                        </MultiDataTrigger.Conditions>
-                                                                                        <Setter Property="Foreground" Value="White" />
-                                                                                    </MultiDataTrigger>
-                                                                                </Style.Triggers>
-                                                                            </Style>
-                                                                        </TextBlock.Style>
-                                                                    </TextBlock>
-                                                                    <TextBlock Grid.Column="1" Text="{Binding AdditionalNoteName}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,0" Foreground="Gray" />
-                                                                </Grid>
-                                                            </Viewbox>
-                                                        </Border>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </ScrollViewer>
-                                </avalonDockLayout:LayoutAnchorable>
-                            </avalonDockLayout:LayoutAnchorablePane>
-
                             <avalonDockLayout:LayoutAnchorablePane>
-                                <avalonDockLayout:LayoutAnchorable ContentId="pianoRoll" Title="ピアノロール" CanClose="False">
+                                <avalonDockLayout:LayoutAnchorable ContentId="pianoRoll" Title="MIDIエディター" CanClose="False">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="*" />
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="{Binding PianoKeysWidth, Mode=TwoWay}" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
 
-                                        <ScrollViewer Grid.Row="0" Name="RulerScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" ScrollChanged="PianoRollScrollViewer_ScrollChanged" PreviewMouseDown="TimeBar_MouseDown" PreviewMouseMove="TimeBar_MouseMove" PreviewMouseUp="TimeBar_MouseUp">
+                                        <Border Grid.Row="0" Grid.Column="0" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="#B0B0B0" BorderThickness="0,0,1,1"/>
+
+                                        <ScrollViewer Grid.Row="1" Grid.Column="0" Name="PianoKeysScrollViewer" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled" ScrollChanged="PianoRollScrollViewer_ScrollChanged">
+                                            <ItemsControl ItemsSource="{Binding PianoKeys}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <VirtualizingStackPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Height="{Binding Height}" PreviewMouseDown="PianoKey_PreviewMouseDown" PreviewMouseUp="PianoKey_PreviewMouseUp" MouseEnter="PianoKey_MouseEnter" MouseLeave="PianoKey_MouseLeave">
+                                                            <Border BorderBrush="#B0B0B0" BorderThickness="0,0,1,1">
+                                                                <Border.Style>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="Background">
+                                                                            <Setter.Value>
+                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                    <GradientStop Color="#FFFFFF" Offset="0.0" />
+                                                                                    <GradientStop Color="#E8E8E8" Offset="1.0" />
+                                                                                </LinearGradientBrush>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                        <Setter Property="Effect">
+                                                                            <Setter.Value>
+                                                                                <DropShadowEffect ShadowDepth="2" Direction="270" Color="Black" Opacity="0.2" BlurRadius="2" />
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsBlackKey}" Value="True">
+                                                                                <Setter Property="Background">
+                                                                                    <Setter.Value>
+                                                                                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                                                                            <GradientStop Color="#555555" Offset="0.0" />
+                                                                                            <GradientStop Color="#222222" Offset="1.0" />
+                                                                                        </LinearGradientBrush>
+                                                                                    </Setter.Value>
+                                                                                </Setter>
+                                                                                <Setter Property="Panel.ZIndex" Value="1" />
+                                                                                <Setter Property="Margin" Value="0,0,40,0" />
+                                                                                <Setter Property="BorderThickness" Value="0" />
+                                                                                <Setter Property="Effect">
+                                                                                    <Setter.Value>
+                                                                                        <DropShadowEffect ShadowDepth="3" Direction="270" Color="Black" Opacity="0.5" BlurRadius="4" />
+                                                                                    </Setter.Value>
+                                                                                </Setter>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding IsPressed}" Value="True">
+                                                                                <Setter Property="Background">
+                                                                                    <Setter.Value>
+                                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                            <GradientStop Color="#AAAAAA" Offset="0.0" />
+                                                                                            <GradientStop Color="#888888" Offset="1.0" />
+                                                                                        </LinearGradientBrush>
+                                                                                    </Setter.Value>
+                                                                                </Setter>
+                                                                                <Setter Property="Effect" Value="{x:Null}" />
+                                                                            </DataTrigger>
+                                                                            <MultiDataTrigger>
+                                                                                <MultiDataTrigger.Conditions>
+                                                                                    <Condition Binding="{Binding IsPressed}" Value="True" />
+                                                                                    <Condition Binding="{Binding IsBlackKey}" Value="True" />
+                                                                                </MultiDataTrigger.Conditions>
+                                                                                <Setter Property="Background">
+                                                                                    <Setter.Value>
+                                                                                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                                                                            <GradientStop Color="#333333" Offset="0.0" />
+                                                                                            <GradientStop Color="#111111" Offset="1.0" />
+                                                                                        </LinearGradientBrush>
+                                                                                    </Setter.Value>
+                                                                                </Setter>
+                                                                                <Setter Property="Effect" Value="{x:Null}" />
+                                                                            </MultiDataTrigger>
+                                                                            <DataTrigger Binding="{Binding IsKeyboardPlaying}" Value="True">
+                                                                                <Setter Property="Background" Value="OrangeRed" />
+                                                                            </DataTrigger>
+                                                                            <MultiDataTrigger>
+                                                                                <MultiDataTrigger.Conditions>
+                                                                                    <Condition Binding="{Binding IsKeyboardPlaying}" Value="True" />
+                                                                                    <Condition Binding="{Binding IsBlackKey}" Value="True" />
+                                                                                </MultiDataTrigger.Conditions>
+                                                                                <Setter Property="Background" Value="DarkRed" />
+                                                                            </MultiDataTrigger>
+                                                                            <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                                                                <Setter Property="Background" Value="LightGreen" />
+                                                                            </DataTrigger>
+                                                                            <MultiDataTrigger>
+                                                                                <MultiDataTrigger.Conditions>
+                                                                                    <Condition Binding="{Binding IsPlaying}" Value="True" />
+                                                                                    <Condition Binding="{Binding IsBlackKey}" Value="True" />
+                                                                                </MultiDataTrigger.Conditions>
+                                                                                <Setter Property="Background" Value="DarkGreen" />
+                                                                            </MultiDataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Border.Style>
+                                                                <Viewbox Stretch="Uniform" StretchDirection="Both">
+                                                                    <Grid Width="100" Height="18">
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="*" />
+                                                                            <ColumnDefinition Width="*" />
+                                                                        </Grid.ColumnDefinitions>
+                                                                        <TextBlock Text="{Binding NoteName}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0">
+                                                                            <TextBlock.Style>
+                                                                                <Style TargetType="TextBlock">
+                                                                                    <Setter Property="Foreground" Value="Black" />
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Binding="{Binding IsBlackKey}" Value="True">
+                                                                                            <Setter Property="Foreground" Value="White" />
+                                                                                        </DataTrigger>
+                                                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                                            <Setter Property="Foreground" Value="White" />
+                                                                                        </DataTrigger>
+                                                                                        <DataTrigger Binding="{Binding IsPressed}" Value="True">
+                                                                                            <Setter Property="Foreground" Value="White" />
+                                                                                        </DataTrigger>
+                                                                                        <DataTrigger Binding="{Binding IsKeyboardPlaying}" Value="True">
+                                                                                            <Setter Property="Foreground" Value="White" />
+                                                                                        </DataTrigger>
+                                                                                        <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                                                                            <Setter Property="Foreground" Value="Black" />
+                                                                                        </DataTrigger>
+                                                                                        <MultiDataTrigger>
+                                                                                            <MultiDataTrigger.Conditions>
+                                                                                                <Condition Binding="{Binding IsPlaying}" Value="True" />
+                                                                                                <Condition Binding="{Binding IsBlackKey}" Value="True" />
+                                                                                            </MultiDataTrigger.Conditions>
+                                                                                            <Setter Property="Foreground" Value="White" />
+                                                                                        </MultiDataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </TextBlock.Style>
+                                                                        </TextBlock>
+                                                                        <TextBlock Grid.Column="1" Text="{Binding AdditionalNoteName}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,0" Foreground="Gray" />
+                                                                    </Grid>
+                                                                </Viewbox>
+                                                            </Border>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+
+                                        <GridSplitter Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" ResizeBehavior="PreviousAndNext" ShowsPreview="True" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+
+                                        <ScrollViewer Grid.Row="0" Grid.Column="2" Name="RulerScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" ScrollChanged="PianoRollScrollViewer_ScrollChanged" PreviewMouseDown="TimeBar_MouseDown" PreviewMouseMove="TimeBar_MouseMove" PreviewMouseUp="TimeBar_MouseUp">
                                             <Grid Width="{Binding PianoRollWidth}">
                                                 <ItemsControl ItemsSource="{Binding TimeRuler}">
                                                     <ItemsControl.ItemsPanel>
@@ -506,7 +511,7 @@
                                             </Grid>
                                         </ScrollViewer>
 
-                                        <ScrollViewer Grid.Row="1" Name="PianoRollScrollViewer" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto" ScrollChanged="PianoRollScrollViewer_ScrollChanged" PreviewMouseWheel="PianoRollScrollViewer_PreviewMouseWheel">
+                                        <ScrollViewer Grid.Row="1" Grid.Column="2" Name="PianoRollScrollViewer" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto" ScrollChanged="PianoRollScrollViewer_ScrollChanged" PreviewMouseWheel="PianoRollScrollViewer_PreviewMouseWheel">
                                             <Grid MouseLeftButtonDown="PianoRoll_MouseDown" MouseMove="PianoRoll_MouseMove" MouseLeftButtonUp="PianoRoll_MouseUp" MouseRightButtonDown="PianoRoll_MouseRightButtonDown" Background="Transparent">
                                                 <Grid.ContextMenu>
                                                     <ContextMenu>
@@ -693,7 +698,7 @@
                                             </Grid>
                                         </ScrollViewer>
 
-                                        <Grid Grid.Row="2" Height="60" Visibility="{Binding ShowThumbnail, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <Grid Grid.Row="2" Grid.Column="2" Height="60" Visibility="{Binding ShowThumbnail, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <Border Background="#55FFFFFF" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="0,1,0,0">
                                                 <Canvas Name="ThumbnailCanvas" MouseLeftButtonDown="Thumbnail_MouseDown" MouseMove="Thumbnail_MouseMove" MouseLeftButtonUp="Thumbnail_MouseUp" MouseEnter="Thumbnail_MouseEnter" MouseLeave="Thumbnail_MouseLeave">
                                                     <Image Source="{Binding ThumbnailBitmap}" Stretch="Fill" Width="{Binding ActualWidth, ElementName=ThumbnailCanvas}" Height="{Binding ActualHeight, ElementName=ThumbnailCanvas}" />
