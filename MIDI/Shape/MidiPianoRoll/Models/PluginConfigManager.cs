@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
+using MIDI.Utils;
 
 namespace MIDI.Shape.MidiPianoRoll.Models
 {
@@ -35,57 +34,25 @@ namespace MIDI.Shape.MidiPianoRoll.Models
             if (_isLoaded) return;
             _isLoaded = true;
 
-            if (!File.Exists(ConfigFilePath)) return;
+            var ini = new IniFile();
+            ini.Load(ConfigFilePath);
 
-            var configData = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
-            Dictionary<string, string>? currentSection = null;
+            var widthStr = ini.GetValue(SectionEffectPopup, KeyWidth);
+            if (double.TryParse(widthStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var width))
+                EffectAddPopupWidth = width;
 
-            try
+            var heightStr = ini.GetValue(SectionEffectPopup, KeyHeight);
+            if (double.TryParse(heightStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var height))
+                EffectAddPopupHeight = height;
+
+            var posStr = ini.GetValue(SectionEffectPopup, KeySplitterPos);
+            if (double.TryParse(posStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var pos))
+                EffectAddPopupSplitterPosition = pos;
+
+            var favoritesStr = ini.GetValue(SectionEffectFavorites, KeyFavoritePlugins);
+            if (!string.IsNullOrEmpty(favoritesStr))
             {
-                var lines = File.ReadAllLines(ConfigFilePath);
-                foreach (var line in lines)
-                {
-                    var trimmedLine = line.Trim();
-                    if (trimmedLine.StartsWith(";") || string.IsNullOrEmpty(trimmedLine)) continue;
-
-                    if (trimmedLine.StartsWith("[") && trimmedLine.EndsWith("]"))
-                    {
-                        var sectionName = trimmedLine.Substring(1, trimmedLine.Length - 2);
-                        currentSection = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                        configData[sectionName] = currentSection;
-                    }
-                    else if (currentSection != null)
-                    {
-                        var parts = trimmedLine.Split(new[] { '=' }, 2);
-                        if (parts.Length == 2)
-                        {
-                            currentSection[parts[0].Trim()] = parts[1].Trim();
-                        }
-                    }
-                }
-
-                if (configData.TryGetValue(SectionEffectPopup, out var popupConfig))
-                {
-                    if (popupConfig.TryGetValue(KeyWidth, out var widthStr) && double.TryParse(widthStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var width))
-                        EffectAddPopupWidth = width;
-
-                    if (popupConfig.TryGetValue(KeyHeight, out var heightStr) && double.TryParse(heightStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var height))
-                        EffectAddPopupHeight = height;
-
-                    if (popupConfig.TryGetValue(KeySplitterPos, out var posStr) && double.TryParse(posStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var pos))
-                        EffectAddPopupSplitterPosition = pos;
-                }
-
-                if (configData.TryGetValue(SectionEffectFavorites, out var favoritesConfig))
-                {
-                    if (favoritesConfig.TryGetValue(KeyFavoritePlugins, out var favoritesStr))
-                    {
-                        FavoritePlugins = new HashSet<string>(favoritesStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries), StringComparer.OrdinalIgnoreCase);
-                    }
-                }
-            }
-            catch (Exception)
-            {
+                FavoritePlugins = new HashSet<string>(favoritesStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries), StringComparer.OrdinalIgnoreCase);
             }
         }
 
@@ -93,23 +60,15 @@ namespace MIDI.Shape.MidiPianoRoll.Models
         {
             try
             {
-                if (!Directory.Exists(ConfigDir))
-                {
-                    Directory.CreateDirectory(ConfigDir);
-                }
+                var ini = new IniFile();
 
-                var sb = new StringBuilder();
-                sb.AppendLine($"; {ConfigFileName} - Config for MidiPianoRoll Plugin");
-                sb.AppendLine();
-                sb.AppendLine($"[{SectionEffectPopup}]");
-                sb.AppendLine($"{KeyWidth}={EffectAddPopupWidth.ToString(CultureInfo.InvariantCulture)}");
-                sb.AppendLine($"{KeyHeight}={EffectAddPopupHeight.ToString(CultureInfo.InvariantCulture)}");
-                sb.AppendLine($"{KeySplitterPos}={EffectAddPopupSplitterPosition.ToString(CultureInfo.InvariantCulture)}");
-                sb.AppendLine();
-                sb.AppendLine($"[{SectionEffectFavorites}]");
-                sb.AppendLine($"{KeyFavoritePlugins}={string.Join(",", FavoritePlugins)}");
+                ini.SetValue(SectionEffectPopup, KeyWidth, EffectAddPopupWidth.ToString(CultureInfo.InvariantCulture));
+                ini.SetValue(SectionEffectPopup, KeyHeight, EffectAddPopupHeight.ToString(CultureInfo.InvariantCulture));
+                ini.SetValue(SectionEffectPopup, KeySplitterPos, EffectAddPopupSplitterPosition.ToString(CultureInfo.InvariantCulture));
 
-                File.WriteAllText(ConfigFilePath, sb.ToString());
+                ini.SetValue(SectionEffectFavorites, KeyFavoritePlugins, string.Join(",", FavoritePlugins));
+
+                ini.Save(ConfigFilePath);
             }
             catch (Exception)
             {
