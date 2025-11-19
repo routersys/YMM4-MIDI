@@ -91,8 +91,15 @@ namespace MIDI.Utils
             }
 
             var sb = new StringBuilder();
+            var isFirstSection = true;
+
             foreach (var section in _data)
             {
+                if (!isFirstSection)
+                {
+                    sb.AppendLine();
+                }
+
                 sb.AppendLine($"[{section.Key}]");
                 foreach (var kvp in section.Value)
                 {
@@ -103,7 +110,8 @@ namespace MIDI.Utils
                     }
                     sb.AppendLine($"{kvp.Key}={value}");
                 }
-                sb.AppendLine();
+
+                isFirstSection = false;
             }
 
             File.WriteAllText(filePath, sb.ToString());
