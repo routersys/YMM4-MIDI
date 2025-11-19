@@ -1,22 +1,23 @@
-﻿using System;
+﻿using MIDI.UI.ViewModels;
+using MIDI.UI.ViewModels.MidiEditor.Modals;
+using MIDI.UI.ViewModels.MidiEditor.Settings;
+using MIDI.Utils;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using MIDI.UI.ViewModels;
-using MIDI.UI.ViewModels.MidiEditor.Modals;
-using MIDI.UI.ViewModels.MidiEditor.Settings;
-using MIDI.Utils;
 using YukkuriMovieMaker.Plugin;
 
 namespace MIDI.Configuration.Models
@@ -328,6 +329,46 @@ namespace MIDI.Configuration.Models
             Save();
             return true;
         }
+
+        public void SaveLayout(double keyWidth)
+        {
+            if (keyWidth <= 0) return;
+            try
+            {
+                var path = Path.Combine(ConfigDir, "layout.ini");
+                var ini = new IniFile();
+                ini.Load(path);
+                ini.SetValue("View", "KeyWidth", keyWidth.ToString(CultureInfo.InvariantCulture));
+                ini.Save(path);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("レイアウト設定の保存中にエラーが発生しました。", ex);
+            }
+        }
+
+        public double LoadLayout()
+        {
+            try
+            {
+                var path = Path.Combine(ConfigDir, "layout.ini");
+                if (!File.Exists(path)) return 120.0;
+
+                var ini = new IniFile();
+                ini.Load(path);
+                var widthStr = ini.GetValue("View", "KeyWidth");
+
+                if (double.TryParse(widthStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var width))
+                {
+                    return width > 0 ? width : 120.0;
+                }
+                return 120.0;
+            }
+            catch
+            {
+                return 120.0;
+            }
+        }
     }
 
     [SettingGroup("表示")]
@@ -548,6 +589,110 @@ namespace MIDI.Configuration.Models
             field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName ?? string.Empty));
             return true;
+        }
+    }
+
+    public class IniFile
+    {
+        private readonly Dictionary<string, Dictionary<string, string>> _data = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+
+        private string NormalizeValue(string value)
+        {
+            if (value.Length >= 2 && ((value.StartsWith("\"") && value.EndsWith("\"")) || (value.StartsWith("'") && value.EndsWith("'"))))
+            {
+                return value.Substring(1, value.Length - 2);
+            }
+            return value;
+        }
+
+        public void Load(string filePath)
+        {
+            _data.Clear();
+
+            if (!File.Exists(filePath)) return;
+
+            var lines = File.ReadAllLines(filePath);
+            Dictionary<string, string> currentSection = null!;
+
+            foreach (var line in lines)
+            {
+                var trimmedLine = line.Trim();
+
+                if (string.IsNullOrEmpty(trimmedLine)) continue;
+
+                var content = trimmedLine;
+
+                var commentIndex = content.IndexOf(';');
+                if (commentIndex >= 0)
+                {
+                    content = content.Substring(0, commentIndex).Trim();
+                }
+
+                if (string.IsNullOrEmpty(content)) continue;
+
+                if (content.StartsWith("[") && content.EndsWith("]"))
+                {
+                    var sectionName = content.Substring(1, content.Length - 2);
+                    currentSection = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    _data[sectionName] = currentSection;
+                }
+                else if (currentSection != null)
+                {
+                    var parts = content.Split(new[] { '=' }, 2);
+                    if (parts.Length == 2)
+                    {
+                        var key = parts[0].Trim();
+                        var rawValue = parts[1].Trim();
+                        currentSection[key] = NormalizeValue(rawValue);
+                    }
+                }
+            }
+        }
+
+        public string GetValue(string section, string key, string defaultValue = "")
+        {
+            if (_data.TryGetValue(section, out var sectionData) && sectionData.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+            return defaultValue;
+        }
+
+        public void SetValue(string section, string key, string value)
+        {
+            if (!_data.TryGetValue(section, out var sectionData))
+            {
+                sectionData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                _data[section] = sectionData;
+            }
+            sectionData[key] = value;
+        }
+
+        public void Save(string filePath)
+        {
+            var dir = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            var sb = new StringBuilder();
+            foreach (var section in _data)
+            {
+                sb.AppendLine($"[{section.Key}]");
+                foreach (var kvp in section.Value)
+                {
+                    var value = kvp.Value;
+                    if (value.Contains(" ") || value.Contains(","))
+                    {
+                        value = $"\"{value}\"";
+                    }
+                    sb.AppendLine($"{kvp.Key}={value}");
+                }
+                sb.AppendLine();
+            }
+
+            File.WriteAllText(filePath, sb.ToString());
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using MessagePack;
+using Microsoft.Win32;
 using MIDI.Configuration.Models;
 using MIDI.Core;
 using MIDI.Core.Audio;
@@ -9,8 +10,10 @@ using MIDI.UI.ViewModels.MidiEditor;
 using MIDI.UI.ViewModels.MidiEditor.Modals;
 using MIDI.UI.ViewModels.MidiEditor.Settings;
 using MIDI.UI.Views.MidiEditor.Modals;
+using MIDI.Utils;
 using NAudio.Midi;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -19,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,9 +33,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using NAudioMidi = NAudio.Midi;
-using MessagePack;
-using System.Runtime.InteropServices;
-using System.Collections.Concurrent;
 
 namespace MIDI.UI.ViewModels
 {
@@ -713,7 +714,6 @@ namespace MIDI.UI.ViewModels
             renderThread.Start();
             _renderScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
-
             _filePath = filePath ?? "ファイルが選択されていません";
 
             MidiEditorSettings.Default.Note.PropertyChanged += Editor_Note_PropertyChanged;
@@ -751,6 +751,9 @@ namespace MIDI.UI.ViewModels
             };
 
             RefreshPianoKeys();
+
+            // ViewModel側でのロードを削除し、View側で確実に設定させる
+            // PianoKeysWidth = new GridLength(MidiEditorSettings.Default.LoadLayout());
 
             _playbackService = new PlaybackService(this);
             _playbackService.AudioChunkRendered += OnAudioChunkRendered;
@@ -1011,6 +1014,11 @@ namespace MIDI.UI.ViewModels
                 IsMidiFileLoaded = false;
             }
             LoadSoundFonts();
+        }
+
+        public void SaveLayout()
+        {
+            MidiEditorSettings.Default.SaveLayout(PianoKeysWidth.Value);
         }
 
         public void ThemeChanged(bool isDarkMode)

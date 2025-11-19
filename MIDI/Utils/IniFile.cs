@@ -26,7 +26,7 @@ namespace MIDI.Utils
             if (!File.Exists(filePath)) return;
 
             var lines = File.ReadAllLines(filePath);
-            Dictionary<string, string> currentSection = null;
+            Dictionary<string, string> currentSection = null!;
 
             foreach (var line in lines)
             {
@@ -63,7 +63,7 @@ namespace MIDI.Utils
             }
         }
 
-        public string GetValue(string section, string key, string defaultValue = null)
+        public string GetValue(string section, string key, string defaultValue = null!)
         {
             if (_data.TryGetValue(section, out var sectionData) && sectionData.TryGetValue(key, out var value))
             {

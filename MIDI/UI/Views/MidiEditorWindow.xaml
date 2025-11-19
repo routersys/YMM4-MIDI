@@ -336,9 +336,9 @@
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="{Binding PianoKeysWidth, Mode=TwoWay}" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition x:Name="PianoKeysColumn" Width="120" MinWidth="50" MaxWidth="400"/>
+                                            <ColumnDefinition Width="5"/>
+                                            <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
 
                                         <Border Grid.Row="0" Grid.Column="0" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="#B0B0B0" BorderThickness="0,0,1,1"/>

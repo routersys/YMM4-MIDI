@@ -45,6 +45,8 @@ namespace MIDI.UI.Views
             _viewModel = new MidiEditorViewModel(filePath);
             DataContext = _viewModel;
             _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+            ContentRendered += MidiEditorWindow_ContentRendered;
             Loaded += MidiEditorWindow_Loaded;
             Closing += MidiEditorWindow_Closing;
 
@@ -87,6 +89,24 @@ namespace MIDI.UI.Views
                     }
                 }
             }
+        }
+
+        private void MidiEditorWindow_ContentRendered(object? sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    var savedWidth = MidiEditorSettings.Default.LoadLayout();
+                    if (savedWidth > 0)
+                    {
+                        PianoKeysColumn.Width = new GridLength(savedWidth);
+                    }
+                }
+                catch
+                {
+                }
+            }), DispatcherPriority.ContextIdle);
         }
 
         private void MidiEditorWindow_Loaded(object sender, RoutedEventArgs e)
@@ -370,6 +390,12 @@ namespace MIDI.UI.Views
             catch (Exception)
             {
             }
+
+            try
+            {
+                MidiEditorSettings.Default.SaveLayout(PianoKeysColumn.Width.Value);
+            }
+            catch { }
 
             var serializer = new XmlLayoutSerializer(DockingManager);
             using (var writer = new StringWriter())
