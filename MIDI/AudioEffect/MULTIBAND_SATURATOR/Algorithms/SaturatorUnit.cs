@@ -4,14 +4,35 @@ namespace MIDI.AudioEffect.MULTIBAND_SATURATOR.Algorithms
 {
     public class SaturatorUnit
     {
+        private readonly PolyphaseResampler4x resampler;
+        private readonly SimpleDcBlocker dcBlocker;
         private double drive;
         private double levelDb;
         private double levelLinear;
+        private float driveCoef;
+
+        public SaturatorUnit()
+        {
+            resampler = new PolyphaseResampler4x();
+            dcBlocker = new SimpleDcBlocker();
+            Drive = 0;
+            LevelDb = 0;
+        }
+
+        public void Reset()
+        {
+            resampler.Reset();
+            dcBlocker.Reset();
+        }
 
         public double Drive
         {
             get => drive;
-            set => drive = Math.Max(0, value);
+            set
+            {
+                drive = Math.Max(0, value);
+                driveCoef = (float)(drive / 5.0);
+            }
         }
 
         public double LevelDb
@@ -24,33 +45,25 @@ namespace MIDI.AudioEffect.MULTIBAND_SATURATOR.Algorithms
             }
         }
 
-        public SaturatorUnit()
-        {
-            Drive = 0;
-            LevelDb = 0;
-        }
-
         public float Process(float input)
         {
-            float dry = input;
-            float driven = (float)(dry * (1.0 + drive * 0.5));
-
-            float saturated;
-            if (drive > 0)
+            if (drive < 0.1)
             {
-                saturated = (float)Math.Tanh(driven);
-
-                if (Math.Abs(driven) > 2.0)
-                {
-                    saturated = (float)(saturated * 0.9 + Math.Sin(driven) * 0.1);
-                }
-            }
-            else
-            {
-                saturated = dry;
+                return (float)(input * levelLinear);
             }
 
-            return (float)(saturated * levelLinear);
+            float processed = resampler.Process(input, ApplySaturation);
+            processed = dcBlocker.Process(processed);
+            return (float)(processed * levelLinear);
+        }
+
+        private float ApplySaturation(float x)
+        {
+            float xDriven = x * (1.0f + driveCoef);
+
+            double sat = Math.Tanh(xDriven);
+
+            return (float)sat;
         }
     }
 }
