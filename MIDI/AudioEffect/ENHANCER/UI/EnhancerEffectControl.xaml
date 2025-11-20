@@ -1,0 +1,358 @@
+﻿<UserControl x:Class="MIDI.AudioEffect.ENHANCER.UI.EnhancerEffectControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="clr-namespace:MIDI.AudioEffect.ENHANCER.UI"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=ui:EnhancerEffectViewModel}"
+             Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+             Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+             Height="260">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,0,2,0"/>
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        </Style>
+        <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="Slider" BasedOn="{StaticResource {x:Type Slider}}"/>
+        <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}"/>
+        <Style x:Key="MeterBar" TargetType="ProgressBar" BasedOn="{StaticResource {x:Type ProgressBar}}">
+            <Setter Property="Orientation" Value="Vertical"/>
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="160"/>
+            <Setter Property="Minimum" Value="-60"/>
+            <Setter Property="Maximum" Value="0"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+        </Style>
+
+        <Style x:Key="CircularSliderThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Grid>
+                            <Ellipse x:Name="ThumbEllipse"
+                                     Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+                                     Stroke="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                     StrokeThickness="1"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ThumbEllipse" Property="Fill" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter TargetName="ThumbEllipse" Property="Stroke" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="True">
+                                <Setter TargetName="ThumbEllipse" Property="Fill" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter TargetName="ThumbEllipse" Property="Stroke" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="VerticalSliderStyle" TargetType="{x:Type Slider}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Orientation" Value="Vertical"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Slider}">
+                        <Grid>
+                            <Border x:Name="TrackBorder"
+                                    Background="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                                    BorderBrush="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                    BorderThickness="1"
+                                    Width="4"
+                                    CornerRadius="2"/>
+                            <Track x:Name="PART_Track" IsDirectionReversed="False">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.DecreaseLarge}">
+                                        <RepeatButton.Style>
+                                            <Style TargetType="RepeatButton">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="RepeatButton">
+                                                            <Border Background="{TemplateBinding Background}"/>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </RepeatButton.Style>
+                                    </RepeatButton>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.IncreaseLarge}">
+                                        <RepeatButton.Style>
+                                            <Style TargetType="RepeatButton">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="RepeatButton">
+                                                            <Border Background="{TemplateBinding Background}"/>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </RepeatButton.Style>
+                                    </RepeatButton>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource CircularSliderThumb}"/>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <CubicEase x:Key="EaseOut" EasingMode="EaseOut"/>
+
+        <Storyboard x:Key="ShineAnimation" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="ShineEffect" Storyboard.TargetProperty="Opacity" From="0.2" To="0.8" Duration="0:0:1.5" AutoReverse="True" EasingFunction="{StaticResource EaseOut}"/>
+            <DoubleAnimation Storyboard.TargetName="ShineEffect" Storyboard.TargetProperty="Width" From="10" To="50" Duration="0:0:1.5" AutoReverse="True" EasingFunction="{StaticResource EaseOut}"/>
+        </Storyboard>
+
+        <Storyboard x:Key="TitleAnimation">
+            <DoubleAnimation Storyboard.TargetName="TitleE" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.1"/>
+            <DoubleAnimation Storyboard.TargetName="TitleE" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.1" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleN" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.15"/>
+            <DoubleAnimation Storyboard.TargetName="TitleN" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.15" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleH" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.2"/>
+            <DoubleAnimation Storyboard.TargetName="TitleH" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.2" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleA" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.25"/>
+            <DoubleAnimation Storyboard.TargetName="TitleA" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.25" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleN2" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.3"/>
+            <DoubleAnimation Storyboard.TargetName="TitleN2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.3" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleC" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.35"/>
+            <DoubleAnimation Storyboard.TargetName="TitleC" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.35" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleE2" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.4"/>
+            <DoubleAnimation Storyboard.TargetName="TitleE2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.4" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleR" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.45"/>
+            <DoubleAnimation Storyboard.TargetName="TitleR" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.45" EasingFunction="{StaticResource EaseOut}"/>
+        </Storyboard>
+
+    </UserControl.Resources>
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Row="0" Grid.ColumnSpan="3" BorderBrush="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" BorderThickness="0,0,0,1" Margin="0,0,0,5" Padding="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="2,0" VerticalAlignment="Center">
+                    <TextBlock Text="E" FontSize="18" FontWeight="Bold" x:Name="TitleE" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform></TextBlock>
+                    <TextBlock Text="N" FontSize="18" FontWeight="Bold" x:Name="TitleN" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform></TextBlock>
+                    <TextBlock Text="H" FontSize="18" FontWeight="Bold" x:Name="TitleH" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform></TextBlock>
+                    <TextBlock Text="A" FontSize="18" FontWeight="Bold" x:Name="TitleA" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform></TextBlock>
+                    <TextBlock Text="N" FontSize="18" FontWeight="Bold" x:Name="TitleN2" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform></TextBlock>
+                    <TextBlock Text="C" FontSize="18" FontWeight="Bold" x:Name="TitleC" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform></TextBlock>
+                    <TextBlock Text="E" FontSize="18" FontWeight="Bold" x:Name="TitleE2" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform></TextBlock>
+                    <TextBlock Text="R" FontSize="18" FontWeight="Bold" x:Name="TitleR" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform></TextBlock>
+                </StackPanel>
+
+                <Grid Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Width="60" Height="20">
+                    <Ellipse x:Name="ShineEffect" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="10" Height="10" Opacity="0.5">
+                        <Ellipse.Effect>
+                            <BlurEffect Radius="5"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Grid.Column="0" VerticalAlignment="Bottom" Margin="5,0,0,19">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Height="160">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource LabelStyle}" Text="0" VerticalAlignment="Top"/>
+                <TextBlock Grid.Row="1" Style="{StaticResource LabelStyle}" Text="-12" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                <TextBlock Grid.Row="2" Style="{StaticResource LabelStyle}" Text="-24" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                <TextBlock Grid.Row="3" Style="{StaticResource LabelStyle}" Text="-36" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                <TextBlock Grid.Row="4" Style="{StaticResource LabelStyle}" Text="-48" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                <TextBlock Grid.Row="5" Style="{StaticResource LabelStyle}" Text="-60" VerticalAlignment="Bottom"/>
+            </Grid>
+            <ProgressBar Grid.Column="1" Style="{StaticResource MeterBar}" Value="{Binding InputLevel}" Margin="1,0,0,0"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.Column="1" Margin="10,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="プリセットカテゴリ" Margin="2,5,2,2"/>
+            <ComboBox Grid.Row="1" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"/>
+
+            <ListBox Grid.Row="2" Margin="0,5,0,0" ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset, Mode=TwoWay}" DisplayMemberPath="Name"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.Column="2" Margin="5,0">
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Top">
+                    <TextBlock Text="Drive" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    <Slider Orientation="Vertical" Height="130" Style="{StaticResource VerticalSliderStyle}" Minimum="0" Maximum="100" Value="{Binding EffectItem.Drive, Mode=TwoWay}" IsMoveToPointEnabled="True" x:Name="DriveSlider" Margin="0,5,0,0" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                    <Grid Margin="0,5,0,0" HorizontalAlignment="Center">
+                        <TextBlock x:Name="DriveTextBlock" Text="{Binding ElementName=DriveSlider, Path=Value, StringFormat={}{0:F0}}" HorizontalAlignment="Center" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Tag="Drive"/>
+                        <TextBox x:Name="DriveTextBox" Width="40" Text="{Binding ElementName=DriveSlider, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" HorizontalAlignment="Center" HorizontalContentAlignment="Center" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Tag="Drive"/>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Top">
+                    <TextBlock Text="Freq" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    <Slider Orientation="Vertical" Height="130" Style="{StaticResource VerticalSliderStyle}" Minimum="100" Maximum="10000" Value="{Binding EffectItem.Frequency, Mode=TwoWay}" IsMoveToPointEnabled="True" x:Name="FreqSlider" Margin="0,5,0,0" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                    <Grid Margin="0,5,0,0" HorizontalAlignment="Center">
+                        <TextBlock x:Name="FreqTextBlock" Text="{Binding ElementName=FreqSlider, Path=Value, StringFormat={}{0:F0}}" HorizontalAlignment="Center" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Tag="Freq"/>
+                        <TextBox x:Name="FreqTextBox" Width="40" Text="{Binding ElementName=FreqSlider, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" HorizontalAlignment="Center" HorizontalContentAlignment="Center" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Tag="Freq"/>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Top">
+                    <TextBlock Text="Mix" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    <Slider Orientation="Vertical" Height="130" Style="{StaticResource VerticalSliderStyle}" Minimum="0" Maximum="100" Value="{Binding EffectItem.Mix, Mode=TwoWay}" IsMoveToPointEnabled="True" x:Name="MixSlider" Margin="0,5,0,0" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                    <Grid Margin="0,5,0,0" HorizontalAlignment="Center">
+                        <TextBlock x:Name="MixTextBlock" Text="{Binding ElementName=MixSlider, Path=Value, StringFormat={}{0:F0}%}" HorizontalAlignment="Center" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Tag="Mix"/>
+                        <TextBox x:Name="MixTextBox" Width="40" Text="{Binding ElementName=MixSlider, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" HorizontalAlignment="Center" HorizontalContentAlignment="Center" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Tag="Mix"/>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" Orientation="Vertical" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Top">
+                    <TextBlock Text="Gain" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    <Slider Orientation="Vertical" Height="130" Style="{StaticResource VerticalSliderStyle}" Minimum="-20" Maximum="20" Value="{Binding EffectItem.Gain, Mode=TwoWay}" IsMoveToPointEnabled="True" x:Name="GainSlider" Margin="0,5,0,0" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                    <Grid Margin="0,5,0,0" HorizontalAlignment="Center">
+                        <TextBlock x:Name="GainTextBlock" Text="{Binding ElementName=GainSlider, Path=Value, StringFormat={}{0:F0}dB}" HorizontalAlignment="Center" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Tag="Gain"/>
+                        <TextBox x:Name="GainTextBox" Width="40" Text="{Binding ElementName=GainSlider, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" HorizontalAlignment="Center" HorizontalContentAlignment="Center" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Tag="Gain"/>
+                    </Grid>
+                </StackPanel>
+
+                <Grid Grid.Column="4" VerticalAlignment="Bottom" Margin="5,0,5,19">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" Height="160">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Style="{StaticResource LabelStyle}" Text="0" VerticalAlignment="Top"/>
+                        <TextBlock Grid.Row="1" Style="{StaticResource LabelStyle}" Text="-12" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                        <TextBlock Grid.Row="2" Style="{StaticResource LabelStyle}" Text="-24" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                        <TextBlock Grid.Row="3" Style="{StaticResource LabelStyle}" Text="-36" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                        <TextBlock Grid.Row="4" Style="{StaticResource LabelStyle}" Text="-48" VerticalAlignment="Top" Margin="0,1,0,0"/>
+                        <TextBlock Grid.Row="5" Style="{StaticResource LabelStyle}" Text="-60" VerticalAlignment="Bottom"/>
+                    </Grid>
+                    <ProgressBar Grid.Column="1" Style="{StaticResource MeterBar}" Value="{Binding OutputLevel}" Margin="1,0,0,0"/>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource ShineAnimation}"/>
+            <BeginStoryboard Storyboard="{StaticResource TitleAnimation}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+</UserControl>
