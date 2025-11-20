@@ -248,7 +248,27 @@
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </Slider>
-                            <TextBlock Text="{Binding HorizontalZoom, StringFormat='{}{0:F1}x'}" VerticalAlignment="Center" Margin="5,0,0,0" MinWidth="30" />
+                            <Grid VerticalAlignment="Center" Margin="5,0,0,0" MinWidth="30">
+                                <TextBlock Text="{Binding HorizontalZoom, StringFormat='{}{0:F1}x'}" 
+                                           Visibility="{Binding IsEditingHorizontalZoom, Converter={StaticResource BooleanToVisibilityInvertedConverter}}"
+                                           Cursor="Hand" ToolTip="ダブルクリックで値を入力">
+                                    <TextBlock.InputBindings>
+                                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding StartEditingHorizontalZoomCommand}" />
+                                    </TextBlock.InputBindings>
+                                </TextBlock>
+                                <TextBox Text="{Binding TempHorizontalZoomInput, UpdateSourceTrigger=PropertyChanged}" 
+                                         Visibility="{Binding IsEditingHorizontalZoom, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                         Width="40">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding FinishEditingHorizontalZoomCommand}" />
+                                    </TextBox.InputBindings>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="LostFocus">
+                                            <i:InvokeCommandAction Command="{Binding FinishEditingHorizontalZoomCommand}" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </Grid>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,0,0">
                             <Slider Value="{Binding VerticalZoom, Mode=TwoWay}" Minimum="0.5" Maximum="5" Width="100" VerticalAlignment="Center" ToolTip="垂直ズーム">
@@ -261,7 +281,27 @@
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </Slider>
-                            <TextBlock Text="{Binding VerticalZoom, StringFormat='{}{0:F1}x'}" VerticalAlignment="Center" Margin="5,0,0,0" MinWidth="30" />
+                            <Grid VerticalAlignment="Center" Margin="5,0,0,0" MinWidth="30">
+                                <TextBlock Text="{Binding VerticalZoom, StringFormat='{}{0:F1}x'}" 
+                                           Visibility="{Binding IsEditingVerticalZoom, Converter={StaticResource BooleanToVisibilityInvertedConverter}}"
+                                           Cursor="Hand" ToolTip="ダブルクリックで値を入力">
+                                    <TextBlock.InputBindings>
+                                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding StartEditingVerticalZoomCommand}" />
+                                    </TextBlock.InputBindings>
+                                </TextBlock>
+                                <TextBox Text="{Binding TempVerticalZoomInput, UpdateSourceTrigger=PropertyChanged}" 
+                                         Visibility="{Binding IsEditingVerticalZoom, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                         Width="40">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding FinishEditingVerticalZoomCommand}" />
+                                    </TextBox.InputBindings>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="LostFocus">
+                                            <i:InvokeCommandAction Command="{Binding FinishEditingVerticalZoomCommand}" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </Grid>
                         </StackPanel>
                         <Separator />
                         <TextBlock Text="音量:" VerticalAlignment="Center" Margin="5,0" />
@@ -504,9 +544,9 @@
                                                 </ItemsControl>
                                                 <Canvas>
                                                     <Rectangle Fill="#330078D7" Height="20"
-                                                                 Visibility="{Binding IsLooping, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                                 Width="{Binding LoopDurationWidth}"
-                                                                 Canvas.Left="{Binding LoopStartX}" />
+                                                                   Visibility="{Binding IsLooping, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                                   Width="{Binding LoopDurationWidth}"
+                                                                   Canvas.Left="{Binding LoopStartX}" />
                                                 </Canvas>
                                             </Grid>
                                         </ScrollViewer>
@@ -641,7 +681,7 @@
                                                     <ItemsControl.ItemContainerStyle>
                                                         <Style TargetType="ContentPresenter">
                                                             <Setter Property="Canvas.Left" Value="{Binding X}" />
-                                                            <Setter Property="Canvas.Top" Value="0" />
+                                                            <Setter Property="Canvas.Top" Value="{Binding Y}" />
                                                         </Style>
                                                     </ItemsControl.ItemContainerStyle>
                                                     <ItemsControl.ItemTemplate>

@@ -701,6 +701,39 @@ namespace MIDI.UI.ViewModels
         private readonly object _chunkLock = new object();
         private readonly TaskScheduler _renderScheduler;
 
+        private bool _isEditingHorizontalZoom;
+        public bool IsEditingHorizontalZoom
+        {
+            get => _isEditingHorizontalZoom;
+            set => SetField(ref _isEditingHorizontalZoom, value);
+        }
+
+        private bool _isEditingVerticalZoom;
+        public bool IsEditingVerticalZoom
+        {
+            get => _isEditingVerticalZoom;
+            set => SetField(ref _isEditingVerticalZoom, value);
+        }
+
+        public ICommand StartEditingHorizontalZoomCommand { get; }
+        public ICommand FinishEditingHorizontalZoomCommand { get; }
+        public ICommand StartEditingVerticalZoomCommand { get; }
+        public ICommand FinishEditingVerticalZoomCommand { get; }
+
+        private string _tempHorizontalZoomInput = "100.0";
+        public string TempHorizontalZoomInput
+        {
+            get => _tempHorizontalZoomInput;
+            set => SetField(ref _tempHorizontalZoomInput, value);
+        }
+
+        private string _tempVerticalZoomInput = "1.0";
+        public string TempVerticalZoomInput
+        {
+            get => _tempVerticalZoomInput;
+            set => SetField(ref _tempVerticalZoomInput, value);
+        }
+
         public MidiEditorViewModel(string? filePath)
         {
             var renderThread = new Thread(() =>
@@ -1014,6 +1047,30 @@ namespace MIDI.UI.ViewModels
                 IsMidiFileLoaded = false;
             }
             LoadSoundFonts();
+
+            StartEditingHorizontalZoomCommand = new RelayCommand(_ => {
+                TempHorizontalZoomInput = HorizontalZoom.ToString("F1");
+                IsEditingHorizontalZoom = true;
+            });
+            FinishEditingHorizontalZoomCommand = new RelayCommand(_ => {
+                if (double.TryParse(TempHorizontalZoomInput, out double val))
+                {
+                    HorizontalZoom = Math.Clamp(val, 10, 1000);
+                }
+                IsEditingHorizontalZoom = false;
+            });
+
+            StartEditingVerticalZoomCommand = new RelayCommand(_ => {
+                TempVerticalZoomInput = VerticalZoom.ToString("F1");
+                IsEditingVerticalZoom = true;
+            });
+            FinishEditingVerticalZoomCommand = new RelayCommand(_ => {
+                if (double.TryParse(TempVerticalZoomInput, out double val))
+                {
+                    VerticalZoom = Math.Clamp(val, 0.5, 5);
+                }
+                IsEditingVerticalZoom = false;
+            });
         }
 
         public void SaveLayout()
