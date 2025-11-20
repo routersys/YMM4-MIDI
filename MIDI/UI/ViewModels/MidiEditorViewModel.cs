@@ -785,9 +785,6 @@ namespace MIDI.UI.ViewModels
 
             RefreshPianoKeys();
 
-            // ViewModel側でのロードを削除し、View側で確実に設定させる
-            // PianoKeysWidth = new GridLength(MidiEditorSettings.Default.LoadLayout());
-
             _playbackService = new PlaybackService(this);
             _playbackService.AudioChunkRendered += OnAudioChunkRendered;
             Metronome = new MetronomeViewModel(_playbackService);
