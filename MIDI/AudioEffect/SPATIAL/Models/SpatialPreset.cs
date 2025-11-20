@@ -1,6 +1,6 @@
-﻿using MIDI.AudioEffect.SpatialAudioEffect.Models;
+﻿using MIDI.AudioEffect.SPATIAL.Models;
 
-namespace MIDI.AudioEffect.SpatialAudioEffect.Models
+namespace MIDI.AudioEffect.SPATIAL.Models
 {
     public class SpatialPreset
     {

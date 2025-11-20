@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
-using MIDI.AudioEffect.SpatialAudioEffect.Models;
+using MIDI.AudioEffect.SPATIAL.Models;
 
-namespace MIDI.AudioEffect.SpatialAudioEffect.Services
+namespace MIDI.AudioEffect.SPATIAL.Services
 {
     public class SpatialPresetService
     {

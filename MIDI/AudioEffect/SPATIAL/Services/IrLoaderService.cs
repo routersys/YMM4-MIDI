@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using NAudio.Wave;
 
-namespace MIDI.AudioEffect.SpatialAudioEffect.Services
+namespace MIDI.AudioEffect.SPATIAL.Services
 {
     public class IrLoaderService
     {

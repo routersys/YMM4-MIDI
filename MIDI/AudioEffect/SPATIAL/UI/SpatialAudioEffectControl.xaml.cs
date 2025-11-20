@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using YukkuriMovieMaker.Commons;
 
-namespace MIDI.AudioEffect.SpatialAudioEffect.UI
+namespace MIDI.AudioEffect.SPATIAL.UI
 {
     public partial class SpatialAudioEffectControl : UserControl, IPropertyEditorControl
     {

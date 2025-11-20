@@ -6,9 +6,9 @@ using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Audio.Effects;
 using YukkuriMovieMaker.Plugin.Effects;
-using MIDI.AudioEffect.SpatialAudioEffect.UI;
+using MIDI.AudioEffect.SPATIAL.UI;
 
-namespace MIDI.AudioEffect.SpatialAudioEffect
+namespace MIDI.AudioEffect.SPATIAL
 {
     [AudioEffect("SPATIAL AUDIO", ["MIDI"], ["音響", "IR", "畳み込み"], IsAviUtlSupported = false)]
     public class SpatialAudioEffect : AudioEffectBase

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using YukkuriMovieMaker.Player.Audio.Effects;
-using MIDI.AudioEffect.SpatialAudioEffect.Services;
-using MIDI.AudioEffect.SpatialAudioEffect.Algorithms;
+using MIDI.AudioEffect.SPATIAL.Services;
+using MIDI.AudioEffect.SPATIAL.Algorithms;
 
-namespace MIDI.AudioEffect.SpatialAudioEffect
+namespace MIDI.AudioEffect.SPATIAL
 {
     public class SpatialAudioEffectProcessor : AudioEffectProcessorBase
     {

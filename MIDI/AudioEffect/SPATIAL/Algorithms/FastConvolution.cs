@@ -1,7 +1,7 @@
 ﻿using System;
 using NAudio.Dsp;
 
-namespace MIDI.AudioEffect.SpatialAudioEffect.Algorithms
+namespace MIDI.AudioEffect.SPATIAL.Algorithms
 {
     public class FastConvolution : IConvolutionAlgorithm
     {

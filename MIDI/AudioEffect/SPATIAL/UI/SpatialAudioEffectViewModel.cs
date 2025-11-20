@@ -1,6 +1,6 @@
 ﻿using Microsoft.Win32;
-using MIDI.AudioEffect.SpatialAudioEffect.Models;
-using MIDI.AudioEffect.SpatialAudioEffect.Services;
+using MIDI.AudioEffect.SPATIAL.Models;
+using MIDI.AudioEffect.SPATIAL.Services;
 using MIDI.TextCompletion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
 
-namespace MIDI.AudioEffect.SpatialAudioEffect.UI
+namespace MIDI.AudioEffect.SPATIAL.UI
 {
     internal class SpatialAudioEffectViewModel : Bindable, IDisposable
     {

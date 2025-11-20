@@ -3,7 +3,7 @@ using System.Windows;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 
-namespace MIDI.AudioEffect.SpatialAudioEffect.UI
+namespace MIDI.AudioEffect.SPATIAL.UI
 {
     internal class SpatialAudioEffectControlAttribute : PropertyEditorAttribute2
     {

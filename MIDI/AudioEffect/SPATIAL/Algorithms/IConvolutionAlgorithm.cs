@@ -1,4 +1,4 @@
-﻿namespace MIDI.AudioEffect.SpatialAudioEffect.Algorithms
+﻿namespace MIDI.AudioEffect.SPATIAL.Algorithms
 {
     public interface IConvolutionAlgorithm
     {
