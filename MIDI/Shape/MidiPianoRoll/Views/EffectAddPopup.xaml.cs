@@ -17,6 +17,7 @@ namespace MIDI.Shape.MidiPianoRoll.Views
         public EffectAddPopup()
         {
             InitializeComponent();
+            PluginConfigManager.Load();
             _viewModel = new EffectAddViewModel();
             DataContext = _viewModel;
         }
@@ -40,7 +41,6 @@ namespace MIDI.Shape.MidiPianoRoll.Views
         private void EffectAddPopup_Loaded(object sender, RoutedEventArgs e)
         {
             _parentPopup = this.Parent as Popup;
-            PluginConfigManager.Load();
             this.Width = PluginConfigManager.EffectAddPopupWidth;
             this.Height = PluginConfigManager.EffectAddPopupHeight;
             GroupColumn.Width = new GridLength(PluginConfigManager.EffectAddPopupSplitterPosition, GridUnitType.Pixel);
