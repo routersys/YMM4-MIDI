@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using YukkuriMovieMaker.Player.Audio.Effects;
 using MIDI.AudioEffect.SpatialAudioEffect.Services;
 using MIDI.AudioEffect.SpatialAudioEffect.Algorithms;
@@ -9,37 +10,39 @@ namespace MIDI.AudioEffect.SpatialAudioEffect
     {
         private readonly SpatialAudioEffect item;
         private readonly TimeSpan duration;
+        private readonly object lockObject = new object();
 
         public override int Hz => Input?.Hz ?? 0;
         public override long Duration => (long)(duration.TotalSeconds * Input?.Hz ?? 0) * 2;
 
-        private float[] inputBuffer = new float[4096];
-        private float[] monoBuffer = new float[2048];
+        private const int BlockSize = 1024;
 
-        private IConvolutionAlgorithm? convLeft = null;
-        private IConvolutionAlgorithm? convRight = null;
-        private IrLoaderService? loaderService = null;
-
+        private IrLoaderService? loaderService;
+        private IConvolutionAlgorithm? convLeft;
+        private IConvolutionAlgorithm? convRight;
         private string loadedIrLeft = "";
         private string loadedIrRight = "";
         private int lastHz = 0;
 
-        private int inputBufferCount = 0;
-        private int outputBufferCount = 0;
-        private int outputBufferPos = 0;
-        private float[] outputBufferLeft;
-        private float[] outputBufferRight;
+        private readonly Queue<float> outputQueue = new Queue<float>();
 
-        private const int BlockSize = 1024;
-        private float[] blockBuffer = new float[BlockSize];
+        private float[] inputReadBuffer = new float[BlockSize * 2];
+        private float[] dryBlockL = new float[BlockSize];
+        private float[] dryBlockR = new float[BlockSize];
+        private float[] wetBlockL = new float[BlockSize];
+        private float[] wetBlockR = new float[BlockSize];
+
+        private float[] convInputBuffer = new float[BlockSize];
+        private float[] convOutputBufferL;
+        private float[] convOutputBufferR;
 
         public SpatialAudioEffectProcessor(SpatialAudioEffect item, TimeSpan duration)
         {
             this.item = item;
             this.duration = duration;
 
-            outputBufferLeft = new float[BlockSize * 2];
-            outputBufferRight = new float[BlockSize * 2];
+            convOutputBufferL = new float[BlockSize * 2];
+            convOutputBufferR = new float[BlockSize * 2];
         }
 
         private void InitializeServices()
@@ -48,24 +51,30 @@ namespace MIDI.AudioEffect.SpatialAudioEffect
             {
                 loaderService = new IrLoaderService(Hz);
                 lastHz = Hz;
-
-                convLeft = null;
-                convRight = null;
-                loadedIrLeft = "";
-                loadedIrRight = "";
+                ResetState();
             }
         }
 
-        private void LoadImpulseResponse()
+        private void ResetState()
+        {
+            convLeft = null;
+            convRight = null;
+            loadedIrLeft = "";
+            loadedIrRight = "";
+            outputQueue.Clear();
+            Array.Clear(inputReadBuffer, 0, inputReadBuffer.Length);
+
+            convOutputBufferL = new float[BlockSize * 2];
+            convOutputBufferR = new float[BlockSize * 2];
+        }
+
+        private void UpdateImpulseResponse()
         {
             if (loaderService == null || Hz == 0) return;
 
-            bool leftChanged = loadedIrLeft != item.IrFileLeft;
-            bool rightChanged = loadedIrRight != item.IrFileRight;
-
-            if (leftChanged || rightChanged)
+            if (loadedIrLeft != item.IrFileLeft || loadedIrRight != item.IrFileRight)
             {
-                (float[]? irL, float[]? irR) = loaderService.LoadIrPair(item.IrFileLeft, item.IrFileRight);
+                var (irL, irR) = loaderService.LoadIrPair(item.IrFileLeft, item.IrFileRight);
 
                 convLeft = (irL != null) ? new FastConvolution(irL, BlockSize) : null;
                 convRight = (irR != null) ? new FastConvolution(irR, BlockSize) : null;
@@ -73,113 +82,138 @@ namespace MIDI.AudioEffect.SpatialAudioEffect
                 loadedIrLeft = item.IrFileLeft;
                 loadedIrRight = item.IrFileRight;
 
-                if (irL != null && irR != null)
-                {
-                    if (outputBufferLeft.Length < convLeft!.OutputSize)
-                        outputBufferLeft = new float[convLeft.OutputSize];
-                    if (outputBufferRight.Length < convRight!.OutputSize)
-                        outputBufferRight = new float[convRight.OutputSize];
-                }
+                if (convLeft != null && convOutputBufferL.Length < convLeft.OutputSize)
+                    convOutputBufferL = new float[convLeft.OutputSize];
+
+                if (convRight != null && convOutputBufferR.Length < convRight.OutputSize)
+                    convOutputBufferR = new float[convRight.OutputSize];
             }
         }
 
         protected override void seek(long position)
         {
-            Input?.Seek(position);
-            convLeft?.Reset();
-            convRight?.Reset();
-            inputBufferCount = 0;
-            outputBufferCount = 0;
-            outputBufferPos = 0;
+            lock (lockObject)
+            {
+                Input?.Seek(position);
+                convLeft?.Reset();
+                convRight?.Reset();
+                outputQueue.Clear();
+            }
         }
 
         protected override int read(float[] destBuffer, int offset, int count)
         {
             if (Input == null) return 0;
 
-            InitializeServices();
-            LoadImpulseResponse();
-
-            if (convLeft == null || convRight == null)
+            lock (lockObject)
             {
-                return Input.Read(destBuffer, offset, count);
-            }
+                InitializeServices();
+                UpdateImpulseResponse();
 
-            int samplesWritten = 0;
-            long currentFrame = Position / 2;
-            long totalFrame = Duration / 2;
-            int sampleRate = Hz;
+                int samplesRequired = count;
+                int samplesWritten = 0;
 
-            float gain = (float)Math.Pow(10, item.Gain.GetValue(currentFrame, totalFrame, sampleRate) / 20.0);
-
-            while (samplesWritten < count)
-            {
-                if (outputBufferPos < outputBufferCount)
+                while (outputQueue.Count < samplesRequired)
                 {
-                    int toWrite = Math.Min(count - samplesWritten, outputBufferCount - outputBufferPos);
-                    for (int i = 0; i < toWrite; i += 2)
-                    {
-                        int monoIndex = (outputBufferPos + i) / 2;
-                        if (monoIndex >= outputBufferLeft.Length) break;
-                        destBuffer[offset + samplesWritten + i] = outputBufferLeft[monoIndex] * gain;
-                        destBuffer[offset + samplesWritten + i + 1] = outputBufferRight[monoIndex] * gain;
-                    }
-                    outputBufferPos += toWrite;
-                    samplesWritten += toWrite;
-                }
-                else
-                {
-                    int samplesNeeded = BlockSize - inputBufferCount;
-                    int samplesToRead = samplesNeeded * 2;
+                    ProcessNextBlock();
 
-                    if (inputBuffer.Length < samplesToRead)
-                        inputBuffer = new float[samplesToRead];
-
-                    int samplesRead = Input.Read(inputBuffer, 0, samplesToRead);
-                    if (samplesRead == 0 && inputBufferCount == 0)
-                        break;
-
-                    int monoSamples = samplesRead / 2;
-                    if (monoBuffer.Length < monoSamples)
-                        monoBuffer = new float[monoSamples];
-
-                    for (int i = 0; i < monoSamples; i++)
-                    {
-                        monoBuffer[i] = (inputBuffer[i * 2] + inputBuffer[i * 2 + 1]) * 0.5f;
-                    }
-
-                    int samplesToCopy = Math.Min(monoSamples, samplesNeeded);
-                    Array.Copy(monoBuffer, 0, blockBuffer, inputBufferCount, samplesToCopy);
-                    inputBufferCount += samplesToCopy;
-
-                    if (inputBufferCount == BlockSize || (samplesRead == 0 && inputBufferCount > 0))
-                    {
-                        if (inputBufferCount < BlockSize)
-                        {
-                            Array.Clear(blockBuffer, inputBufferCount, BlockSize - inputBufferCount);
-                        }
-
-                        if (outputBufferLeft.Length < convLeft.OutputSize)
-                            outputBufferLeft = new float[convLeft.OutputSize];
-                        if (outputBufferRight.Length < convRight.OutputSize)
-                            outputBufferRight = new float[convRight.OutputSize];
-
-                        convLeft.Process(blockBuffer, outputBufferLeft);
-                        convRight.Process(blockBuffer, outputBufferRight);
-
-                        outputBufferCount = (convLeft.OutputSize) * 2;
-                        outputBufferPos = 0;
-                        inputBufferCount = 0;
-
-                        if (samplesRead == 0)
-                            break;
-                    }
+                    if (outputQueue.Count == 0) break;
                 }
 
-                gain = (float)Math.Pow(10, item.Gain.GetValue(Position / 2 + samplesWritten / 2, totalFrame, sampleRate) / 20.0);
+                int available = Math.Min(count, outputQueue.Count);
+                for (int i = 0; i < available; i++)
+                {
+                    destBuffer[offset + i] = outputQueue.Dequeue();
+                }
+                samplesWritten = available;
+
+                MeasureLevels(destBuffer, offset, samplesWritten);
+
+                return samplesWritten;
+            }
+        }
+
+        private void ProcessNextBlock()
+        {
+            if (Input == null) return;
+
+            int samplesRead = Input.Read(inputReadBuffer, 0, BlockSize * 2);
+            if (samplesRead == 0) return;
+
+            int framesRead = samplesRead / 2;
+            if (framesRead < BlockSize)
+            {
+                Array.Clear(inputReadBuffer, samplesRead, (BlockSize * 2) - samplesRead);
             }
 
-            return samplesWritten;
+            for (int i = 0; i < BlockSize; i++)
+            {
+                dryBlockL[i] = inputReadBuffer[i * 2];
+                dryBlockR[i] = inputReadBuffer[i * 2 + 1];
+
+                convInputBuffer[i] = (dryBlockL[i] + dryBlockR[i]) * 0.5f;
+            }
+
+            if (convLeft != null && convRight != null)
+            {
+                convLeft.Process(convInputBuffer, convOutputBufferL);
+                convRight.Process(convInputBuffer, convOutputBufferR);
+
+                Array.Copy(convOutputBufferL, 0, wetBlockL, 0, BlockSize);
+                Array.Copy(convOutputBufferR, 0, wetBlockR, 0, BlockSize);
+            }
+            else
+            {
+                Array.Copy(dryBlockL, wetBlockL, BlockSize);
+                Array.Copy(dryBlockR, wetBlockR, BlockSize);
+            }
+
+            MixAndEnqueue(framesRead);
+        }
+
+        private void MixAndEnqueue(int validFrames)
+        {
+            double mix = Math.Clamp(item.Mix / 100.0, 0.0, 1.0);
+            double gainDb = item.Gain;
+            double wetGain = Math.Pow(10.0, gainDb / 20.0);
+
+            double dryLevel = 1.0 - mix;
+            double wetLevel = mix * wetGain;
+
+            for (int i = 0; i < validFrames; i++)
+            {
+                float outL = (float)(dryBlockL[i] * dryLevel + wetBlockL[i] * wetLevel);
+                float outR = (float)(dryBlockR[i] * dryLevel + wetBlockR[i] * wetLevel);
+
+                outputQueue.Enqueue(outL);
+                outputQueue.Enqueue(outR);
+            }
+        }
+
+        private void MeasureLevels(float[] buffer, int offset, int count)
+        {
+            float outputMax = 0;
+
+            for (int i = 0; i < count; i++)
+            {
+                float val = Math.Abs(buffer[offset + i]);
+                if (val > outputMax) outputMax = val;
+            }
+
+            item.OutputLevel = (outputMax <= 0) ? -60.0 : Math.Max(-60.0, 20.0 * Math.Log10(outputMax));
+
+            MeasureInputLevelInBlock();
+        }
+
+        private void MeasureInputLevelInBlock()
+        {
+            float max = 0;
+            for (int i = 0; i < BlockSize; i++)
+            {
+                max = Math.Max(max, Math.Abs(dryBlockL[i]));
+                max = Math.Max(max, Math.Abs(dryBlockR[i]));
+            }
+            item.InputLevel = (max <= 0) ? -60.0 : Math.Max(-60.0, 20.0 * Math.Log10(max));
         }
     }
 }

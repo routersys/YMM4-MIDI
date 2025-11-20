@@ -10,28 +10,35 @@ using MIDI.AudioEffect.SpatialAudioEffect.UI;
 
 namespace MIDI.AudioEffect.SpatialAudioEffect
 {
-    [AudioEffect("立体音響(畳み込み)", ["MIDI"], ["音響", "IR", "畳み込み"], IsAviUtlSupported = false)]
+    [AudioEffect("SPATIAL AUDIO", ["MIDI"], ["音響", "IR", "畳み込み"], IsAviUtlSupported = false)]
     public class SpatialAudioEffect : AudioEffectBase
     {
-        public override string Label => "立体音響(畳み込み)";
+        public override string Label => "SPATIAL AUDIO";
 
-        [Display(GroupName = "立体音響", Name = "IRファイル(L / ステレオ)", Description = "左耳用IR(モノラル) または L/R両方を含むIR(ステレオ)")]
-        [FileSelector(YukkuriMovieMaker.Settings.FileGroupType.AudioItem)]
+        [Display(GroupName = "立体音響", Name = "")]
+        [SpatialAudioEffectControl(PropertyEditorSize = PropertyEditorSize.FullWidth)]
+        public bool DummyPropertyForUI { get; } = false;
+
         public string IrFileLeft { get => irFileLeft; set => Set(ref irFileLeft, value); }
         string irFileLeft = "";
 
-        [Display(GroupName = "立体音響", Name = "IRファイル(R)", Description = "右耳用IR(モノラル)。 (L側でステレオIRを指定した場合は無視されます)")]
-        [FileSelector(YukkuriMovieMaker.Settings.FileGroupType.AudioItem)]
         public string IrFileRight { get => irFileRight; set => Set(ref irFileRight, value); }
         string irFileRight = "";
 
-        [Display(GroupName = "立体音響", Name = "IR状態", Description = "インパルス応答ファイルの状態（サンプリングレートの検証は処理実行時に行われます）")]
-        [IrStatusDisplay]
-        public bool IrStatus { get; } = false;
+        public double Gain { get => gain; set => Set(ref gain, value); }
+        double gain = 0;
 
-        [Display(GroupName = "立体音響", Name = "ゲイン", Description = "音量")]
-        [AnimationSlider("F0", "dB", -60, 0)]
-        public Animation Gain { get; } = new Animation(0, -60, 0);
+        public double Mix { get => mix; set => Set(ref mix, value); }
+        double mix = 100;
+
+        public string SelectedPresetCategory { get => selectedPresetCategory; set => Set(ref selectedPresetCategory, value); }
+        private string selectedPresetCategory = string.Empty;
+
+        public string SelectedPreset { get => selectedPreset; set => Set(ref selectedPreset, value); }
+        private string selectedPreset = string.Empty;
+
+        public double InputLevel { get; set; } = -60.0;
+        public double OutputLevel { get; set; } = -60.0;
 
         public override IAudioEffectProcessor CreateAudioEffect(TimeSpan duration)
         {
@@ -43,6 +50,6 @@ namespace MIDI.AudioEffect.SpatialAudioEffect
             return [];
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [Gain];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [];
     }
 }
