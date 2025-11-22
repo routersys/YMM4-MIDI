@@ -1,0 +1,242 @@
+﻿<UserControl x:Class="MIDI.AudioEffect.AMP_SIMULATOR.UI.AmpSimulatorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="clr-namespace:MIDI.AudioEffect.AMP_SIMULATOR.UI"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=ui:AmpSimulatorViewModel}"
+             Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+             Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+             Height="360">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+
+        <Style x:Key="KnobThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Grid>
+                            <Ellipse x:Name="ThumbEllipse"
+                                     Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
+                                     Stroke="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" 
+                                     StrokeThickness="1"/>
+                            <Ellipse Fill="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" Margin="3"/>
+                            <Rectangle Width="2" Height="8" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Margin="0,-10,0,0" VerticalAlignment="Top"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ThumbEllipse" Property="Stroke" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="KnobStyle" TargetType="{x:Type Slider}">
+            <Setter Property="Orientation" Value="Vertical"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Slider}">
+                        <Grid>
+                            <Border Background="Transparent" Width="20" Height="{TemplateBinding Height}"/>
+                            <Track x:Name="PART_Track">
+                                <Track.Thumb>
+                                    <Thumb Style="{DynamicResource KnobThumb}"/>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}"/>
+
+        <CubicEase x:Key="EaseOut" EasingMode="EaseOut"/>
+        <SineEase x:Key="SineInOut" EasingMode="EaseInOut"/>
+
+        <Storyboard x:Key="TubeGlowAnimation" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="TubeLightLeft" Storyboard.TargetProperty="Opacity" From="0.3" To="0.7" Duration="0:0:2.5" AutoReverse="True" EasingFunction="{StaticResource SineInOut}"/>
+            <DoubleAnimation Storyboard.TargetName="TubeLightRight" Storyboard.TargetProperty="Opacity" From="0.2" To="0.6" Duration="0:0:3.0" AutoReverse="True" EasingFunction="{StaticResource SineInOut}"/>
+        </Storyboard>
+
+        <Storyboard x:Key="TitleAnimation">
+            <DoubleAnimation Storyboard.TargetName="TitleA" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.1"/>
+            <DoubleAnimation Storyboard.TargetName="TitleM" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.2"/>
+            <DoubleAnimation Storyboard.TargetName="TitleP" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.3"/>
+            <DoubleAnimation Storyboard.TargetName="TitleSim" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.8" BeginTime="0:0:0.5"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
+                <TextBlock Text="A" FontSize="18" FontWeight="Bold" x:Name="TitleA" Opacity="0"/>
+                <TextBlock Text="M" FontSize="18" FontWeight="Bold" x:Name="TitleM" Opacity="0" Margin="2,0,0,0"/>
+                <TextBlock Text="P" FontSize="18" FontWeight="Bold" x:Name="TitleP" Opacity="0" Margin="2,0,0,0"/>
+                <TextBlock Text=" S I M U L A T O R" FontSize="18" FontWeight="Bold" x:Name="TitleSim" Opacity="0" Margin="10,0,0,0" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <TextBlock Text="プリセット:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" Width="100" Margin="0,0,5,0"/>
+                <ComboBox ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset}" DisplayMemberPath="Name" Width="180"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Grid.ColumnSpan="4" Panel.ZIndex="-1" Opacity="0.5">
+                <Ellipse x:Name="TubeLightLeft" Fill="OrangeRed" Width="60" Height="120" HorizontalAlignment="Left" Margin="150,0,0,0" VerticalAlignment="Center">
+                    <Ellipse.Effect>
+                        <BlurEffect Radius="40"/>
+                    </Ellipse.Effect>
+                </Ellipse>
+                <Ellipse x:Name="TubeLightRight" Fill="OrangeRed" Width="60" Height="120" HorizontalAlignment="Right" Margin="0,0,150,0" VerticalAlignment="Center">
+                    <Ellipse.Effect>
+                        <BlurEffect Radius="40"/>
+                    </Ellipse.Effect>
+                </Ellipse>
+            </Grid>
+
+            <Border Grid.Column="0" BorderBrush="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" BorderThickness="1" Padding="5" Margin="2" Background="#AA111111">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="PREAMP" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FFCCCCCC"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel Margin="10,0">
+                            <TextBlock Text="Gain" HorizontalAlignment="Center" FontSize="10" Margin="0,0,0,5"/>
+                            <Slider Style="{StaticResource KnobStyle}" Value="{Binding EffectItem.InputGain}" Minimum="0" Maximum="100" Height="200" x:Name="SlGain" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                            <TextBlock x:Name="GainTextBlock" Text="{Binding ElementName=SlGain, Path=Value, StringFormat=F0}" HorizontalAlignment="Center" Tag="Gain" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Cursor="Hand"/>
+                            <TextBox x:Name="GainTextBox" Text="{Binding ElementName=SlGain, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" Tag="Gain" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Width="30"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" BorderBrush="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" BorderThickness="1" Padding="5" Margin="2" Background="#AA111111">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="TONE STACK" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FFCCCCCC"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <StackPanel Margin="8,0">
+                            <TextBlock Text="Bass" HorizontalAlignment="Center" FontSize="10" Margin="0,0,0,5"/>
+                            <Slider Style="{StaticResource KnobStyle}" Value="{Binding EffectItem.Bass}" Minimum="0" Maximum="100" Height="200" x:Name="SlBass" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                            <TextBlock x:Name="BassTextBlock" Text="{Binding ElementName=SlBass, Path=Value, StringFormat=F0}" HorizontalAlignment="Center" Tag="Bass" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Cursor="Hand"/>
+                            <TextBox x:Name="BassTextBox" Text="{Binding ElementName=SlBass, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" Tag="Bass" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Width="30"/>
+                        </StackPanel>
+                        <StackPanel Margin="8,0">
+                            <TextBlock Text="Mid" HorizontalAlignment="Center" FontSize="10" Margin="0,0,0,5"/>
+                            <Slider Style="{StaticResource KnobStyle}" Value="{Binding EffectItem.Middle}" Minimum="0" Maximum="100" Height="200" x:Name="SlMid" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                            <TextBlock x:Name="MidTextBlock" Text="{Binding ElementName=SlMid, Path=Value, StringFormat=F0}" HorizontalAlignment="Center" Tag="Mid" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Cursor="Hand"/>
+                            <TextBox x:Name="MidTextBox" Text="{Binding ElementName=SlMid, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" Tag="Mid" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Width="30"/>
+                        </StackPanel>
+                        <StackPanel Margin="8,0">
+                            <TextBlock Text="Treb" HorizontalAlignment="Center" FontSize="10" Margin="0,0,0,5"/>
+                            <Slider Style="{StaticResource KnobStyle}" Value="{Binding EffectItem.Treble}" Minimum="0" Maximum="100" Height="200" x:Name="SlTreb" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                            <TextBlock x:Name="TrebTextBlock" Text="{Binding ElementName=SlTreb, Path=Value, StringFormat=F0}" HorizontalAlignment="Center" Tag="Treb" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Cursor="Hand"/>
+                            <TextBox x:Name="TrebTextBox" Text="{Binding ElementName=SlTreb, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" Tag="Treb" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Width="30"/>
+                        </StackPanel>
+                        <StackPanel Margin="8,0">
+                            <TextBlock Text="Pres" HorizontalAlignment="Center" FontSize="10" Margin="0,0,0,5"/>
+                            <Slider Style="{StaticResource KnobStyle}" Value="{Binding EffectItem.Presence}" Minimum="0" Maximum="100" Height="200" x:Name="SlPres" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                            <TextBlock x:Name="PresTextBlock" Text="{Binding ElementName=SlPres, Path=Value, StringFormat=F0}" HorizontalAlignment="Center" Tag="Pres" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Cursor="Hand"/>
+                            <TextBox x:Name="PresTextBox" Text="{Binding ElementName=SlPres, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" Tag="Pres" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Width="30"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2" BorderBrush="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" BorderThickness="1" Padding="5" Margin="2" Background="#AA111111">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="POWER AMP" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FFCCCCCC"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <StackPanel Margin="8,0">
+                            <TextBlock Text="Sag" HorizontalAlignment="Center" FontSize="10" Margin="0,0,0,5"/>
+                            <Slider Style="{StaticResource KnobStyle}" Value="{Binding EffectItem.Sag}" Minimum="0" Maximum="100" Height="200" x:Name="SlSag" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                            <TextBlock x:Name="SagTextBlock" Text="{Binding ElementName=SlSag, Path=Value, StringFormat=F0}" HorizontalAlignment="Center" Tag="Sag" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Cursor="Hand"/>
+                            <TextBox x:Name="SagTextBox" Text="{Binding ElementName=SlSag, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" Tag="Sag" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Width="30"/>
+                        </StackPanel>
+                        <StackPanel Margin="8,0">
+                            <TextBlock Text="Bias" HorizontalAlignment="Center" FontSize="10" Margin="0,0,0,5"/>
+                            <Slider Style="{StaticResource KnobStyle}" Value="{Binding EffectItem.Bias}" Minimum="0" Maximum="100" Height="200" x:Name="SlBias" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                            <TextBlock x:Name="BiasTextBlock" Text="{Binding ElementName=SlBias, Path=Value, StringFormat=F0}" HorizontalAlignment="Center" Tag="Bias" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Cursor="Hand"/>
+                            <TextBox x:Name="BiasTextBox" Text="{Binding ElementName=SlBias, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" Tag="Bias" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Width="30"/>
+                        </StackPanel>
+                        <StackPanel Margin="8,0">
+                            <TextBlock Text="Master" HorizontalAlignment="Center" FontSize="10" Margin="0,0,0,5"/>
+                            <Slider Style="{StaticResource KnobStyle}" Value="{Binding EffectItem.MasterVolume}" Minimum="0" Maximum="100" Height="200" x:Name="SlMaster" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                            <TextBlock x:Name="MasterTextBlock" Text="{Binding ElementName=SlMaster, Path=Value, StringFormat=F0}" HorizontalAlignment="Center" Tag="Master" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Cursor="Hand"/>
+                            <TextBox x:Name="MasterTextBox" Text="{Binding ElementName=SlMaster, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" Tag="Master" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Width="30"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="3" BorderBrush="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" BorderThickness="1" Padding="5" Margin="2" Background="#AA111111">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="CABINET" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FFCCCCCC"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel Margin="5,0">
+                            <TextBlock Text="Res" HorizontalAlignment="Center" FontSize="10" Margin="0,0,0,5"/>
+                            <Slider Style="{StaticResource KnobStyle}" Value="{Binding EffectItem.CabinetResonance}" Minimum="0" Maximum="100" Height="200" x:Name="SlCabRes" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                            <TextBlock x:Name="CabResTextBlock" Text="{Binding ElementName=SlCabRes, Path=Value, StringFormat=F0}" HorizontalAlignment="Center" Tag="CabRes" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Cursor="Hand"/>
+                            <TextBox x:Name="CabResTextBox" Text="{Binding ElementName=SlCabRes, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" Tag="CabRes" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Width="30"/>
+                        </StackPanel>
+                        <StackPanel Margin="5,0">
+                            <TextBlock Text="Bright" HorizontalAlignment="Center" FontSize="10" Margin="0,0,0,5"/>
+                            <Slider Style="{StaticResource KnobStyle}" Value="{Binding EffectItem.CabinetBright}" Minimum="0" Maximum="100" Height="200" x:Name="SlCabBri" Thumb.DragStarted="Slider_BeginEdit" Thumb.DragCompleted="Slider_EndEdit"/>
+                            <TextBlock x:Name="CabBriTextBlock" Text="{Binding ElementName=SlCabBri, Path=Value, StringFormat=F0}" HorizontalAlignment="Center" Tag="CabBri" MouseLeftButtonDown="ValueTextBlock_MouseLeftButtonDown" Cursor="Hand"/>
+                            <TextBox x:Name="CabBriTextBox" Text="{Binding ElementName=SlCabBri, Path=Value, UpdateSourceTrigger=Explicit}" Visibility="Collapsed" Tag="CabBri" LostFocus="ValueTextBox_LostFocus" KeyDown="ValueTextBox_KeyDown" PreviewTextInput="ValueTextBox_PreviewTextInput" Width="30"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource TubeGlowAnimation}"/>
+            <BeginStoryboard Storyboard="{StaticResource TitleAnimation}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+</UserControl>
