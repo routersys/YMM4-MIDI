@@ -46,7 +46,7 @@ namespace MIDI.Shape.MidiPianoRoll.Rendering
             float baseHeight = keyHeight * baseNoteRange;
             float yOffset = (totalHeight - baseHeight) / 2f;
 
-            for (int note = 0; note <= 127; note++)
+            for (int note = minNote; note <= maxNote; note++)
             {
                 float y;
                 if (invertVertical)
@@ -133,7 +133,7 @@ namespace MIDI.Shape.MidiPianoRoll.Rendering
             float baseWidth = keyWidth * baseNoteRange;
             float xOffset = (totalWidth - baseWidth) / 2f;
 
-            for (int note = 0; note <= 127; note++)
+            for (int note = minNote; note <= maxNote; note++)
             {
                 float x;
                 if (invertVertical)
