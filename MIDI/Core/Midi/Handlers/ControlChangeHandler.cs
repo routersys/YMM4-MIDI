@@ -20,16 +20,16 @@ namespace MIDI.Core.Midi.Handlers
                 case (int)MidiController.FootController:
                     state.FootControllerMsb = controlEvent.Value;
                     break;
-                case 5: // ポルタメントタイム (PortamentoTime)
+                case 5:
                     state.PortamentoTimeMsb = controlEvent.Value;
                     break;
-                case 6: // データエントリー (DataEntry)
+                case 6:
                     state.DataEntryMsb = controlEvent.Value;
                     break;
                 case (int)MidiController.MainVolume:
                     state.VolumeMsb = controlEvent.Value;
                     break;
-                case 8: // バランス (Balance)
+                case 8:
                     state.BalanceMsb = controlEvent.Value;
                     break;
                 case (int)MidiController.Pan:
@@ -38,58 +38,58 @@ namespace MIDI.Core.Midi.Handlers
                 case (int)MidiController.Expression:
                     state.ExpressionMsb = controlEvent.Value;
                     break;
-                case 12: // エフェクトコントロール1 (EffectControl1)
+                case 12:
                     state.EffectControl1 = controlEvent.Value / 127.0f;
                     break;
-                case 13: // エフェクトコントロール2 (EffectControl2)
+                case 13:
                     state.EffectControl2 = controlEvent.Value / 127.0f;
                     break;
-                case 16: // 汎用コントローラー1 (GeneralPurposeController1)
+                case 16:
                     state.GeneralPurposeController1 = controlEvent.Value;
                     break;
-                case 17: // 汎用コントローラー2 (GeneralPurposeController2)
+                case 17:
                     state.GeneralPurposeController2 = controlEvent.Value;
                     break;
-                case 18: // 汎用コントローラー3 (GeneralPurposeController3)
+                case 18:
                     state.GeneralPurposeController3 = controlEvent.Value;
                     break;
-                case 19: // 汎用コントローラー4 (GeneralPurposeController4)
+                case 19:
                     state.GeneralPurposeController4 = controlEvent.Value;
                     break;
                 case (int)MidiController.BankSelectLsb:
                     state.BankSelectLsb = controlEvent.Value;
                     break;
-                case 33: // モジュレーションLSB (ModulationLsb)
+                case 33:
                     state.ModulationLsb = controlEvent.Value;
                     break;
-                case 34: // ブレスコントローラーLSB (BreathControllerLsb)
+                case 34:
                     state.BreathControllerLsb = controlEvent.Value;
                     break;
-                case 36: // フットコントローラーLSB (FootControllerLsb)
+                case 36:
                     state.FootControllerLsb = controlEvent.Value;
                     break;
-                case 37: // ポルタメントタイムLSB (PortamentoTimeLsb)
+                case 37:
                     state.PortamentoTimeLsb = controlEvent.Value;
                     break;
-                case 38: // データエントリーLSB (DataEntryLsb)
+                case 38:
                     state.DataEntryLsb = controlEvent.Value;
                     break;
-                case 39: // メインボリュームLSB (MainVolumeLsb)
+                case 39:
                     state.VolumeLsb = controlEvent.Value;
                     break;
-                case 40: // バランスLSB (BalanceLsb)
+                case 40:
                     state.BalanceLsb = controlEvent.Value;
                     break;
-                case 42: // パンLSB (PanLsb)
+                case 42:
                     state.PanLsb = controlEvent.Value;
                     break;
-                case 43: // エクスプレッションLSB (ExpressionLsb)
+                case 43:
                     state.ExpressionLsb = controlEvent.Value;
                     break;
-                case 44: // エフェクトコントロール1 LSB (EffectControl1Lsb)
+                case 44:
                     state.EffectControl1Lsb = controlEvent.Value / 127.0f;
                     break;
-                case 45: // エフェクトコントロール2 LSB (EffectControl2Lsb)
+                case 45:
                     state.EffectControl2Lsb = controlEvent.Value / 127.0f;
                     break;
                 case (int)MidiController.Sustain:
@@ -107,75 +107,75 @@ namespace MIDI.Core.Midi.Handlers
                 case (int)MidiController.LegatoFootswitch:
                     state.LegatoFootswitch = controlEvent.Value >= 64;
                     break;
-                case 69: // ホールド2 (Hold2)
+                case 69:
                     state.Hold2 = controlEvent.Value >= 64;
                     break;
-                case 70: // サウンドコントローラー1 (Sound Variation)
+                case 70:
                     state.SoundController1 = controlEvent.Value / 127.0f;
                     break;
-                case 80: // 汎用コントローラー5 (GeneralPurposeController5)
+                case 80:
                     state.GeneralPurposeController5 = controlEvent.Value;
                     break;
-                case 81: // 汎用コントローラー6 (GeneralPurposeController6)
+                case 81:
                     state.GeneralPurposeController6 = controlEvent.Value;
                     break;
-                case 82: // 汎用コントローラー7 (GeneralPurposeController7)
+                case 82:
                     state.GeneralPurposeController7 = controlEvent.Value;
                     break;
-                case 83: // 汎用コントローラー8 (GeneralPurposeController8)
+                case 83:
                     state.GeneralPurposeController8 = controlEvent.Value;
                     break;
-                case 84: // ポルタメントコントロール (PortamentoControl)
+                case 84:
                     state.PortamentoControl = controlEvent.Value;
                     break;
-                case 91: // エフェクト1デプス (Reverb) (Effects1Depth)
+                case 91:
                     state.Effects1Depth = controlEvent.Value / 127.0f;
                     break;
-                case 92: // エフェクト2デプス (Tremolo) (Effects2Depth)
+                case 92:
                     state.Effects2Depth = controlEvent.Value / 127.0f;
                     break;
-                case 93: // エフェクト3デプス (Chorus) (Effects3Depth)
+                case 93:
                     state.Effects3Depth = controlEvent.Value / 127.0f;
                     break;
-                case 94: // エフェクト4デプス (Celeste) (Effects4Depth)
+                case 94:
                     state.Effects4Depth = controlEvent.Value / 127.0f;
                     break;
-                case 95: // エフェクト5デプス (Phaser) (Effects5Depth)
+                case 95:
                     state.Effects5Depth = controlEvent.Value / 127.0f;
                     break;
-                case 96: // データインクリメント (DataIncrement)
+                case 96:
                     state.DataEntry++;
                     break;
-                case 97: // データデクリメント (DataDecrement)
+                case 97:
                     state.DataEntry--;
                     break;
-                case 98: // 非登録パラメーターナンバーLSB (NonRegisteredParameterNumberLsb)
+                case 98:
                     state.NonRegisteredParameterNumberLsb = controlEvent.Value;
                     break;
-                case 99: // 非登録パラメーターナンバーMSB (NonRegisteredParameterNumberMsb)
+                case 99:
                     state.NonRegisteredParameterNumberMsb = controlEvent.Value;
                     break;
-                case 100: // 登録パラメーターナンバーLSB (RegisteredParameterNumberLsb)
+                case 100:
                     state.RegisteredParameterNumberLsb = controlEvent.Value;
                     break;
-                case 101: // 登録パラメーターナンバーMSB (RegisteredParameterNumberMsb)
+                case 101:
                     state.RegisteredParameterNumberMsb = controlEvent.Value;
                     break;
-                case 120: // オールサウンドオフ (AllSoundOff)
+                case 120:
                     break;
                 case (int)MidiController.ResetAllControllers:
                     break;
-                case 122: // ローカルコントロール (LocalControl)
+                case 122:
                     break;
                 case (int)MidiController.AllNotesOff:
                     break;
-                case 124: // オムニオフ (OmniOff)
+                case 124:
                     break;
-                case 125: // オムニオン (OmniOn)
+                case 125:
                     break;
-                case 126: // モノモードオン (MonoModeOn)
+                case 126:
                     break;
-                case 127: // ポリモードオン (PolyModeOn)
+                case 127:
                     break;
                 default:
                     ApplySoundControllerMappings(controlEvent, state);
@@ -187,31 +187,31 @@ namespace MIDI.Core.Midi.Handlers
         {
             switch (controlEvent.Controller)
             {
-                case 71: // サウンドコントローラー2 (Timbre/Resonance)
-                    state.FilterResonanceMultiplier = controlEvent.Value / 64.0;
+                case 71:
+                    state.FilterResonanceMultiplier = controlEvent.Value / 127.0;
                     break;
-                case 72: // サウンドコントローラー3 (Release Time)
-                    state.ReleaseMultiplier = controlEvent.Value / 64.0;
+                case 72:
+                    state.ReleaseMultiplier = controlEvent.Value / 127.0;
                     break;
-                case 73: // サウンドコントローラー4 (Attack Time)
-                    state.AttackMultiplier = controlEvent.Value / 64.0;
+                case 73:
+                    state.AttackMultiplier = controlEvent.Value / 127.0;
                     break;
-                case 74: // サウンドコントローラー5 (Brightness/Cutoff)
-                    state.FilterCutoffMultiplier = controlEvent.Value / 64.0;
+                case 74:
+                    state.FilterCutoffMultiplier = controlEvent.Value / 127.0;
                     break;
-                case 75: // サウンドコントローラー6 (Decay Time)
-                    state.DecayMultiplier = controlEvent.Value / 64.0;
+                case 75:
+                    state.DecayMultiplier = controlEvent.Value / 127.0;
                     break;
-                case 76: // サウンドコントローラー7 (Vibrato Rate)
+                case 76:
                     state.SoundController7 = controlEvent.Value / 127.0f;
                     break;
-                case 77: // サウンドコントローラー8 (Vibrato Depth)
+                case 77:
                     state.SoundController8 = controlEvent.Value / 127.0f;
                     break;
-                case 78: // サウンドコントローラー9 (Vibrato Delay)
+                case 78:
                     state.SoundController9 = controlEvent.Value / 127.0f;
                     break;
-                case 79: // サウンドコントローラー10 (General Purpose)
+                case 79:
                     state.SoundController10 = controlEvent.Value / 127.0f;
                     break;
             }

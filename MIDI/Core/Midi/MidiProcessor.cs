@@ -1,5 +1,4 @@
-﻿// v3.0.0 182 図形拡張/Core/Midi/MidiProcessor.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using MIDI.Core.Midi.Handlers;
