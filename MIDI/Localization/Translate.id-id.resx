@@ -73,5 +73,4 @@
 <data name="EnableNamedPipeApiTooltip" xml:space="preserve"><value>las aplicaciones externas pueden acceder a las funciones del complemento. Requiere reiniciar YMM4 después del cambio.</value></data>
 <data name="ShowMidiInfoWindowTooltip" xml:space="preserve"><value>se abrirá automáticamente una ventana que muestra la información MIDI interna del archivo al añadir un archivo MIDI a la línea de tiempo. Útil para depuración y confirmación detallada.</value></data>
 <data name="OpenMidiEditorTooltip" xml:space="preserve"><value>la ventana del editor MIDI se abrirá automáticamente al añadir un archivo MIDI a la línea de tiempo.</value></data>
-<data name="Key_VersionNewAvailable" xml:space="preserve"><value>يتوفر إصدار جديد: {0}</value></data>
 </root>

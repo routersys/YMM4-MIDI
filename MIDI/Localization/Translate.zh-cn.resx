@@ -413,7 +413,7 @@
 <data name="ReloadConfigTooltip" xml:space="preserve"><value>从文件重新加载当前设置。未保存的更改将被丢弃。</value></data>
 <data name="Key_VersionChecking" xml:space="preserve"><value>正在获取版本信息...</value></data>
 <data name="Key_VersionCurrent" xml:space="preserve"><value>当前版本: {0}</value></data>
-<data name="Key_VersionNewAvailable" xml:space="preserve"><value>New version available: {0}</value></data>
+<data name="Key_VersionNewAvailable" xml:space="preserve"><value>新版本可用: {0}</value></data>
 <data name="Key_VersionUpToDate" xml:space="preserve"><value>您的版本已是最新。</value></data>
 <data name="Key_VersionCheckFailed" xml:space="preserve"><value>无法获取更新信息。</value></data>
 <data name="MidiWriterHeader" xml:space="preserve"><value>MIDI Conversion Settings</value></data>

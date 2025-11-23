@@ -413,7 +413,7 @@
 <data name="ReloadConfigTooltip" xml:space="preserve"><value>Recarga la configuración actual desde el archivo. Los cambios no guardados se descartarán.</value></data>
 <data name="Key_VersionChecking" xml:space="preserve"><value>Obteniendo información de la versión...</value></data>
 <data name="Key_VersionCurrent" xml:space="preserve"><value>Versión Actual: {0}</value></data>
-<data name="Key_VersionNewAvailable" xml:space="preserve"><value>새 버전 사용 가능: {0}</value></data>
+<data name="Key_VersionNewAvailable" xml:space="preserve"><value>Nueva versión disponible: {0}</value></data>
 <data name="Key_VersionUpToDate" xml:space="preserve"><value>Su versión está actualizada.</value></data>
 <data name="Key_VersionCheckFailed" xml:space="preserve"><value>No se pudo recuperar la información de actualización.</value></data>
 <data name="MidiWriterHeader" xml:space="preserve"><value>MIDI Conversion Settings</value></data>

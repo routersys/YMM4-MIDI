@@ -413,7 +413,7 @@
 <data name="ReloadConfigTooltip" xml:space="preserve"><value>파일에서 현재 설정을 다시 로드합니다. 저장되지 않은 변경 사항은 삭제됩니다.</value></data>
 <data name="Key_VersionChecking" xml:space="preserve"><value>버전 정보를 가져오는 중...</value></data>
 <data name="Key_VersionCurrent" xml:space="preserve"><value>현재 버전: {0}</value></data>
-<data name="Key_VersionNewAvailable" xml:space="preserve"><value>新版本可用: {0}</value></data>
+<data name="Key_VersionNewAvailable" xml:space="preserve"><value>새 버전 사용 가능: {0}</value></data>
 <data name="Key_VersionUpToDate" xml:space="preserve"><value>현재 사용 중인 버전이 최신입니다.</value></data>
 <data name="Key_VersionCheckFailed" xml:space="preserve"><value>업데이트 정보를 가져올 수 없습니다.</value></data>
 <data name="MidiWriterHeader" xml:space="preserve"><value>MIDI Conversion Settings</value></data>

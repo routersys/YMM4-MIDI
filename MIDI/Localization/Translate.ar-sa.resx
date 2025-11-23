@@ -412,8 +412,8 @@
 <data name="RefreshFilesTooltip" xml:space="preserve"><value>تحديث قوائم ملفات SFZ و SoundFont.</value></data>
 <data name="ReloadConfigTooltip" xml:space="preserve"><value>إعادة تحميل الإعدادات الحالية من الملف. سيتم تجاهل التغييرات غير المحفوظة.</value></data>
 <data name="Key_VersionChecking" xml:space="preserve"><value>جارٍ الحصول على معلومات الإصدار...</value></data>
-<data name="Key_VersionCurrent" xml:space="preserve"><value>الإصدار الحالي: {0}</value></data>
-<data name="Key_VersionNewAvailable" xml:space="preserve"><value>Nueva versión disponible: {0}</value></data>
+<data name="Key_VersionCurrent" xml:space="preserve"><value>{الإصدار الحالي: {0</value></data>
+<data name="Key_VersionNewAvailable" xml:space="preserve"><value>{يتوفر إصدار جديد: {0</value></data>
 <data name="Key_VersionUpToDate" xml:space="preserve"><value>إصدارك محدّث.</value></data>
 <data name="Key_VersionCheckFailed" xml:space="preserve"><value>تعذر استرداد معلومات التحديث.</value></data>
 <data name="MidiWriterHeader" xml:space="preserve"><value>MIDI Conversion Settings</value></data>
