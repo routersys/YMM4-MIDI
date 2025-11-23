@@ -8,19 +8,16 @@ namespace MIDI.AudioEffect.AMP_SIMULATOR.Algorithms
         private const int Taps = 256;
         private readonly float[] coeffs;
         private readonly float[] state;
-        private int head;
 
         public PolyphaseFirOversampler()
         {
             state = new float[Taps];
             coeffs = DesignKaiserLowpass(Taps, 0.5 / Factor, 12.0);
-            head = 0;
         }
 
         public void Reset()
         {
             Array.Clear(state, 0, state.Length);
-            head = 0;
         }
 
         public float Process(float input, Func<double, double> processor)
@@ -52,8 +49,6 @@ namespace MIDI.AudioEffect.AMP_SIMULATOR.Algorithms
 
         public float ProcessHiRes(float input, Func<double, double> processor)
         {
-            float outputAccumulator = 0.0f;
-
             for (int i = 0; i < Factor; i++)
             {
                 float sample = (i == 0) ? input * Factor : 0.0f;
