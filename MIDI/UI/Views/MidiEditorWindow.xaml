@@ -154,7 +154,6 @@
                         <MenuItem Header="ノートの色をリセット" Command="{Binding ResetNoteColorCommand}" />
                     </MenuItem>
                     <MenuItem Header="ウィンドウ(_W)">
-                        <MenuItem Header="ピアノキー" IsCheckable="True" IsChecked="{Binding IsPianoKeysVisible, Mode=TwoWay}" />
                         <MenuItem Header="ピアノロール" IsCheckable="True" IsChecked="{Binding IsPianoRollVisible, Mode=TwoWay}" />
                         <MenuItem Header="ノーツの編集" IsCheckable="True" IsChecked="{Binding IsNoteEditorVisible, Mode=TwoWay}" />
                         <MenuItem Header="クオンタイズ設定" IsCheckable="True" IsChecked="{Binding IsQuantizeSettingsVisible, Mode=TwoWay}" />
