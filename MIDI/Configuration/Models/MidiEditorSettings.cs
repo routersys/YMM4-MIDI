@@ -54,6 +54,14 @@ namespace MIDI.Configuration.Models
         Delete
     }
 
+    public enum PianoRollMouseMode
+    {
+        [Description("カーソル")]
+        Cursor,
+        [Description("エディター")]
+        Editor
+    }
+
     [MajorSettingGroup("エディター設定")]
     public class MidiEditorSettings : SettingsBase<MidiEditorSettings>
     {
@@ -518,9 +526,14 @@ namespace MIDI.Configuration.Models
         [Setting("MIDI入力モード", Description = "MIDIキーボードやPCキーボードからの入力方法を選択します。")]
         public MidiInputMode MidiInputMode { get => _midiInputMode; set => SetField(ref _midiInputMode, value); }
 
+        private PianoRollMouseMode _pianoRollMouseMode = PianoRollMouseMode.Cursor;
+        [Setting("マウス操作モード", Description = "ピアノロールのマウス操作モードを設定します。エディターモードではワンクリックでノートを配置できます。")]
+        public PianoRollMouseMode PianoRollMouseMode { get => _pianoRollMouseMode; set => SetField(ref _pianoRollMouseMode, value); }
+
         public void CopyFrom(Input source)
         {
             MidiInputMode = source.MidiInputMode;
+            PianoRollMouseMode = source.PianoRollMouseMode;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

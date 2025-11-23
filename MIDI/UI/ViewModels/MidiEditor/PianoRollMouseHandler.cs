@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
+using MIDI.Configuration.Models;
 using NAudioMidi = NAudio.Midi;
 
 namespace MIDI.UI.ViewModels.MidiEditor
@@ -148,7 +149,25 @@ namespace MIDI.UI.ViewModels.MidiEditor
             }
             else
             {
-                if (isShiftPressed)
+                if (MidiEditorSettings.Default.Input.PianoRollMouseMode == PianoRollMouseMode.Editor && !isShiftPressed && !isCtrlPressed)
+                {
+                    var newNote = _viewModel.AddNoteAt(position);
+                    if (newNote != null)
+                    {
+                        _viewModel.ClearSelections();
+                        newNote.IsSelected = true;
+                        _viewModel.SelectedNotes.Add(newNote);
+                        _viewModel.SelectedNote = newNote;
+
+                        CurrentDragMode = DragMode.ResizeRight;
+                        _dragStartNoteData.Clear();
+                        var startTime = _viewModel.TicksToTime(newNote.StartTicks);
+                        var durationTime = _viewModel.TicksToTime(newNote.StartTicks + newNote.DurationTicks) - startTime;
+                        _dragStartNoteData[newNote] = (newNote.StartTicks, startTime, newNote.DurationTicks, durationTime, newNote.NoteNumber, newNote.CentOffset, newNote.Channel, newNote.Velocity);
+                        newNote.IsEditing = true;
+                    }
+                }
+                else if (isShiftPressed)
                 {
                     if (!isCtrlPressed)
                     {

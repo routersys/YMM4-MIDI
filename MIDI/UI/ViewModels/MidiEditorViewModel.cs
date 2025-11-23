@@ -2731,9 +2731,9 @@ namespace MIDI.UI.ViewModels
             return TimeSpan.FromSeconds(timeInSeconds);
         }
 
-        public void AddNoteAt(Point position)
+        public NoteViewModel? AddNoteAt(Point position)
         {
-            if (_midiFile == null) return;
+            if (_midiFile == null) return null;
 
             long ticks;
             if (EditorSettings.Grid.EnableSnapToGrid && !(Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)))
@@ -2750,7 +2750,7 @@ namespace MIDI.UI.ViewModels
             }
 
             var noteNumber = MaxNoteNumber - (int)Math.Floor(position.Y / NoteHeight);
-            if (noteNumber < 0 || noteNumber > MaxNoteNumber) return;
+            if (noteNumber < 0 || noteNumber > MaxNoteNumber) return null;
 
             var durationTicks = (long)GetTicksPerGrid();
             if (durationTicks <= 0) durationTicks = _midiFile.DeltaTicksPerQuarterNote / 4;
@@ -2766,6 +2766,7 @@ namespace MIDI.UI.ViewModels
             var noteViewModel = new NoteViewModel(noteOn, _midiFile.DeltaTicksPerQuarterNote, tempoMap, this);
 
             _undoRedoService.Execute(new AddNoteCommand(this, noteViewModel));
+            return noteViewModel;
         }
 
         internal void AddNoteInternal(NoteViewModel noteViewModel)
