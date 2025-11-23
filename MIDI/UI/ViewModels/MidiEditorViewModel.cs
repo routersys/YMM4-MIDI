@@ -932,7 +932,12 @@ namespace MIDI.UI.ViewModels
             ZoomInCommand = new RelayCommand(_ => HorizontalZoom = Math.Min(HorizontalZoom * 1.2, 1000));
             ZoomOutCommand = new RelayCommand(_ => HorizontalZoom = Math.Max(HorizontalZoom / 1.2, 10));
 
-            SliderDragStartedCommand = new RelayCommand(_ => IsSliderDragging = true);
+            SliderDragStartedCommand = new RelayCommand(_ =>
+            {
+                IsSliderDragging = true;
+                IsEditingHorizontalZoom = false;
+                IsEditingVerticalZoom = false;
+            });
             SliderDragCompletedCommand = new RelayCommand(_ =>
             {
                 IsSliderDragging = false;
@@ -2631,6 +2636,11 @@ namespace MIDI.UI.ViewModels
             double intervalSeconds = TimeRulerInterval;
             if (intervalSeconds <= 0) intervalSeconds = 1.0;
 
+            while (intervalSeconds * HorizontalZoom < 50)
+            {
+                intervalSeconds += (TimeRulerInterval > 0 ? TimeRulerInterval : 1.0);
+            }
+
             for (double seconds = 0; ; seconds += intervalSeconds)
             {
                 var time = TimeSpan.FromSeconds(seconds);
@@ -2643,10 +2653,7 @@ namespace MIDI.UI.ViewModels
 
                 var width = nextX - x;
 
-                if (width > 50)
-                {
-                    TimeRuler.Add(new TimeRulerViewModel(time, width, x));
-                }
+                TimeRuler.Add(new TimeRulerViewModel(time, width, x));
 
                 if (time > totalDuration.Add(TimeSpan.FromSeconds(intervalSeconds)) || x > pianoRollWidth + 200)
                 {
