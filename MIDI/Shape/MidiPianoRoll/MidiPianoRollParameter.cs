@@ -58,8 +58,13 @@ namespace MIDI.Shape.MidiPianoRoll
         private PianoRollResourcePack _resourcePack = new();
         private readonly MidiDataManager _midiDataManager = new MidiDataManager();
 
+        [Newtonsoft.Json.JsonIgnore]
         public PianoRollResourcePack ResourcePack => _resourcePack;
+
+        [Newtonsoft.Json.JsonIgnore]
         public MidiDataManager MidiDataManager => _midiDataManager;
+
+        [Newtonsoft.Json.JsonIgnore]
         public double MidiDurationSeconds => _midiDataManager.MidiDuration.TotalSeconds;
 
         public event EventHandler? MidiFileReloadRequested;
