@@ -1343,6 +1343,8 @@ namespace MIDI.UI.ViewModels
             double ticksPerGrid = GetTicksPerGrid();
             if (ticksPerGrid <= 0) return;
 
+            long ticksPerBar = TicksPerBar;
+
             long startTicks = TimeToTicks(TimeSpan.FromSeconds(rect.X / HorizontalZoom));
             long endTicks = TimeToTicks(TimeSpan.FromSeconds((rect.X + rect.Width) / HorizontalZoom));
 
@@ -1357,11 +1359,13 @@ namespace MIDI.UI.ViewModels
                 if (x > rect.X + rect.Width) break;
                 if (x >= rect.X && x < PianoRollBitmap.PixelWidth)
                 {
+                    bool isMeasureLine = ticksPerBar > 0 && ticks % ticksPerBar == 0;
+
                     for (int y = rect.Y; y < rect.Y + rect.Height; y++)
                     {
                         if (y >= PianoRollBitmap.PixelHeight) break;
 
-                        if ((y / 2) % 2 == 0)
+                        if (isMeasureLine || (y / 2) % 2 == 0)
                         {
                             int* pPixel = (int*)(pBits + y * stride + x * 4);
                             *pPixel = gridColorInt;
