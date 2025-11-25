@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:ShortcutHelpViewModel}"
         Title="ショートカットキー ヘルプ"
-        Width="600" Height="700"
+        Width="700" Height="700"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
         Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
@@ -18,36 +18,111 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Resources/MidiEditorResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="KeyChipStyle" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="3"/>
+                <Setter Property="Padding" Value="6,2"/>
+                <Setter Property="Margin" Value="0,0,5,0"/>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <Grid Margin="15">
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding ShortcutCategories}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <GroupBox Header="{Binding CategoryName}" FontWeight="Bold" Margin="0,0,0,10">
-                            <ListView ItemsSource="{Binding Shortcuts}" BorderThickness="0" Background="Transparent">
-                                <ListView.ItemTemplate>
+                            <ItemsControl ItemsSource="{Binding Shortcuts}" BorderThickness="0" Background="Transparent">
+                                <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="5,2">
+                                        <Grid Margin="5,4">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="40"/>
-                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="200"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <Path Data="{Binding IconPath}" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                            <Border Grid.Column="1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" CornerRadius="3" Padding="5,3" Margin="5,0" Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}">
-                                                <TextBlock Text="{Binding Key}" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                            </Border>
-                                            <TextBlock Grid.Column="2" Text="{Binding Description}" VerticalAlignment="Center"/>
+
+                                            <Path Data="{Binding IconPath}" 
+                                                  Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" 
+                                                  Width="16" Height="16" Stretch="Uniform" 
+                                                  VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                                            <TextBlock Grid.Column="1" Text="{Binding Description}" VerticalAlignment="Center" Margin="10,0" TextTrimming="CharacterEllipsis"/>
+
+                                            <Grid Grid.Column="2" HorizontalAlignment="Right" Margin="10,0,5,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled"
+                                                              FlowDirection="RightToLeft" VerticalAlignment="Center" Margin="0,0,5,0"
+                                                              MaxWidth="350">
+                                                    <ItemsControl ItemsSource="{Binding Keys}" FlowDirection="LeftToRight">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel Orientation="Horizontal"/>
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Style="{StaticResource KeyChipStyle}">
+                                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                                        <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                                        <Button Content="×" 
+                                                                                Command="{Binding DataContext.RemoveKeyCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                                CommandParameter="{Binding}"
+                                                                                Background="Transparent" BorderThickness="0" 
+                                                                                Margin="5,0,0,0" Padding="0" 
+                                                                                VerticalAlignment="Center" 
+                                                                                FontWeight="Bold" Foreground="Red"
+                                                                                Cursor="Hand"/>
+                                                                    </StackPanel>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </ScrollViewer>
+
+                                                <TextBox Grid.Column="1" Width="80" Height="24" VerticalAlignment="Center"
+                                                         PreviewKeyDown="ShortcutTextBox_PreviewKeyDown" Tag="{Binding}"
+                                                         ToolTip="ここをクリックしてキーを入力すると登録されます"
+                                                         Background="Transparent" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox">
+                                                            <Setter Property="Text" Value=""/>
+                                                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsFocused" Value="True">
+                                                                    <Setter Property="Text" Value="入力待機..."/>
+                                                                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
+                                            </Grid>
                                         </Grid>
                                     </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </GroupBox>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,5,0">
+            <Button Content="デフォルトに戻す" Command="{Binding ResetCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,0,10,0"/>
+            <Button Content="閉じる" IsCancel="True" Style="{StaticResource RichButtonStyle}" Click="CloseButton_Click"/>
+        </StackPanel>
     </Grid>
 </Window>

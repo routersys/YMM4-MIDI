@@ -62,6 +62,24 @@ namespace MIDI.Configuration.Models
         Editor
     }
 
+    public class KeyboardShortcut : INotifyPropertyChanged
+    {
+        private string _commandId = string.Empty;
+        public string CommandId { get => _commandId; set => SetField(ref _commandId, value); }
+
+        private ObservableCollection<string> _keys = new();
+        public ObservableCollection<string> Keys { get => _keys; set => SetField(ref _keys, value); }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
+        }
+    }
+
     [MajorSettingGroup("エディター設定")]
     public class MidiEditorSettings : SettingsBase<MidiEditorSettings>
     {
@@ -118,6 +136,9 @@ namespace MIDI.Configuration.Models
         private ObservableCollection<KeyboardMapping> _keyboardMappings = new();
         public ObservableCollection<KeyboardMapping> KeyboardMappings { get => _keyboardMappings; set => Set(ref _keyboardMappings, value); }
 
+        private ObservableCollection<KeyboardShortcut> _shortcuts = new();
+        public ObservableCollection<KeyboardShortcut> Shortcuts { get => _shortcuts; set => Set(ref _shortcuts, value); }
+
 
         public override void Initialize()
         {
@@ -134,6 +155,7 @@ namespace MIDI.Configuration.Models
             Input.PropertyChanged += OnNestedPropertyChanged;
             Metronome.PropertyChanged += OnNestedPropertyChanged;
             Backup.PropertyChanged += OnNestedPropertyChanged;
+            Shortcuts.CollectionChanged += (s, e) => Save();
         }
 
         private void OnNestedPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -319,6 +341,17 @@ namespace MIDI.Configuration.Models
             LayoutXml = source.LayoutXml;
             TuningSystem = source.TuningSystem;
             KeyboardMappings = new ObservableCollection<KeyboardMapping>(source.KeyboardMappings.Select(m => (KeyboardMapping)m.Clone()));
+
+            var newShortcuts = new ObservableCollection<KeyboardShortcut>();
+            foreach (var s in source.Shortcuts)
+            {
+                newShortcuts.Add(new KeyboardShortcut
+                {
+                    CommandId = s.CommandId,
+                    Keys = new ObservableCollection<string>(s.Keys)
+                });
+            }
+            Shortcuts = newShortcuts;
 
             View.CopyFrom(source.View);
             Note.CopyFrom(source.Note);

@@ -27,21 +27,6 @@
         KeyUp="MidiEditorWindow_KeyUp">
 
     <Window.InputBindings>
-        <KeyBinding Key="N" Modifiers="Control" Command="{Binding NewCommand}" />
-        <KeyBinding Key="O" Modifiers="Control" Command="{Binding LoadMidiCommand}" />
-        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
-        <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveAsCommand}" />
-        <KeyBinding Key="Space" Command="{Binding PlayPauseCommand}" />
-        <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}" />
-        <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}" />
-        <KeyBinding Key="Q" Modifiers="Control" Command="{Binding OpenQuantizeSettingsCommand}" />
-        <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopyCommand}" />
-        <KeyBinding Key="V" Modifiers="Control" Command="{Binding PasteCommand}" />
-        <KeyBinding Key="Delete" Command="{Binding DeleteSelectedNotesCommand}" />
-        <KeyBinding Key="Delete" Command="{Binding DeleteSelectedFlagsCommand}" />
-        <KeyBinding Key="A" Modifiers="Control" Command="{Binding SelectAllCommand}" />
-        <KeyBinding Key="Right" Modifiers="Alt" Command="{Binding GoToNextFlagCommand}" />
-        <KeyBinding Key="Left" Modifiers="Alt" Command="{Binding GoToPreviousFlagCommand}" />
     </Window.InputBindings>
 
     <Window.Resources>
@@ -110,7 +95,7 @@
                         <MenuItem Header="貼り付け(_V)" Command="{Binding PasteCommand}" />
                         <MenuItem Header="削除(_D)" Command="{Binding DeleteSelectedNotesCommand}" />
                         <Separator />
-                        <MenuItem Header="すべて選択(_A)" Command="{Binding SelectAllCommand}" InputGestureText="Ctrl+A" />
+                        <MenuItem Header="すべて選択(_A)" Command="{Binding SelectAllCommand}" />
                         <MenuItem Header="選択を反転" Command="{Binding InvertSelectionCommand}" />
                         <MenuItem Header="同じ音程のノートを選択" Command="{Binding SelectSamePitchCommand}" />
                         <MenuItem Header="同じチャンネルのノートを選択" Command="{Binding SelectSameChannelCommand}" />
@@ -131,8 +116,8 @@
                         </MenuItem>
                         <Separator />
                         <MenuItem Header="フラグ">
-                            <MenuItem Header="次のフラグへ移動" Command="{Binding GoToNextFlagCommand}" InputGestureText="Alt+→" />
-                            <MenuItem Header="前のフラグへ移動" Command="{Binding GoToPreviousFlagCommand}" InputGestureText="Alt+←" />
+                            <MenuItem Header="次のフラグへ移動" Command="{Binding GoToNextFlagCommand}" />
+                            <MenuItem Header="前のフラグへ移動" Command="{Binding GoToPreviousFlagCommand}" />
                             <Separator />
                             <MenuItem Header="選択したフラグを削除" Command="{Binding DeleteSelectedFlagsCommand}" />
                             <MenuItem Header="すべてのフラグを削除" Command="{Binding DeleteAllFlagsCommand}" />
@@ -205,14 +190,14 @@
                         </Style>
                     </ToolBarTray.Style>
                     <ToolBar>
-                        <Button Command="{Binding SaveCommand}" ToolTip="保存 (Ctrl+S)" Style="{StaticResource ToolButtonStyle}">
+                        <Button Command="{Binding SaveCommand}" ToolTip="保存" Style="{StaticResource ToolButtonStyle}">
                             <Path Data="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" Style="{StaticResource IconPathStyle}" />
                         </Button>
-                        <Button Command="{Binding SaveAsCommand}" ToolTip="名前を付けて保存 (Ctrl+Shift+S)" Style="{StaticResource ToolButtonStyle}">
+                        <Button Command="{Binding SaveAsCommand}" ToolTip="名前を付けて保存" Style="{StaticResource ToolButtonStyle}">
                             <Path Data="M17,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3M15,15H9V19H15V15M12,2A3,3 0 0,1 15,5H9A3,3 0 0,1 12,2Z" Style="{StaticResource IconPathStyle}" />
                         </Button>
                         <Separator />
-                        <Button Command="{Binding PlayPauseCommand}" ToolTip="再生/一時停止 (Space)" Style="{StaticResource ToolButtonStyle}">
+                        <Button Command="{Binding PlayPauseCommand}" ToolTip="再生/一時停止" Style="{StaticResource ToolButtonStyle}">
                             <Path Data="{Binding PlayButtonIcon}" Style="{StaticResource IconPathStyle}" />
                         </Button>
                         <Button Command="{Binding StopCommand}" ToolTip="停止" Style="{StaticResource ToolButtonStyle}">
@@ -226,7 +211,7 @@
                         <TextBlock Text="{Binding CurrentTime, StringFormat='{}{0:mm\\:ss\\.fff}'}" VerticalAlignment="Center" MinWidth="80" />
                         <TextBlock Text="{Binding LoopRangeText}" Foreground="DodgerBlue" VerticalAlignment="Center" Margin="5,0" />
                         <Separator />
-                        <Button Command="{Binding OpenQuantizeSettingsCommand}" ToolTip="クオンタイズ設定 (Ctrl+Q)" Style="{StaticResource ToolButtonStyle}">
+                        <Button Command="{Binding OpenQuantizeSettingsCommand}" ToolTip="クオンタイズ設定" Style="{StaticResource ToolButtonStyle}">
                             <Path Data="M6 13h12v-2H6v2zm-4-4h12V7H2v2zm4 8h12v-2H6v2z" Style="{StaticResource IconPathStyle}" />
                         </Button>
                         <Separator />
@@ -543,9 +528,9 @@
                                                 </ItemsControl>
                                                 <Canvas>
                                                     <Rectangle Fill="#330078D7" Height="20"
-                                                                   Visibility="{Binding IsLooping, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                                   Width="{Binding LoopDurationWidth}"
-                                                                   Canvas.Left="{Binding LoopStartX}" />
+                                                               Visibility="{Binding IsLooping, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                               Width="{Binding LoopDurationWidth}"
+                                                               Canvas.Left="{Binding LoopStartX}" />
                                                 </Canvas>
                                             </Grid>
                                         </ScrollViewer>
@@ -555,7 +540,7 @@
                                                 <Grid.ContextMenu>
                                                     <ContextMenu>
                                                         <MenuItem Header="選択">
-                                                            <MenuItem Header="すべて選択" Command="{Binding SelectAllCommand}" InputGestureText="Ctrl+A" />
+                                                            <MenuItem Header="すべて選択" Command="{Binding SelectAllCommand}" />
                                                             <MenuItem Header="選択を反転" Command="{Binding InvertSelectionCommand}" />
                                                             <MenuItem Header="同じ音程のノートを選択" Command="{Binding SelectSamePitchCommand}" />
                                                             <MenuItem Header="同じチャンネルのノートを選択" Command="{Binding SelectSameChannelCommand}" />

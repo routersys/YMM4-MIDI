@@ -13,6 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -49,12 +50,53 @@ namespace MIDI.UI.Views
             ContentRendered += MidiEditorWindow_ContentRendered;
             Loaded += MidiEditorWindow_Loaded;
             Closing += MidiEditorWindow_Closing;
+            PreviewKeyDown += MidiEditorWindow_PreviewKeyDown;
 
             _autoScrollTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(30)
             };
             _autoScrollTimer.Tick += AutoScrollTimer_Tick;
+        }
+
+        private void MidiEditorWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.OriginalSource is TextBox) return;
+            if (e.Key == Key.System) return;
+
+            var key = e.Key;
+            if (key == Key.LeftCtrl || key == Key.RightCtrl ||
+                key == Key.LeftAlt || key == Key.RightAlt ||
+                key == Key.LeftShift || key == Key.RightShift ||
+                key == Key.LWin || key == Key.RWin)
+            {
+                return;
+            }
+
+            var sb = new StringBuilder();
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) sb.Append("Ctrl + ");
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) sb.Append("Shift + ");
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) sb.Append("Alt + ");
+            sb.Append(key.ToString());
+
+            var pressedKeyString = sb.ToString();
+
+            foreach (var shortcut in MidiEditorSettings.Default.Shortcuts)
+            {
+                if (shortcut.Keys.Contains(pressedKeyString))
+                {
+                    var commandProperty = typeof(MidiEditorViewModel).GetProperty(shortcut.CommandId);
+                    if (commandProperty != null)
+                    {
+                        if (commandProperty.GetValue(_viewModel) is ICommand command && command.CanExecute(null))
+                        {
+                            command.Execute(null);
+                            e.Handled = true;
+                            return;
+                        }
+                    }
+                }
+            }
         }
 
         private void AutoScrollTimer_Tick(object? sender, EventArgs e)
@@ -306,17 +348,6 @@ namespace MIDI.UI.Views
                     break;
                 case Key.Down:
                     PianoRollScrollViewer.ScrollToVerticalOffset(PianoRollScrollViewer.VerticalOffset + 20);
-                    e.Handled = true;
-                    break;
-                case Key.Delete:
-                    if (_viewModel.SelectedNotes.Any())
-                    {
-                        _viewModel.DeleteSelectedNotesCommand.Execute(null);
-                    }
-                    else if (_viewModel.SelectedFlags.Any())
-                    {
-                        _viewModel.DeleteSelectedFlagsCommand.Execute(null);
-                    }
                     e.Handled = true;
                     break;
                 default:
