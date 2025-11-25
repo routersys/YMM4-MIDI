@@ -726,10 +726,10 @@
                                         </Grid.RowDefinitions>
                                         <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.RenderingModeLabel}" ToolTip="{x:Static midi:Translate.RenderingModeTooltip}"/>
                                         <ComboBox Grid.Row="0" Grid.Column="1"
-                                            ItemsSource="{Binding Source={StaticResource RenderingModeEnum}}"
-                                            SelectedItem="{Binding Settings.Performance.RenderingMode}"
-                                            Margin="10,0,0,0"
-                                            ToolTip="{x:Static midi:Translate.RenderingModeTooltip}">
+                                          ItemsSource="{Binding Source={StaticResource RenderingModeEnum}}"
+                                          SelectedItem="{Binding Settings.Performance.RenderingMode}"
+                                          Margin="10,0,0,0"
+                                          ToolTip="{x:Static midi:Translate.RenderingModeTooltip}">
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
@@ -751,6 +751,13 @@
                                                         <MultiDataTrigger>
                                                             <MultiDataTrigger.Conditions>
                                                                 <Condition Binding="{Binding}" Value="{x:Static configModels:RenderingMode.RealtimeGPU}"/>
+                                                                <Condition Binding="{Binding DataContext.Settings.Performance.GPU.EnableGpuSynthesis, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding}" Value="{x:Static configModels:RenderingMode.ProgressiveHighQualityGPU}"/>
                                                                 <Condition Binding="{Binding DataContext.Settings.Performance.GPU.EnableGpuSynthesis, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
                                                             </MultiDataTrigger.Conditions>
                                                             <Setter Property="IsEnabled" Value="False"/>
