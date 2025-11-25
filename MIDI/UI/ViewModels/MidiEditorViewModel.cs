@@ -1312,7 +1312,7 @@ namespace MIDI.UI.ViewModels
                     isBlackKey = keyVm.IsBlackKey;
                 }
 
-                int colorInt = isBlackKey ? blackColorInt : whiteColorInt;
+                int colorInt = isBlackKey ? whiteColorInt : blackColorInt;
 
                 int* pRow = (int*)(pBits + y * stride);
                 pRow += rect.X;
