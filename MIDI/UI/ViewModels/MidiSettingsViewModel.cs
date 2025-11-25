@@ -247,8 +247,10 @@ namespace MIDI
 
             SavePresetCommand = new RelayCommand(async _ => {
                 string presetName = NewPresetName;
-                await _presetService.SavePresetWithOptionsAsync(presetName);
-                SelectedPreset = Presets.FirstOrDefault(p => p.Name == presetName);
+                if (await _presetService.SavePresetWithOptionsAsync(presetName))
+                {
+                    SelectedPreset = Presets.FirstOrDefault(p => p.Name == presetName);
+                }
             });
             DeletePresetCommand = new RelayCommand(async _ => {
                 if (SelectedPreset is not null)

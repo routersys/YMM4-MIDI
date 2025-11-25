@@ -22,12 +22,12 @@ namespace MIDI.UI.ViewModels.Services
             _presetManager = presetManager;
         }
 
-        public async Task SavePresetWithOptionsAsync(string newPresetName)
+        public async Task<bool> SavePresetWithOptionsAsync(string newPresetName)
         {
             if (string.IsNullOrWhiteSpace(newPresetName) || newPresetName == CurrentSettingsPresetName)
             {
                 MessageBox.Show("有効なプリセット名を入力してください。", "保存エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                return false;
             }
 
             var optionsWindow = new SavePresetOptionsWindow
@@ -40,7 +40,9 @@ namespace MIDI.UI.ViewModels.Services
             {
                 await _presetManager.SavePresetAsync(newPresetName, _settings, optionsWindow.SelectedCategories);
                 await LoadPresetFilesAsync();
+                return true;
             }
+            return false;
         }
 
         public async Task LoadPresetAsync(string presetName)
