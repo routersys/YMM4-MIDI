@@ -44,6 +44,7 @@ namespace MIDI
         private IAudioRenderer? renderer;
         private readonly EffectsProcessor effectsProcessor;
         private bool isHighQualityMode;
+        private bool isProgressiveMode = false;
         private readonly object readLock = new object();
         private bool disposed = false;
         private bool isStopping = false;
@@ -126,7 +127,21 @@ namespace MIDI
             {
                 this.audioBuffer = cachedData.audioBuffer;
                 this.isHighQualityMode = !(config.Performance.RenderingMode == RenderingMode.RealtimeCPU || config.Performance.RenderingMode == RenderingMode.RealtimeGPU);
+                this.isProgressiveMode = (config.Performance.RenderingMode == RenderingMode.ProgressiveHighQualityCPU || config.Performance.RenderingMode == RenderingMode.ProgressiveHighQualityGPU);
                 return;
+            }
+
+            var initialRenderMode = config.Performance.RenderingMode;
+            isProgressiveMode = (initialRenderMode == RenderingMode.ProgressiveHighQualityCPU || initialRenderMode == RenderingMode.ProgressiveHighQualityGPU);
+
+            if (isProgressiveMode)
+            {
+                isHighQualityMode = true;
+                initialRenderMode = (initialRenderMode == RenderingMode.ProgressiveHighQualityCPU) ? RenderingMode.RealtimeCPU : RenderingMode.RealtimeGPU;
+            }
+            else
+            {
+                isHighQualityMode = !(initialRenderMode == RenderingMode.RealtimeCPU || initialRenderMode == RenderingMode.RealtimeGPU);
             }
 
             await Task.Run(() =>
@@ -134,15 +149,24 @@ namespace MIDI
                 token.ThrowIfCancellationRequested();
                 renderMethod = DetermineRenderMethod();
                 string pathForRenderer = (renderMethod == RenderMethod.Synthesis) ? midiFilePath : ApplyMicrotonalPitchBend(midiFilePath);
-                renderer = CreateRenderer(renderMethod, pathForRenderer);
+
+                var rendererConfig = config.Clone();
+                rendererConfig.Performance.RenderingMode = initialRenderMode;
+
+                renderer = CreateRenderer(renderMethod, pathForRenderer, rendererConfig);
             }, token).ConfigureAwait(false);
 
 
-            isHighQualityMode = !(config.Performance.RenderingMode == RenderingMode.RealtimeCPU || config.Performance.RenderingMode == RenderingMode.RealtimeGPU);
-
-            if (isHighQualityMode)
+            if (audioBuffer == null)
             {
-                await LoadFullAudioAsync(midiFilePath, cacheKey, token);
+                if (isProgressiveMode)
+                {
+                    _ = LoadFullAudioAsync(midiFilePath, cacheKey, token);
+                }
+                else if (isHighQualityMode)
+                {
+                    await LoadFullAudioAsync(midiFilePath, cacheKey, token);
+                }
             }
         }
 
@@ -204,7 +228,16 @@ namespace MIDI
                 try
                 {
                     var tempFilePath = (renderMethod == RenderMethod.Synthesis) ? filePath : ApplyMicrotonalPitchBend(filePath);
-                    using var backgroundRenderer = CreateRenderer(renderMethod, tempFilePath);
+
+                    var actualRenderMode = config.Performance.RenderingMode;
+                    if (isProgressiveMode)
+                    {
+                        actualRenderMode = (actualRenderMode == RenderingMode.ProgressiveHighQualityCPU) ? RenderingMode.HighQualityCPU : RenderingMode.HighQualityGPU;
+                    }
+                    var renderConfig = config.Clone();
+                    renderConfig.Performance.RenderingMode = actualRenderMode;
+
+                    using var backgroundRenderer = CreateRenderer(renderMethod, tempFilePath, renderConfig);
                     float[] fullBuffer;
 
                     try
@@ -218,7 +251,10 @@ namespace MIDI
                         {
                             try
                             {
-                                using var fallbackRenderer = new SynthesisRenderer(tempFilePath, config, sampleRate);
+                                var fallbackConfig = config.Clone();
+                                fallbackConfig.Performance.RenderingMode = actualRenderMode;
+
+                                using var fallbackRenderer = new SynthesisRenderer(tempFilePath, fallbackConfig, sampleRate);
                                 fullBuffer = fallbackRenderer.Render(tempFilePath, null);
                             }
                             catch (Exception fallbackEx)
@@ -278,13 +314,13 @@ namespace MIDI
             }, token);
         }
 
-        private IAudioRenderer CreateRenderer(RenderMethod method, string filePathToUse)
+        private IAudioRenderer CreateRenderer(RenderMethod method, string filePathToUse, MidiConfiguration configToUse)
         {
             return method switch
             {
-                RenderMethod.Sfz => new SfzRenderer(filePathToUse, config, sampleRate),
-                RenderMethod.SoundFont => new SoundFontRenderer(filePathToUse, config, sampleRate, FindActiveSoundFonts(filePathToUse, GetAssemblyLocation())),
-                _ => new SynthesisRenderer(filePathToUse, config, sampleRate),
+                RenderMethod.Sfz => new SfzRenderer(filePathToUse, configToUse, sampleRate),
+                RenderMethod.SoundFont => new SoundFontRenderer(filePathToUse, configToUse, sampleRate, FindActiveSoundFonts(filePathToUse, GetAssemblyLocation())),
+                _ => new SynthesisRenderer(filePathToUse, configToUse, sampleRate),
             };
         }
 

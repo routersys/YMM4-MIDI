@@ -13,7 +13,11 @@ namespace MIDI.Configuration.Models
         [Description("CPU (リアルタイム)")]
         RealtimeCPU,
         [Description("GPU (リアルタイム)")]
-        RealtimeGPU
+        RealtimeGPU,
+        [Description("CPU (プログレッシブ)")]
+        ProgressiveHighQualityCPU,
+        [Description("GPU (プログレッシブ)")]
+        ProgressiveHighQualityGPU
     }
 
     public class PerformanceSettings : INotifyPropertyChanged
@@ -36,7 +40,7 @@ namespace MIDI.Configuration.Models
         private double _initialSyncDurationSeconds = 15.0;
         public double InitialSyncDurationSeconds { get => _initialSyncDurationSeconds; set => SetField(ref _initialSyncDurationSeconds, value); }
 
-        private RenderingMode _renderingMode = RenderingMode.HighQualityCPU;
+        private RenderingMode _renderingMode = RenderingMode.ProgressiveHighQualityCPU;
         public RenderingMode RenderingMode { get => _renderingMode; set => SetField(ref _renderingMode, value); }
 
         private GpuSettings _gpu = new();
