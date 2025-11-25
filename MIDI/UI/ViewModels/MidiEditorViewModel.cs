@@ -1216,7 +1216,7 @@ namespace MIDI.UI.ViewModels
 
             if (newX + newWidth > PianoRollWidth)
             {
-                newWidth = (int)PianoRollWidth - newX;
+                newWidth = Math.Max(0, (int)PianoRollWidth - newX);
             }
 
             int newY = 0;

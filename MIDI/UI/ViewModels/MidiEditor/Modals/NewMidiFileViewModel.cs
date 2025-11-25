@@ -48,15 +48,14 @@ namespace MIDI.UI.ViewModels.MidiEditor.Modals
             const int tempoBpm = 120;
             const int microsecondsPerQuarterNote = 60000000 / tempoBpm;
             const int timeSignatureNumerator = 4;
-            const int timeSignatureDenominator = 4;
+            const int timeSignatureDenominator = 2;
 
             var midiEvents = new MidiEventCollection(1, ticksPerQuarterNote);
             midiEvents.AddTrack();
             midiEvents[0].Add(new TimeSignatureEvent(0, timeSignatureNumerator, timeSignatureDenominator, 24, 8));
             midiEvents[0].Add(new TempoEvent(microsecondsPerQuarterNote, 0));
 
-            double secondsPerTick = (double)microsecondsPerQuarterNote / 1000000.0 / ticksPerQuarterNote;
-            CalculatedTotalTicks = (long)(LengthInSeconds / secondsPerTick);
+            CalculatedTotalTicks = (long)LengthInSeconds * 1000000L * ticksPerQuarterNote / microsecondsPerQuarterNote;
 
             midiEvents[0].Add(new MetaEvent(MetaEventType.EndTrack, 0, CalculatedTotalTicks));
 
