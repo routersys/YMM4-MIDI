@@ -21,6 +21,9 @@ namespace MIDI.Core
 
         [Key(4)]
         public List<FlagOperation> FlagOperations { get; set; } = new List<FlagOperation>();
+
+        [Key(5)]
+        public bool IsNewFile { get; set; }
     }
 
     [MessagePackObject]

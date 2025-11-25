@@ -2304,6 +2304,8 @@ namespace MIDI.UI.ViewModels
             UpdateTimeRuler();
         }
 
+        private bool _isNewFile = false;
+
         private async Task LoadMidiDataAsync(string? newPath = null)
         {
             await _loadCts.CancelAsync();
@@ -2328,35 +2330,52 @@ namespace MIDI.UI.ViewModels
                     return;
                 }
 
-                var (newNotes, tempMidiFile, timeSigNum, timeSigDen, tempo, tempoEvents, ccEvents, project, loadedMidiPath) = await Task.Run(async () =>
+                var (newNotes, tempMidiFile, timeSigNum, timeSigDen, tempo, tempoEvents, ccEvents, project, loadedMidiPath, isNewFileProject) = await Task.Run(async () =>
                 {
                     token.ThrowIfCancellationRequested();
 
                     var extension = Path.GetExtension(path)?.ToLower();
                     ProjectFile? loadedProject = null;
                     string midiPathToLoad = path;
+                    bool isNewProject = false;
 
                     if (extension == ".ymidi")
                     {
                         loadingViewModel.StatusMessage = "プロジェクトファイルを解析中...";
                         loadedProject = await ProjectService.LoadProjectAsync(path);
-                        midiPathToLoad = loadedProject.MidiFilePath;
 
-                        if (!File.Exists(midiPathToLoad))
+                        if (loadedProject.IsNewFile)
                         {
-                            bool found = false;
-                            await Application.Current.Dispatcher.InvokeAsync(() => {
-                                var missingFileDialog = new MissingMidiFileDialog(new MissingMidiFileViewModel(midiPathToLoad)) { Owner = Application.Current.MainWindow };
-                                if (missingFileDialog.ShowDialog() == true)
-                                {
-                                    midiPathToLoad = missingFileDialog.ViewModel.NewPath;
-                                    loadedProject.MidiFilePath = midiPathToLoad;
-                                    found = true;
-                                }
-                            });
-                            if (!found)
+                            isNewProject = true;
+                            var tempPath = Path.GetTempFileName();
+                            var blankMidi = new MidiEventCollection(1, 480);
+                            blankMidi.AddTrack();
+                            blankMidi[0].Add(new TimeSignatureEvent(0, 4, 2, 24, 8));
+                            blankMidi[0].Add(new TempoEvent(500000, 0));
+                            blankMidi[0].Add(new MetaEvent(MetaEventType.EndTrack, 0, 0));
+                            NAudioMidi.MidiFile.Export(tempPath, blankMidi);
+                            midiPathToLoad = tempPath;
+                        }
+                        else
+                        {
+                            midiPathToLoad = loadedProject.MidiFilePath;
+
+                            if (!File.Exists(midiPathToLoad))
                             {
-                                throw new FileNotFoundException("プロジェクトに関連付けられたMIDIファイルが見つかりません。", midiPathToLoad);
+                                bool found = false;
+                                await Application.Current.Dispatcher.InvokeAsync(() => {
+                                    var missingFileDialog = new MissingMidiFileDialog(new MissingMidiFileViewModel(midiPathToLoad)) { Owner = Application.Current.MainWindow };
+                                    if (missingFileDialog.ShowDialog() == true)
+                                    {
+                                        midiPathToLoad = missingFileDialog.ViewModel.NewPath;
+                                        loadedProject.MidiFilePath = midiPathToLoad;
+                                        found = true;
+                                    }
+                                });
+                                if (!found)
+                                {
+                                    throw new FileNotFoundException("プロジェクトに関連付けられたMIDIファイルが見つかりません。", midiPathToLoad);
+                                }
                             }
                         }
                     }
@@ -2415,7 +2434,7 @@ namespace MIDI.UI.ViewModels
                         return noteVm;
                     }).ToList();
 
-                    return (notes, midiFile, num, den, tempoValue, tempos, ccs, loadedProject, midiPathToLoad);
+                    return (notes, midiFile, num, den, tempoValue, tempos, ccs, loadedProject, midiPathToLoad, isNewProject);
                 }, token);
 
                 if (token.IsCancellationRequested)
@@ -2426,10 +2445,18 @@ namespace MIDI.UI.ViewModels
 
                 _filePath = path;
                 _originalMidiFile = new NAudioMidi.MidiFile(loadedMidiPath, false);
+                _isNewFile = isNewFileProject;
 
                 if (project != null)
                 {
-                    _filePath = project.MidiFilePath;
+                    if (isNewFileProject)
+                    {
+                        _filePath = newPath ?? path;
+                    }
+                    else
+                    {
+                        _filePath = project.MidiFilePath;
+                    }
                     _projectPath = newPath ?? path;
                     (SaveProjectCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
@@ -3179,6 +3206,7 @@ namespace MIDI.UI.ViewModels
             {
                 _filePath = openFileDialog.FileName;
                 _projectPath = string.Empty;
+                _isNewFile = false;
                 LoadingTask = LoadMidiDataAsync();
                 (SaveProjectCommand as RelayCommand)?.RaiseCanExecuteChanged();
             }
@@ -3745,7 +3773,7 @@ namespace MIDI.UI.ViewModels
         private async Task SaveProjectAsync(string? path = null, bool isBackup = false)
         {
             if (_midiFile == null || _originalMidiFile == null) return;
-            var project = await ProjectService.CreateProjectFileAsync(_filePath, _originalMidiFile, _midiFile, AllNotes, Flags, false);
+            var project = await ProjectService.CreateProjectFileAsync(_filePath, _originalMidiFile, _midiFile, AllNotes, Flags, false, _isNewFile);
             await ProjectService.SaveProjectAsync(project, path ?? _projectPath, false);
             if (!isBackup)
             {
@@ -3762,7 +3790,7 @@ namespace MIDI.UI.ViewModels
             if (saveFileDialog.ShowDialog() == true && !string.IsNullOrEmpty(saveFileDialog.FilePath))
             {
                 _projectPath = saveFileDialog.FilePath;
-                var project = await ProjectService.CreateProjectFileAsync(_filePath, _originalMidiFile, _midiFile, AllNotes, Flags, saveFileDialog.SaveAllData);
+                var project = await ProjectService.CreateProjectFileAsync(_filePath, _originalMidiFile, _midiFile, AllNotes, Flags, saveFileDialog.SaveAllData, _isNewFile);
                 await ProjectService.SaveProjectAsync(project, _projectPath, saveFileDialog.CompressProject);
                 StatusText = "プロジェクトを名前を付けて保存しました。";
                 OnPropertyChanged(nameof(FileName));

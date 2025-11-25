@@ -12,9 +12,13 @@ namespace MIDI.Core
 {
     public static class ProjectService
     {
-        public static async Task<ProjectFile> CreateProjectFileAsync(string midiFilePath, MidiFile originalMidi, MidiFile currentMidi, ICollection<NoteViewModel> currentNotes, ICollection<FlagViewModel> currentFlags, bool saveAllData)
+        public static async Task<ProjectFile> CreateProjectFileAsync(string midiFilePath, MidiFile originalMidi, MidiFile currentMidi, ICollection<NoteViewModel> currentNotes, ICollection<FlagViewModel> currentFlags, bool saveAllData, bool isNewFile)
         {
-            var project = new ProjectFile { MidiFilePath = midiFilePath };
+            var project = new ProjectFile
+            {
+                MidiFilePath = isNewFile ? string.Empty : midiFilePath,
+                IsNewFile = isNewFile
+            };
 
             var originalNotes = originalMidi.Events
                 .SelectMany(track => track.OfType<NoteOnEvent>())
@@ -26,7 +30,7 @@ namespace MIDI.Core
                 .GroupBy(n => (n.StartTicks, n.NoteNumber))
                 .ToDictionary(g => g.Key, g => g.First());
 
-            if (saveAllData)
+            if (saveAllData || isNewFile)
             {
                 project.NoteChanges = currentNotes.Select(n => new NoteChange
                 {
