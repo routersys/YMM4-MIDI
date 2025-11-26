@@ -3,9 +3,11 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using ComputeSharp;
 using MIDI.Configuration.Models;
+using MIDI.Core.Network;
 using MIDI.Utils;
 
 namespace MIDI
@@ -32,6 +34,110 @@ namespace MIDI
         public void RenderAudioHighQuality(float[] buffer, List<EnhancedNoteEvent> noteEvents,
                                          Dictionary<int, ChannelState> channelStates,
                                          Dictionary<int, InstrumentSettings> instrumentSettings)
+        {
+            if (config.Performance.Distributed.IsEnabled && config.Performance.Distributed.Role == DistributedRole.Master)
+            {
+                RenderDistributed(buffer, noteEvents, channelStates, instrumentSettings);
+                return;
+            }
+
+            if (config.Performance.RenderingMode == RenderingMode.HighQualityGPU)
+            {
+                return;
+            }
+
+            RenderLocal(buffer, noteEvents, channelStates, instrumentSettings);
+        }
+
+        private void RenderDistributed(float[] buffer, List<EnhancedNoteEvent> noteEvents,
+                                     Dictionary<int, ChannelState> channelStates,
+                                     Dictionary<int, InstrumentSettings> instrumentSettings)
+        {
+            var workers = DistributedAudioService.Instance.ActiveWorkers;
+            if (!workers.Any())
+            {
+                RenderLocal(buffer, noteEvents, channelStates, instrumentSettings);
+                return;
+            }
+
+            DistributedAudioService.Instance.InitializeWorkers("temp.mid");
+
+            int totalSamples = buffer.Length / 2;
+            int chunkSize = config.Performance.Distributed.ChunkSizeFrames;
+            uint taskId = (uint)DateTime.Now.Ticks;
+
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount * 2 };
+            var chunks = new List<(long start, int count)>();
+
+            for (long i = 0; i < totalSamples; i += chunkSize)
+            {
+                int count = (int)Math.Min(chunkSize, totalSamples - i);
+                chunks.Add((i, count));
+            }
+
+            int workerIndex = 0;
+            Parallel.ForEach(chunks, parallelOptions, chunk =>
+            {
+                WorkerNodeInfo? assignedWorker = null;
+                lock (workers)
+                {
+                    if (workerIndex < workers.Count)
+                    {
+                        assignedWorker = workers[workerIndex];
+                        workerIndex = (workerIndex + 1) % workers.Count;
+                    }
+                }
+
+                if (assignedWorker != null)
+                {
+                    DistributedAudioService.Instance.DistributeTask(assignedWorker, chunk.start, chunk.count, taskId);
+
+                    float[]? received = null;
+                    int retries = 0;
+                    while (retries < 200 && received == null)
+                    {
+                        Thread.Sleep(20);
+                        received = DistributedAudioService.Instance.GetReceivedChunk(taskId, chunk.start);
+                        retries++;
+                    }
+
+                    if (received != null)
+                    {
+                        lock (bufferLock)
+                        {
+                            var destSpan = buffer.AsSpan((int)chunk.start * 2, chunk.count * 2);
+                            if (received.Length >= destSpan.Length)
+                            {
+                                received.AsSpan(0, destSpan.Length).CopyTo(destSpan);
+                            }
+                        }
+                        return;
+                    }
+                }
+
+                float[] localBuffer = new float[chunk.count * 2];
+                var chunkNotes = noteEvents.Where(n => n.EndSample > chunk.start && n.StartSample < chunk.start + chunk.count).ToList();
+
+                var localSpan = localBuffer.AsSpan();
+                foreach (var note in chunkNotes)
+                {
+                    RenderNoteWithEffects(note, localSpan, channelStates[note.Channel - 1], instrumentSettings, chunk.start);
+                }
+
+                lock (bufferLock)
+                {
+                    var destSpan = buffer.AsSpan((int)chunk.start * 2, chunk.count * 2);
+                    for (int i = 0; i < localBuffer.Length; i++)
+                    {
+                        destSpan[i] += localBuffer[i];
+                    }
+                }
+            });
+        }
+
+        private void RenderLocal(float[] buffer, List<EnhancedNoteEvent> noteEvents,
+                               Dictionary<int, ChannelState> channelStates,
+                               Dictionary<int, InstrumentSettings> instrumentSettings)
         {
             var groupedNotes = noteEvents.GroupBy(n => n.Channel).ToDictionary(g => g.Key, g => g.ToList());
 
@@ -274,15 +380,16 @@ namespace MIDI
             }
         }
 
-
         private void RenderNoteWithEffects(EnhancedNoteEvent note, Span<float> buffer, ChannelState channelState,
-                                         Dictionary<int, InstrumentSettings> instrumentSettings)
+                                         Dictionary<int, InstrumentSettings> instrumentSettings, long sampleOffset = 0)
         {
             var instrument = synthesisEngine.GetInstrumentSettings(note.Channel, channelState.Program, instrumentSettings);
 
-            var startSample = note.StartSample;
-            var endSample = note.EndSample;
-            var noteDuration = endSample - startSample;
+            var startSample = note.StartSample - sampleOffset;
+            var endSample = note.EndSample - sampleOffset;
+            var noteDuration = note.EndSample - note.StartSample;
+
+            if (endSample < 0 || startSample >= buffer.Length / 2) return;
 
             object envelope;
             if (instrument.AmplitudeEnvelope != null && instrument.AmplitudeEnvelope.Any())
@@ -308,9 +415,13 @@ namespace MIDI
 
             var fadeSamples = config.Synthesis.EnableNoteCrossfade ? (long)(config.Synthesis.NoteCrossfadeDuration * sampleRate) : 0;
 
-            for (long i = startSample; i < endSample && i < buffer.Length / 2; i++)
+            long renderStart = Math.Max(0, startSample);
+            long renderEnd = Math.Min(buffer.Length / 2, endSample);
+
+            for (long i = renderStart; i < renderEnd; i++)
             {
-                var time = (i - startSample) / (double)sampleRate;
+                long absoluteSample = i + sampleOffset;
+                var time = (absoluteSample - note.StartSample) / (double)sampleRate;
 
                 var pitchLfoValue = synthesisEngine.GetLfoValue(instrument.PitchLfo, time) * instrument.PitchLfo.Depth;
                 var ampLfoValue = 1.0 + synthesisEngine.GetLfoValue(instrument.AmplitudeLfo, time) * instrument.AmplitudeLfo.Depth;
@@ -323,11 +434,11 @@ namespace MIDI
                 double envelopeValue;
                 if (envelope is EnvelopeGenerator eg)
                 {
-                    envelopeValue = eg.GetValue(i - startSample, noteDuration);
+                    envelopeValue = eg.GetValue(absoluteSample - note.StartSample, noteDuration);
                 }
                 else
                 {
-                    envelopeValue = ((ADSREnvelope)envelope).GetValue(i - startSample);
+                    envelopeValue = ((ADSREnvelope)envelope).GetValue(absoluteSample - note.StartSample);
                 }
 
                 if (channelState.Sustain && envelopeValue > instrument.Sustain)
@@ -337,8 +448,8 @@ namespace MIDI
 
                 if (fadeSamples > 0)
                 {
-                    long samplesIntoNote = i - startSample;
-                    long samplesToEnd = endSample - i;
+                    long samplesIntoNote = absoluteSample - note.StartSample;
+                    long samplesToEnd = note.EndSample - absoluteSample;
                     double fadeMultiplier = 1.0;
 
                     if (samplesIntoNote < fadeSamples)

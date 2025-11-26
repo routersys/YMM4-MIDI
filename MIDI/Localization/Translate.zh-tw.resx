@@ -446,4 +446,23 @@
 <data name="NewSFModelName" xml:space="preserve"><value>New SF Model</value></data>
 <data name="NewSynthModelName" xml:space="preserve"><value>New Synth Model</value></data>
 <data name="Loading" xml:space="preserve"><value>載入中...</value></data>
+<data name="DistributedProcessingGroupHeader" xml:space="preserve"><value>分散式處理</value></data>
+<data name="EnableDistributedProcessing" xml:space="preserve"><value>啟用分散式處理</value></data>
+<data name="DistributedRole" xml:space="preserve"><value>角色</value></data>
+<data name="DistributedDiscoveryPort" xml:space="preserve"><value>探索連接埠</value></data>
+<data name="DistributedDataPort" xml:space="preserve"><value>資料連接埠</value></data>
+<data name="DistributedMulticast" xml:space="preserve"><value>多播位址</value></data>
+<data name="DistributedInterface" xml:space="preserve"><value>介面IP</value></data>
+<data name="DistributedChunkSize" xml:space="preserve"><value>區塊大小 (幀)</value></data>
+<data name="DistributedRedundancy" xml:space="preserve"><value>冗餘級別</value></data>
+<data name="DistributedZeroCopy" xml:space="preserve"><value>使用零拷貝</value></data>
+<data name="DistributedGcStop" xml:space="preserve"><value>渲染期間停止GC</value></data>
+<data name="DistributedCompression" xml:space="preserve"><value>網路壓縮</value></data>
+<data name="DistributedTimeout" xml:space="preserve"><value>連線逾時 (ms)</value></data>
+<data name="DistributedSyncInterval" xml:space="preserve"><value>同步間隔 (ms)</value></data>
+<data name="DistributedCpuLimit" xml:space="preserve"><value>CPU使用率限制 (%)</value></data>
+<data name="DistributedMemLimit" xml:space="preserve"><value>記憶體使用限制 (MB)</value></data>
+<data name="DistributedEncryption" xml:space="preserve"><value>加密通訊</value></data>
+<data name="DistributedKey" xml:space="preserve"><value>加密金鑰</value></data>
+<data name="DistributedWorkerList" xml:space="preserve"><value>偵測到的工作節點</value></data>
 </root>

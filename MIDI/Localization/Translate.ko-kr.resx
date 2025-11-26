@@ -446,4 +446,23 @@
 <data name="NewSFModelName" xml:space="preserve"><value>New SF Model</value></data>
 <data name="NewSynthModelName" xml:space="preserve"><value>New Synth Model</value></data>
 <data name="Loading" xml:space="preserve"><value>로드 중...</value></data>
+<data name="DistributedProcessingGroupHeader" xml:space="preserve"><value>분산 처리</value></data>
+<data name="EnableDistributedProcessing" xml:space="preserve"><value>분산 처리 활성화</value></data>
+<data name="DistributedRole" xml:space="preserve"><value>역할</value></data>
+<data name="DistributedDiscoveryPort" xml:space="preserve"><value>검색 포트</value></data>
+<data name="DistributedDataPort" xml:space="preserve"><value>데이터 포트</value></data>
+<data name="DistributedMulticast" xml:space="preserve"><value>멀티캐스트 주소</value></data>
+<data name="DistributedInterface" xml:space="preserve"><value>인터페이스 IP</value></data>
+<data name="DistributedChunkSize" xml:space="preserve"><value>청크 크기 (프레임)</value></data>
+<data name="DistributedRedundancy" xml:space="preserve"><value>중복성 수준</value></data>
+<data name="DistributedZeroCopy" xml:space="preserve"><value>제로 카피 사용</value></data>
+<data name="DistributedGcStop" xml:space="preserve"><value>렌더링 중 GC 중지</value></data>
+<data name="DistributedCompression" xml:space="preserve"><value>네트워크 압축</value></data>
+<data name="DistributedTimeout" xml:space="preserve"><value>연결 시간 초과 (ms)</value></data>
+<data name="DistributedSyncInterval" xml:space="preserve"><value>동기화 간격 (ms)</value></data>
+<data name="DistributedCpuLimit" xml:space="preserve"><value>CPU 사용량 제한 (%)</value></data>
+<data name="DistributedMemLimit" xml:space="preserve"><value>메모리 사용량 제한 (MB)</value></data>
+<data name="DistributedEncryption" xml:space="preserve"><value>통신 암호화</value></data>
+<data name="DistributedKey" xml:space="preserve"><value>암호화 키</value></data>
+<data name="DistributedWorkerList" xml:space="preserve"><value>감지된 워커</value></data>
 </root>

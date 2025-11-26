@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using MIDI.API;
 using MIDI.Configuration.Models;
+using MIDI.Core.Network;
 using MIDI.UI.Commands;
 using MIDI.UI.ViewModels;
 using MIDI.UI.ViewModels.Models;
@@ -20,6 +21,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace MIDI
 {
@@ -34,6 +36,8 @@ namespace MIDI
         private FileSystemWatcher? _logWatcher;
         private long _logFileSize = 0;
         private readonly StringBuilder _logContentBuilder = new StringBuilder();
+        private readonly DistributedAudioService _distributedService;
+        private readonly DispatcherTimer _workerPollingTimer;
 
         public ICommand ReloadConfigCommand { get; }
         public ICommand RefreshFilesCommand { get; }
@@ -78,6 +82,7 @@ namespace MIDI
         public ObservableCollection<SoundFontLayer> SoundFontLayers => Settings.SoundFont.Layers;
         public ObservableCollection<string> WavetableFiles { get; } = new();
         public ObservableCollection<PresetViewModel> Presets { get; } = new();
+        public ObservableCollection<WorkerNodeInfo> DetectedWorkers { get; } = new();
 
         private PresetViewModel? _selectedPreset;
         public PresetViewModel? SelectedPreset
@@ -134,6 +139,12 @@ namespace MIDI
             _fileService = new FileService(Settings);
             _presetService = new PresetService(Settings, Presets, new PresetManager());
             _dragDropService = new DragDropService(Settings, _fileService, _presetService);
+            _distributedService = new DistributedAudioService(Settings);
+            _distributedService.WorkersChanged += OnWorkersChanged;
+
+            _workerPollingTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _workerPollingTimer.Tick += (s, e) => UpdateWorkerList();
+            _workerPollingTimer.Start();
 
             ReloadConfigCommand = new RelayCommand(_ =>
             {
@@ -304,6 +315,23 @@ namespace MIDI
 
             _ = CheckForUpdates();
             UpdateLogWatcher();
+        }
+
+        private void OnWorkersChanged()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                DetectedWorkers.Clear();
+                foreach (var worker in _distributedService.ActiveWorkers)
+                {
+                    DetectedWorkers.Add(worker);
+                }
+            });
+        }
+
+        private void UpdateWorkerList()
+        {
+
         }
 
         private void OnApiConnectionChanged()
@@ -634,6 +662,8 @@ namespace MIDI
 
         public void Dispose()
         {
+            _workerPollingTimer.Stop();
+            _distributedService.Dispose();
             _logWatcher?.Dispose();
         }
 
