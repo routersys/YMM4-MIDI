@@ -23,6 +23,7 @@ namespace MIDI.SourceGenerator
 
             var sourceBuilder = new StringBuilder();
 
+            sourceBuilder.AppendLine("#nullable enable");
             sourceBuilder.AppendLine("using System;");
             sourceBuilder.AppendLine("using System.Collections.Generic;");
             sourceBuilder.AppendLine("using System.Threading.Tasks;");
