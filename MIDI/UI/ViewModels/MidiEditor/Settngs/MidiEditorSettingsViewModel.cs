@@ -28,97 +28,14 @@ namespace MIDI.UI.ViewModels.MidiEditor.Settings
         {
             _settingsRoot = settingsRoot;
             ResetSettingGroupCommand = new RelayCommand(ResetSettings);
-            DiscoverSettings(settingsRoot);
+            GeneratedSettingsLoader.Load(_settingsRoot, MajorGroups);
             SelectedGroup = MajorGroups.FirstOrDefault()?.Groups.FirstOrDefault();
         }
 
         private void ResetSettings(object? parameter)
         {
             if (parameter is not SettingGroupViewModel groupToReset) return;
-
-            var rootType = _settingsRoot.GetType();
-            var groupProperty = rootType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(p => p.PropertyType.IsDefined(typeof(SettingGroupAttribute), false) &&
-                                     p.PropertyType.GetCustomAttribute<SettingGroupAttribute>()?.Name == groupToReset.Name);
-
-            if (groupProperty != null)
-            {
-                var defaultGroupInstance = Activator.CreateInstance(groupProperty.PropertyType);
-                var currentGroupInstance = groupProperty.GetValue(_settingsRoot);
-
-                var copyFromMethod = groupProperty.PropertyType.GetMethod("CopyFrom");
-                copyFromMethod?.Invoke(currentGroupInstance, new[] { defaultGroupInstance });
-            }
-        }
-
-        private void DiscoverSettings(object settingsRoot)
-        {
-            var rootType = settingsRoot.GetType();
-            if (!rootType.IsDefined(typeof(MajorSettingGroupAttribute), false)) return;
-
-            var majorGroupAttr = rootType.GetCustomAttribute<MajorSettingGroupAttribute>()!;
-            var majorGroup = new MajorSettingGroupViewModel(majorGroupAttr.Name);
-
-            var groupProperties = rootType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.PropertyType.IsDefined(typeof(SettingGroupAttribute), false));
-
-            foreach (var groupProp in groupProperties)
-            {
-                var targetInstance = groupProp.GetValue(settingsRoot);
-                if (targetInstance == null) continue;
-
-                var groupAttr = groupProp.PropertyType.GetCustomAttribute<SettingGroupAttribute>()!;
-                var group = new SettingGroupViewModel(groupAttr.Name);
-
-                var settingProperties = groupProp.PropertyType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(p => p.IsDefined(typeof(SettingAttribute), false));
-
-                foreach (var settingProp in settingProperties)
-                {
-                    var settingAttr = settingProp.GetCustomAttribute<SettingAttribute>()!;
-                    ISetting? settingVm = CreateSettingViewModel(targetInstance, settingProp, settingAttr);
-                    if (settingVm != null)
-                    {
-                        group.Settings.Add(settingVm);
-                    }
-                }
-
-                if (group.Settings.Any())
-                {
-                    majorGroup.Groups.Add(group);
-                }
-            }
-
-            if (majorGroup.Groups.Any())
-            {
-                MajorGroups.Add(majorGroup);
-            }
-        }
-
-        private ISetting? CreateSettingViewModel(object target, PropertyInfo propertyInfo, SettingAttribute attribute)
-        {
-            var type = propertyInfo.PropertyType;
-
-            if (propertyInfo.Name == "GridQuantizeValue")
-            {
-                var options = new List<string> { "1/4", "1/8", "1/16", "1/32", "1/4T", "1/8T", "1/16T", "1/32T" };
-                return new ComboBoxSettingViewModel(target, propertyInfo, attribute, options);
-            }
-
-            if (type == typeof(bool))
-                return new BoolSettingViewModel(target, propertyInfo, attribute);
-            if (type == typeof(string))
-                return new StringSettingViewModel(target, propertyInfo, attribute);
-            if (type == typeof(int))
-                return new IntSettingViewModel(target, propertyInfo, attribute);
-            if (type == typeof(double))
-                return new DoubleSettingViewModel(target, propertyInfo, attribute);
-            if (type == typeof(Color))
-                return new ColorSettingViewModel(target, propertyInfo, attribute);
-            if (type.IsEnum)
-                return new EnumSettingViewModel(target, propertyInfo, attribute);
-
-            return null;
+            GeneratedSettingsLoader.Reset(_settingsRoot, groupToReset);
         }
     }
 
