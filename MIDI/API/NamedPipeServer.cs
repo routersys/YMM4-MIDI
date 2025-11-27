@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.IO.Pipes;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,18 +14,19 @@ namespace MIDI.API
     {
         private const string PipeName = "YMM4MidiPluginApi";
         private const string MutexName = "Global\\YMM4MidiPluginApiMutex";
-        private readonly NamedPipeApiHandler apiHandler;
-        private CancellationTokenSource? cancellationTokenSource;
-        private Task? serverTask;
-        private Mutex? singleInstanceMutex;
-        private bool isDisposed;
+
+        private readonly NamedPipeApiHandler _apiHandler;
+        private CancellationTokenSource? _cancellationTokenSource;
+        private Task? _serverTask;
+        private Mutex? _singleInstanceMutex;
+        private bool _isDisposed;
 
         public static bool IsClientConnected { get; private set; }
         public static event Action? ConnectionStatusChanged;
 
         public NamedPipeServer(MidiSettingsViewModel viewModel, MidiConfiguration configuration)
         {
-            apiHandler = new NamedPipeApiHandler(viewModel, configuration);
+            _apiHandler = new NamedPipeApiHandler(viewModel, configuration);
         }
 
         private static void UpdateConnectionStatus(bool isConnected)
@@ -39,91 +42,89 @@ namespace MIDI.API
         {
             try
             {
-                singleInstanceMutex = new Mutex(true, MutexName, out bool createdNew);
+                _singleInstanceMutex = new Mutex(true, MutexName, out bool createdNew);
                 if (!createdNew)
                 {
                     Logger.Warn(LogMessages.NamedPipeAlreadyRunning);
-                    singleInstanceMutex?.Dispose();
-                    singleInstanceMutex = null;
+                    _singleInstanceMutex?.Dispose();
+                    _singleInstanceMutex = null;
                     return false;
                 }
             }
-            catch (UnauthorizedAccessException ex)
+            catch
             {
-                Logger.Error(LogMessages.NamedPipeMutexError, ex);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(LogMessages.NamedPipeMutexError, ex);
                 return false;
             }
 
-
-            cancellationTokenSource = new CancellationTokenSource();
-            serverTask = Task.Run(() => ServerLoop(cancellationTokenSource.Token), cancellationTokenSource.Token);
+            _cancellationTokenSource = new CancellationTokenSource();
+            _serverTask = Task.Run(() => ServerLoop(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
             Logger.Info(LogMessages.NamedPipeServerStarted);
             return true;
         }
-
 
         private async Task ServerLoop(CancellationToken token)
         {
             while (!token.IsCancellationRequested)
             {
                 NamedPipeServerStream? server = null;
-                StreamReader? reader = null;
-                StreamWriter? writer = null;
-
                 try
                 {
-                    server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-                    Logger.Info(LogMessages.NamedPipeWaitingConnection);
+                    server = new NamedPipeServerStream(
+                        PipeName,
+                        PipeDirection.InOut,
+                        1,
+                        PipeTransmissionMode.Byte,
+                        PipeOptions.Asynchronous);
+
                     await server.WaitForConnectionAsync(token);
+
                     UpdateConnectionStatus(true);
                     Logger.Info(LogMessages.NamedPipeClientConnected);
 
-                    reader = new StreamReader(server, Encoding.UTF8);
-                    writer = new StreamWriter(server, Encoding.UTF8) { AutoFlush = true };
-
-                    while (server.IsConnected && !token.IsCancellationRequested)
+                    using (var reader = new StreamReader(server, new UTF8Encoding(false), true, 1024, leaveOpen: true))
+                    using (var writer = new StreamWriter(server, new UTF8Encoding(false), 1024, leaveOpen: true) { AutoFlush = true })
                     {
-                        var requestJson = await reader.ReadLineAsync();
-                        if (requestJson == null)
+                        while (server.IsConnected && !token.IsCancellationRequested)
                         {
-                            break;
-                        }
+                            var requestJson = await reader.ReadLineAsync();
 
-                        if (!token.IsCancellationRequested)
-                        {
-                            var responseJson = await apiHandler.HandleRequest(requestJson);
+                            if (requestJson == null)
+                            {
+                                break;
+                            }
+
+                            if (string.IsNullOrWhiteSpace(requestJson))
+                            {
+                                continue;
+                            }
+
+                            var responseJson = await _apiHandler.HandleRequest(requestJson);
+
                             await writer.WriteLineAsync(responseJson);
+
+                            await writer.FlushAsync();
                         }
                     }
                 }
                 catch (OperationCanceledException)
                 {
-                    Logger.Info(LogMessages.NamedPipeOperationCancelled);
                     break;
                 }
-                catch (IOException ex) when (ex.Message.Contains("Pipe is broken") || ex.Message.Contains("パイプが壊れています"))
+                catch (IOException)
                 {
                     Logger.Info(LogMessages.NamedPipeClientDisconnectedIO);
                 }
                 catch (Exception ex)
                 {
+                    Logger.Error(LogMessages.NamedPipeServerError, ex);
                     if (!token.IsCancellationRequested)
                     {
-                        Logger.Error(LogMessages.NamedPipeServerError, ex, ex.Message);
                         await Task.Delay(1000, token);
                     }
                 }
                 finally
                 {
-                    Logger.Info(LogMessages.NamedPipeClientDisconnected);
                     UpdateConnectionStatus(false);
-                    reader?.Dispose();
-                    writer?.Dispose();
                     server?.Dispose();
                 }
             }
@@ -132,32 +133,26 @@ namespace MIDI.API
 
         public void Stop()
         {
-            if (cancellationTokenSource != null && !cancellationTokenSource.IsCancellationRequested)
+            if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
-                cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Cancel();
             }
 
-            if (serverTask != null)
+            if (_serverTask != null)
             {
                 try
                 {
-                    serverTask.Wait(TimeSpan.FromSeconds(2));
+                    _serverTask.Wait(TimeSpan.FromSeconds(2));
                 }
-                catch (OperationCanceledException) { }
-                catch (AggregateException ae) when (ae.InnerExceptions.Any(e => e is OperationCanceledException)) { }
-                catch (Exception ex)
-                {
-                    Logger.Error(LogMessages.NamedPipeStopError, ex);
-                }
-                serverTask = null;
+                catch { }
+                _serverTask = null;
             }
 
-            singleInstanceMutex?.ReleaseMutex();
-            singleInstanceMutex?.Dispose();
-            singleInstanceMutex = null;
+            _singleInstanceMutex?.ReleaseMutex();
+            _singleInstanceMutex?.Dispose();
+            _singleInstanceMutex = null;
 
             UpdateConnectionStatus(false);
-            Logger.Info(LogMessages.NamedPipeServerExplicitStop);
         }
 
         public void Dispose()
@@ -168,14 +163,14 @@ namespace MIDI.API
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!isDisposed)
+            if (!_isDisposed)
             {
                 if (disposing)
                 {
                     Stop();
-                    cancellationTokenSource?.Dispose();
+                    _cancellationTokenSource?.Dispose();
                 }
-                isDisposed = true;
+                _isDisposed = true;
             }
         }
     }
