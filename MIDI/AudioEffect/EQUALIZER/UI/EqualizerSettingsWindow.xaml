@@ -36,16 +36,16 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Name="DefaultPresetComboBox"
-                                  SelectedItem="{Binding DefaultPreset, Mode=TwoWay}"
-                                  SelectionChanged="DefaultPresetComboBox_SelectionChanged"
+                        <ComboBox ItemsSource="{Binding AllPresetNames}"
+                                  SelectedItem="{Binding SelectedDefaultPreset, Mode=TwoWay}"
                                   Margin="0,0,10,0"/>
                         <Button Grid.Column="1" Content="クリア" Width="60"
-                                Click="ClearDefaultPreset_Click"
+                                Command="{Binding ClearDefaultPresetCommand}"
                                 ToolTip="デフォルトプリセットの設定をクリアします"/>
                     </Grid>
                     <TextBlock Text="新しいイコライザーを追加した際に自動適用されるプリセットです。"
-                               FontSize="10" Opacity="0.7" Margin="0,5,0,0"/>
+                              FontSize="10" Opacity="0.7" Margin="0,5,0,0"/>
+                    <Button Content="設定を保存" Command="{Binding SaveSettingsCommand}" HorizontalAlignment="Left" Margin="0,20,0,0" Width="100"/>
                 </StackPanel>
             </TabItem>
 
@@ -64,8 +64,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Text="プリセットグループ" FontWeight="Bold" Margin="0,0,0,5"/>
-                        <ListBox Grid.Row="1" Name="GroupListBox"
-                                 SelectionChanged="GroupListBox_SelectionChanged">
+                        <ListBox Grid.Row="1" Name="GroupListBox" SelectedIndex="0">
                             <ListBox.Items>
                                 <ListBoxItem Content="すべて" IsSelected="True" Tag=""/>
                                 <ListBoxItem Content="お気に入り" Tag="favorites"/>
@@ -75,13 +74,6 @@
                                 <ListBoxItem Content="その他" Tag="other"/>
                             </ListBox.Items>
                         </ListBox>
-
-                        <StackPanel Grid.Row="2" Margin="0,10,0,0">
-                            <Button Content="新規グループ"
-                                    Click="NewGroup_Click" Margin="0,0,0,5"/>
-                            <Button Content="グループ削除"
-                                    Click="DeleteGroup_Click"/>
-                        </StackPanel>
                     </Grid>
 
                     <Grid Grid.Column="1" Margin="10,0,0,0">
@@ -99,17 +91,15 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="プリセット一覧" FontWeight="Bold" VerticalAlignment="Center"/>
                             <Button Grid.Column="1" Content="インポート"
-                                    Click="ImportPreset_Click" Margin="0,0,10,0"
+                                    Command="{Binding ImportCommand}" Margin="0,0,10,0"
                                     ToolTip="プリセットファイルをインポートします"/>
                             <Button Grid.Column="2" Content="エクスポート"
-                                    Click="ExportPreset_Click"
+                                    Command="{Binding ExportCommand}"
                                     ToolTip="選択したプリセットをエクスポートします"/>
                         </Grid>
 
-                        <Grid Grid.Row="1" Margin="0,10,0,0" AllowDrop="True"
-                              Drop="PresetList_Drop" DragOver="PresetList_DragOver">
-                            <ListBox Name="PresetListBox"
-                                     SelectionChanged="PresetListBox_SelectionChanged"
+                        <Grid Grid.Row="1" Margin="0,10,0,0" AllowDrop="True">
+                            <ListBox Name="PresetListBox" ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset}"
                                      MouseDoubleClick="PresetListBox_MouseDoubleClick">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
@@ -123,8 +113,8 @@
                                                     Background="Transparent" 
                                                     BorderThickness="0"
                                                     Width="20" Height="20"
-                                                    Click="FavoriteButton_Click"
-                                                    DataContext="{Binding}"
+                                                    Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                    CommandParameter="{Binding}"
                                                     ToolTip="お気に入りに追加/削除"
                                                     Margin="0,0,5,0">
                                                 <Path Data="M12,17.27L18.18,21L17.27,14.41L22,9.82L15.77,8.89L12,3L8.23,8.89L2,9.82L6.73,14.41L5.82,21L12,17.27Z"
@@ -141,23 +131,15 @@
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
-                            <Border Background="#80000000" Name="DropOverlay" Visibility="Collapsed">
-                                <TextBlock Text="プリセットファイルをドロップしてインポート"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           Foreground="White" FontSize="16"/>
-                            </Border>
                         </Grid>
 
                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                             <Button Content="名前変更"
-                                    Click="RenamePreset_Click" Margin="0,0,10,0"
-                                    IsEnabled="{Binding ElementName=PresetListBox, Path=SelectedItem, Converter={StaticResource NotNullConverter}}"/>
+                                    Command="{Binding RenameCommand}" Margin="0,0,10,0"/>
                             <Button Content="グループ変更"
-                                    Click="ChangeGroup_Click" Margin="0,0,10,0"
-                                    IsEnabled="{Binding ElementName=PresetListBox, Path=SelectedItem, Converter={StaticResource NotNullConverter}}"/>
+                                    Command="{Binding ChangeGroupCommand}" Margin="0,0,10,0"/>
                             <Button Content="削除"
-                                    Click="DeletePreset_Click"
-                                    IsEnabled="{Binding ElementName=PresetListBox, Path=SelectedItem, Converter={StaticResource NotNullConverter}}"/>
+                                    Command="{Binding DeleteCommand}"/>
                         </StackPanel>
                     </Grid>
                 </Grid>

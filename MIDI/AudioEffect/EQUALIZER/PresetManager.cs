@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using Newtonsoft.Json;
+using MIDI.AudioEffect.EQUALIZER.Models;
 
 namespace MIDI.AudioEffect.EQUALIZER
 {
@@ -243,18 +244,5 @@ namespace MIDI.AudioEffect.EQUALIZER
                 return false;
             }
         }
-    }
-
-    public class PresetInfo
-    {
-        public string Name { get; set; } = "";
-        public string Group { get; set; } = "";
-        public bool IsFavorite { get; set; }
-    }
-
-    internal class PresetMetadata
-    {
-        public string Group { get; set; } = "other";
-        public bool IsFavorite { get; set; } = false;
     }
 }

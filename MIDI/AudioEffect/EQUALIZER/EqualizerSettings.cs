@@ -1,74 +1,52 @@
 ﻿using YukkuriMovieMaker.Plugin;
-using System.IO;
-using System.Reflection;
-using System.Text.Json;
 using MIDI.AudioEffect.EQUALIZER.UI;
+using MIDI.AudioEffect.EQUALIZER.Interfaces;
 
 namespace MIDI.AudioEffect.EQUALIZER
 {
     public class EqualizerSettings : SettingsBase<EqualizerSettings>
     {
-        private static readonly string settingsDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "settings_eq");
-        private static readonly string sizeSettingsPath = Path.Combine(settingsDir, "size.json");
+        private readonly IConfigService _configService;
 
         public override string Name => "GUIイコライザー設定";
         public override SettingsCategory Category => SettingsCategory.Voice;
         public override bool HasSettingView => true;
         public override object SettingView => new EqualizerSettingsWindow
         {
-            DataContext = this
+            DataContext = new ViewModels.EqualizerSettingsViewModel()
         };
 
-        public bool HighQualityMode { get => highQualityMode; set => Set(ref highQualityMode, value); }
-        private bool highQualityMode = false;
+        public EqualizerSettings()
+        {
+            _configService = ServiceLocator.ConfigService;
+        }
 
-        public double EditorHeight { get => editorHeight; set => Set(ref editorHeight, value); }
-        private double editorHeight = 240;
+        public bool HighQualityMode
+        {
+            get => _configService.HighQualityMode;
+            set => _configService.HighQualityMode = value;
+        }
 
-        public string DefaultPreset { get => defaultPreset; set => Set(ref defaultPreset, value); }
-        private string defaultPreset = "";
+        public double EditorHeight
+        {
+            get => _configService.EditorHeight;
+            set => _configService.EditorHeight = value;
+        }
+
+        public string DefaultPreset
+        {
+            get => _configService.DefaultPreset;
+            set => _configService.DefaultPreset = value;
+        }
 
         public override void Initialize()
         {
-            Load();
-        }
-
-        public void Load()
-        {
-            if (!File.Exists(sizeSettingsPath)) return;
-            try
-            {
-                var json = File.ReadAllText(sizeSettingsPath);
-                var settings = JsonSerializer.Deserialize<JsonSettings>(json);
-                if (settings != null)
-                {
-                    this.EditorHeight = settings.EditorHeight;
-                    this.DefaultPreset = settings.DefaultPreset ?? "";
-                }
-            }
-            catch { }
+            _configService.Load();
         }
 
         public override void Save()
         {
-            try
-            {
-                Directory.CreateDirectory(settingsDir);
-                var settings = new JsonSettings
-                {
-                    EditorHeight = this.EditorHeight,
-                    DefaultPreset = this.DefaultPreset
-                };
-                var json = JsonSerializer.Serialize(settings);
-                File.WriteAllText(sizeSettingsPath, json);
-            }
-            catch { }
+            _configService.Save();
         }
-    }
-
-    internal class JsonSettings
-    {
-        public double EditorHeight { get; set; }
-        public string? DefaultPreset { get; set; }
     }
 }

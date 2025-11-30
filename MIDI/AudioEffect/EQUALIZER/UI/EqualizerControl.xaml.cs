@@ -11,11 +11,15 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using YukkuriMovieMaker.Commons;
+using MIDI.AudioEffect.EQUALIZER.Models;
+using MIDI.AudioEffect.EQUALIZER.Interfaces;
 
 namespace MIDI.AudioEffect.EQUALIZER.UI
 {
     public partial class EqualizerControl : UserControl, IPropertyEditorControl
     {
+        private readonly IPresetService _presetService;
+
         public static readonly DependencyProperty ItemsSourceProperty =
             DependencyProperty.Register(nameof(ItemsSource), typeof(ObservableCollection<EQBand>), typeof(EqualizerControl), new PropertyMetadata(null, OnItemsSourceChanged));
         public ObservableCollection<EQBand> ItemsSource
@@ -70,6 +74,8 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
         public EqualizerControl()
         {
             InitializeComponent();
+            _presetService = ServiceLocator.PresetService;
+
             EditorGrid.DataContext = EqualizerSettings.Default;
             Loaded += GuiEqualizerControl_Loaded;
             Unloaded += GuiEqualizerControl_Unloaded;
@@ -77,13 +83,13 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
 
         private void GuiEqualizerControl_Loaded(object sender, RoutedEventArgs e)
         {
-            PresetManager.PresetsChanged += OnPresetsChanged;
+            _presetService.PresetsChanged += OnPresetsChanged;
             LoadPresets();
         }
 
         private void GuiEqualizerControl_Unloaded(object sender, RoutedEventArgs e)
         {
-            PresetManager.PresetsChanged -= OnPresetsChanged;
+            _presetService.PresetsChanged -= OnPresetsChanged;
         }
 
         private void OnPresetsChanged(object? sender, EventArgs e) => LoadPresets();
@@ -213,7 +219,7 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
             var settingsWindow = new EqualizerSettingsWindow
             {
                 Owner = Window.GetWindow(this),
-                DataContext = EqualizerSettings.Default,
+                DataContext = new ViewModels.EqualizerSettingsViewModel(),
                 Topmost = true
             };
             settingsWindow.ShowDialog();
@@ -224,10 +230,10 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
             var selectedPresetName = (PresetListBox.SelectedItem as PresetInfo)?.Name;
 
             allPresets.Clear();
-            var presetNames = PresetManager.GetAllPresetNames();
+            var presetNames = _presetService.GetAllPresetNames();
             foreach (var name in presetNames)
             {
-                allPresets.Add(PresetManager.GetPresetInfo(name));
+                allPresets.Add(_presetService.GetPresetInfo(name));
             }
 
             var groupNames = allPresets.Select(p => p.Group).Where(g => !string.IsNullOrEmpty(g)).Distinct().OrderBy(g => g).ToList();
@@ -291,7 +297,7 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
         {
             if (PresetListBox.SelectedItem is PresetInfo selectedPresetInfo)
             {
-                var loadedBands = PresetManager.LoadPreset(selectedPresetInfo.Name);
+                var loadedBands = _presetService.LoadPreset(selectedPresetInfo.Name);
                 if (loadedBands != null && ItemsSource != null)
                 {
                     BeginEdit?.Invoke(this, EventArgs.Empty);
@@ -331,7 +337,7 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
                 string presetName = dialog.InputText;
                 if (!string.IsNullOrWhiteSpace(presetName))
                 {
-                    if (PresetManager.SavePreset(presetName, ItemsSource))
+                    if (_presetService.SavePreset(presetName, ItemsSource))
                     {
                         SelectedPresetName = presetName;
                         LoadPresets();
@@ -352,7 +358,7 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
                 string newName = dialog.InputText;
                 if (!string.IsNullOrWhiteSpace(newName) && newName != selectedPreset.Name)
                 {
-                    if (PresetManager.RenamePreset(selectedPreset.Name, newName))
+                    if (_presetService.RenamePreset(selectedPreset.Name, newName))
                     {
                         if (SelectedPresetName == selectedPreset.Name)
                         {
@@ -371,11 +377,20 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
             if (MessageBox.Show($"プリセット「{selectedPreset.Name}」を削除しますか？", "確認",
                 MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                PresetManager.DeletePreset(selectedPreset.Name);
+                _presetService.DeletePreset(selectedPreset.Name);
                 if (SelectedPresetName == selectedPreset.Name)
                 {
                     SelectedPresetName = "プリセットを選択...";
                 }
+                LoadPresets();
+            }
+        }
+
+        private void FavoriteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.DataContext is PresetInfo preset)
+            {
+                _presetService.SetPresetFavorite(preset.Name, !preset.IsFavorite);
                 LoadPresets();
             }
         }
@@ -476,11 +491,11 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
                 )).ToList();
 
                 var firstBand = activeBands.First();
-                double startY = firstBand.Type == FilterType.LowShelf ? points.First().Y : GainToY(0);
+                double startY = firstBand.Type == MIDI.AudioEffect.EQUALIZER.Models.FilterType.LowShelf ? points.First().Y : GainToY(0);
                 points.Insert(0, new Point(0, startY));
 
                 var lastBand = activeBands.Last();
-                double endY = lastBand.Type == FilterType.HighShelf ? points.Last().Y : GainToY(0);
+                double endY = lastBand.Type == MIDI.AudioEffect.EQUALIZER.Models.FilterType.HighShelf ? points.Last().Y : GainToY(0);
                 points.Add(new Point(MainCanvas.ActualWidth, endY));
 
                 geometry = CreateSpline(points);
@@ -582,7 +597,7 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
         private void AddPoint_Click(object sender, RoutedEventArgs e)
         {
             BeginEdit?.Invoke(this, EventArgs.Empty);
-            var newBand = new EQBand(true, FilterType.Peak, XToFreq(lastRightClickPosition.X), YToGain(lastRightClickPosition.Y), 1.0, StereoMode.Stereo, "");
+            var newBand = new EQBand(true, MIDI.AudioEffect.EQUALIZER.Models.FilterType.Peak, XToFreq(lastRightClickPosition.X), YToGain(lastRightClickPosition.Y), 1.0, StereoMode.Stereo, "");
             ItemsSource.Add(newBand);
             EndEdit?.Invoke(this, EventArgs.Empty);
         }

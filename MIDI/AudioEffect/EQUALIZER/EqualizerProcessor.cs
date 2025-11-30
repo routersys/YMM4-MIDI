@@ -1,4 +1,5 @@
-﻿using MIDI.Configuration.Models;
+﻿using MIDI.AudioEffect.EQUALIZER.Models;
+using MIDI.Configuration.Models;
 using System;
 using System.Collections.ObjectModel;
 using YukkuriMovieMaker.Player.Audio;
@@ -149,7 +150,7 @@ namespace MIDI.AudioEffect.EQUALIZER
 
         public void Reset() { x1L = x2L = y1L = y2L = 0; x1R = x2R = y1R = y2R = 0; }
 
-        public void SetCoefficients(FilterType type, float sampleRate, float freq, float gainDb, float q)
+        public void SetCoefficients(MIDI.AudioEffect.EQUALIZER.Models.FilterType type, float sampleRate, float freq, float gainDb, float q)
         {
             if (freq <= 20) freq = 20;
             if (q <= 0) q = 0.01f;
@@ -164,7 +165,7 @@ namespace MIDI.AudioEffect.EQUALIZER
 
             switch (type)
             {
-                case FilterType.Peak:
+                case MIDI.AudioEffect.EQUALIZER.Models.FilterType.Peak:
                     b0 = (float)(1.0 + alpha * aVal);
                     b1 = (float)(-2.0 * cosOmega);
                     b2 = (float)(1.0 - alpha * aVal);
@@ -172,7 +173,7 @@ namespace MIDI.AudioEffect.EQUALIZER
                     a1 = (float)(-2.0 * cosOmega);
                     a2 = (float)(1.0 - alpha / aVal);
                     break;
-                case FilterType.LowShelf:
+                case MIDI.AudioEffect.EQUALIZER.Models.FilterType.LowShelf:
                     b0 = (float)(aVal * ((aVal + 1.0) - (aVal - 1.0) * cosOmega + 2.0 * System.Math.Sqrt(aVal) * alpha));
                     b1 = (float)(2.0 * aVal * ((aVal - 1.0) - (aVal + 1.0) * cosOmega));
                     b2 = (float)(aVal * ((aVal + 1.0) - (aVal - 1.0) * cosOmega - 2.0 * System.Math.Sqrt(aVal) * alpha));
@@ -180,7 +181,7 @@ namespace MIDI.AudioEffect.EQUALIZER
                     a1 = (float)(-2.0 * ((aVal - 1.0) + (aVal + 1.0) * cosOmega));
                     a2 = (float)((aVal + 1.0) + (aVal - 1.0) * cosOmega - 2.0 * System.Math.Sqrt(aVal) * alpha);
                     break;
-                case FilterType.HighShelf:
+                case MIDI.AudioEffect.EQUALIZER.Models.FilterType.HighShelf:
                     b0 = (float)(aVal * ((aVal + 1.0) + (aVal - 1.0) * cosOmega + 2.0 * System.Math.Sqrt(aVal) * alpha));
                     b1 = (float)(-2.0 * aVal * ((aVal - 1.0) + (aVal + 1.0) * cosOmega));
                     b2 = (float)(aVal * ((aVal + 1.0) + (aVal - 1.0) * cosOmega - 2.0 * System.Math.Sqrt(aVal) * alpha));
