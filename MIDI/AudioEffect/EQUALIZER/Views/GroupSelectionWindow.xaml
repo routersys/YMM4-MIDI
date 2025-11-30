@@ -1,6 +1,11 @@
-﻿<Window x:Class="MIDI.AudioEffect.EQUALIZER.UI.GroupSelectionWindow"
+﻿<Window x:Class="MIDI.AudioEffect.EQUALIZER.Views.GroupSelectionWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MIDI.AudioEffect.EQUALIZER.ViewModels"
+        d:DataContext="{d:DesignInstance Type=vm:GroupSelectionViewModel}"
+        mc:Ignorable="d"
         Title="グループ選択" Height="200" Width="300"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
         Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
@@ -14,7 +19,7 @@
 
         <TextBlock Grid.Row="0" Text="プリセットのグループを選択してください:" Margin="0,0,0,10"/>
 
-        <ListBox Grid.Row="1" Name="GroupListBox" SelectionMode="Single" Margin="0,0,0,10">
+        <ListBox Grid.Row="1" ItemsSource="{Binding GroupOptions}" SelectedItem="{Binding SelectedGroup}" SelectionMode="Single" Margin="0,0,0,10">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding DisplayName}"/>

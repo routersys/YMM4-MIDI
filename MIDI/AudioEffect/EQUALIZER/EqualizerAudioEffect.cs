@@ -1,5 +1,5 @@
 ﻿using MIDI.AudioEffect.EQUALIZER.Models;
-using MIDI.AudioEffect.EQUALIZER.UI;
+using MIDI.AudioEffect.EQUALIZER.Views;
 using MIDI.Configuration.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
@@ -18,7 +18,7 @@ namespace MIDI.AudioEffect.EQUALIZER
     {
         public override string Label => "EQUALIZER";
 
-        [Display(GroupName = "", Name = "バンド設定")]
+        [Display(GroupName = "Equalizer", Name = "")]
         [EqualizerEditor(PropertyEditorSize = PropertyEditorSize.FullWidth)]
         public ObservableCollection<EQBand> Bands { get; } = new();
 

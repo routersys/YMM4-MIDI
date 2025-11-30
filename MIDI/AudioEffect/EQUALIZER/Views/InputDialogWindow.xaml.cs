@@ -1,24 +1,22 @@
-﻿using System.Windows;
+﻿using MIDI.AudioEffect.EQUALIZER.ViewModels;
+using System.Windows;
 
-namespace MIDI.AudioEffect.EQUALIZER.UI
+namespace MIDI.AudioEffect.EQUALIZER.Views
 {
     public partial class InputDialogWindow : Window
     {
-        public string InputText { get; private set; } = "";
+        public string InputText => ((InputDialogViewModel)DataContext).InputText;
 
         public InputDialogWindow(string message, string title, string defaultText = "")
         {
             InitializeComponent();
-            Title = title;
-            MessageLabel.Text = message;
-            InputTextBox.Text = defaultText;
+            DataContext = new InputDialogViewModel(message, title, defaultText);
             InputTextBox.Focus();
             InputTextBox.SelectAll();
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-            InputText = InputTextBox.Text;
             DialogResult = true;
         }
 

@@ -188,6 +188,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
             }
             _presetMetadata[name].Group = group;
             SaveMetadata();
+            PresetsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void SetPresetFavorite(string name, bool isFavorite)
@@ -198,6 +199,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
             }
             _presetMetadata[name].IsFavorite = isFavorite;
             SaveMetadata();
+            PresetsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public bool ExportPreset(string name, string exportPath)

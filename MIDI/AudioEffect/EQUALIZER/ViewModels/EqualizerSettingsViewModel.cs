@@ -1,10 +1,8 @@
 ﻿using MIDI.AudioEffect.EQUALIZER.Interfaces;
 using MIDI.AudioEffect.EQUALIZER.Models;
-using MIDI.AudioEffect.EQUALIZER.UI;
+using MIDI.AudioEffect.EQUALIZER.Views;
 using Microsoft.Win32;
-using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -12,67 +10,72 @@ using System.Windows.Input;
 
 namespace MIDI.AudioEffect.EQUALIZER.ViewModels
 {
-    public class RelayCommand : ICommand
-    {
-        private readonly Action<object?> _execute;
-        private readonly Predicate<object?>? _canExecute;
-
-        public event EventHandler? CanExecuteChanged
-        {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
-        }
-
-        public RelayCommand(Action<object?> execute, Predicate<object?>? canExecute = null)
-        {
-            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            _canExecute = canExecute;
-        }
-
-        public bool CanExecute(object? parameter) => _canExecute == null || _canExecute(parameter);
-        public void Execute(object? parameter) => _execute(parameter);
-    }
-
-    public class EqualizerSettingsViewModel : INotifyPropertyChanged
+    public class EqualizerSettingsViewModel : ViewModelBase
     {
         private readonly IPresetService _presetService;
         private readonly IConfigService _configService;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        private PresetInfo? _selectedPreset;
+        private string? _selectedDefaultPreset;
+        private GroupItem _selectedGroupItem = default!;
 
         public ObservableCollection<PresetInfo> Presets { get; } = new();
         public ObservableCollection<string> AllPresetNames { get; } = new();
+        public ObservableCollection<GroupItem> Groups { get; } = new();
 
-        private PresetInfo? _selectedPreset;
+        public GroupItem SelectedGroupItem
+        {
+            get => _selectedGroupItem;
+            set
+            {
+                if (SetProperty(ref _selectedGroupItem, value))
+                {
+                    LoadData();
+                }
+            }
+        }
+
         public PresetInfo? SelectedPreset
         {
             get => _selectedPreset;
-            set { _selectedPreset = value; OnPropertyChanged(nameof(SelectedPreset)); }
+            set => SetProperty(ref _selectedPreset, value);
         }
 
-        private string? _selectedDefaultPreset;
         public string? SelectedDefaultPreset
         {
             get => _selectedDefaultPreset;
             set
             {
-                _selectedDefaultPreset = value;
-                if (value != null) _configService.DefaultPreset = value == "なし" ? "" : value;
-                OnPropertyChanged(nameof(SelectedDefaultPreset));
+                if (SetProperty(ref _selectedDefaultPreset, value))
+                {
+                    if (value != null) _configService.DefaultPreset = value == "なし" ? "" : value;
+                }
             }
         }
 
         public bool HighQualityMode
         {
             get => _configService.HighQualityMode;
-            set { _configService.HighQualityMode = value; OnPropertyChanged(nameof(HighQualityMode)); }
+            set
+            {
+                if (_configService.HighQualityMode != value)
+                {
+                    _configService.HighQualityMode = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public double EditorHeight
         {
             get => _configService.EditorHeight;
-            set { _configService.EditorHeight = value; OnPropertyChanged(nameof(EditorHeight)); }
+            set
+            {
+                if (_configService.EditorHeight != value)
+                {
+                    _configService.EditorHeight = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public ICommand RenameCommand { get; }
@@ -89,42 +92,80 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
             _presetService = ServiceLocator.PresetService;
             _configService = ServiceLocator.ConfigService;
 
-            LoadData();
-            _presetService.PresetsChanged += (s, e) => LoadData();
-
             RenameCommand = new RelayCommand(p => RenamePreset(), p => SelectedPreset != null);
             DeleteCommand = new RelayCommand(p => DeletePreset(), p => SelectedPreset != null);
             ImportCommand = new RelayCommand(p => ImportPreset());
             ExportCommand = new RelayCommand(p => ExportPreset(), p => SelectedPreset != null);
             ChangeGroupCommand = new RelayCommand(p => ChangeGroup(), p => SelectedPreset != null);
-            ToggleFavoriteCommand = new RelayCommand(p => ToggleFavorite(p));
+            ToggleFavoriteCommand = new RelayCommand(ToggleFavorite);
             SaveSettingsCommand = new RelayCommand(p => _configService.Save());
             ClearDefaultPresetCommand = new RelayCommand(p => SelectedDefaultPreset = "なし");
+
+            InitializeGroups();
+            _presetService.PresetsChanged += (s, e) => LoadData();
+            LoadData();
+        }
+
+        private void InitializeGroups()
+        {
+            Groups.Add(new GroupItem("すべて", ""));
+            Groups.Add(new GroupItem("お気に入り", "favorites"));
+            Groups.Add(new GroupItem("ボーカル", "vocal"));
+            Groups.Add(new GroupItem("BGM", "bgm"));
+            Groups.Add(new GroupItem("効果音", "sfx"));
+            Groups.Add(new GroupItem("その他", "other"));
+            _selectedGroupItem = Groups[0];
         }
 
         private void LoadData()
         {
             Application.Current.Dispatcher.Invoke(() => {
+                var previousSelectionName = SelectedPreset?.Name;
+
                 Presets.Clear();
                 AllPresetNames.Clear();
                 AllPresetNames.Add("なし");
 
-                var names = _presetService.GetAllPresetNames();
-                foreach (var name in names)
+                var allNames = _presetService.GetAllPresetNames();
+                var allPresets = allNames.Select(name => _presetService.GetPresetInfo(name));
+
+                if (SelectedGroupItem != null && !string.IsNullOrEmpty(SelectedGroupItem.Tag))
                 {
-                    Presets.Add(_presetService.GetPresetInfo(name));
+                    if (SelectedGroupItem.Tag == "favorites")
+                    {
+                        allPresets = allPresets.Where(p => p.IsFavorite);
+                    }
+                    else
+                    {
+                        allPresets = allPresets.Where(p => p.Group == SelectedGroupItem.Tag);
+                    }
+                }
+
+                foreach (var preset in allPresets.OrderBy(p => p.Name))
+                {
+                    Presets.Add(preset);
+                }
+
+                foreach (var name in allNames)
+                {
                     AllPresetNames.Add(name);
                 }
 
                 var currentDefault = _configService.DefaultPreset;
-                SelectedDefaultPreset = string.IsNullOrEmpty(currentDefault) || !names.Contains(currentDefault) ? "なし" : currentDefault;
+                SelectedDefaultPreset = string.IsNullOrEmpty(currentDefault) || !allNames.Contains(currentDefault) ? "なし" : currentDefault;
+
+                if (previousSelectionName != null)
+                {
+                    SelectedPreset = Presets.FirstOrDefault(p => p.Name == previousSelectionName);
+                }
             });
         }
 
         private void RenamePreset()
         {
             if (SelectedPreset == null) return;
-            var dialog = new InputDialogWindow("新しいプリセット名", "プリセット名の変更", SelectedPreset.Name);
+            var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current.MainWindow;
+            var dialog = new InputDialogWindow("新しいプリセット名", "プリセット名の変更", SelectedPreset.Name) { Owner = window };
             if (dialog.ShowDialog() == true)
             {
                 string newName = dialog.InputText;
@@ -183,7 +224,8 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
             if (SelectedPreset == null) return;
             var groups = new[] { "vocal", "bgm", "sfx", "other" };
             var groupNames = new[] { "ボーカル", "BGM", "効果音", "その他" };
-            var dialog = new GroupSelectionWindow(groups, groupNames, SelectedPreset.Group);
+            var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current.MainWindow;
+            var dialog = new GroupSelectionWindow(groups, groupNames, SelectedPreset.Group) { Owner = window };
 
             if (dialog.ShowDialog() == true)
             {

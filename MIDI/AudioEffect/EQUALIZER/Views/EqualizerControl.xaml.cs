@@ -12,14 +12,12 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using YukkuriMovieMaker.Commons;
 using MIDI.AudioEffect.EQUALIZER.Models;
-using MIDI.AudioEffect.EQUALIZER.Interfaces;
+using MIDI.AudioEffect.EQUALIZER.ViewModels;
 
-namespace MIDI.AudioEffect.EQUALIZER.UI
+namespace MIDI.AudioEffect.EQUALIZER.Views
 {
     public partial class EqualizerControl : UserControl, IPropertyEditorControl
     {
-        private readonly IPresetService _presetService;
-
         public static readonly DependencyProperty ItemsSourceProperty =
             DependencyProperty.Register(nameof(ItemsSource), typeof(ObservableCollection<EQBand>), typeof(EqualizerControl), new PropertyMetadata(null, OnItemsSourceChanged));
         public ObservableCollection<EQBand> ItemsSource
@@ -28,37 +26,18 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
             set => SetValue(ItemsSourceProperty, value);
         }
 
-        public static readonly DependencyProperty SelectedBandProperty =
-            DependencyProperty.Register(nameof(SelectedBand), typeof(EQBand), typeof(EqualizerControl), new PropertyMetadata(null));
-        public EQBand? SelectedBand
-        {
-            get => (EQBand?)GetValue(SelectedBandProperty);
-            set => SetValue(SelectedBandProperty, value);
-        }
-
-        public static readonly DependencyProperty SelectedPresetNameProperty =
-            DependencyProperty.Register(nameof(SelectedPresetName), typeof(string), typeof(EqualizerControl), new PropertyMetadata("プリセットを選択..."));
-        public string SelectedPresetName
-        {
-            get => (string)GetValue(SelectedPresetNameProperty);
-            set => SetValue(SelectedPresetNameProperty, value);
-        }
-
         public event EventHandler? BeginEdit;
         public event EventHandler? EndEdit;
 
-        private double currentTime = 0;
+        private EqualizerEditorViewModel ViewModel => (EqualizerEditorViewModel)DataContext;
+
         private Point lastRightClickPosition;
         private double minFreq = 20, maxFreq = 20000;
         private double minGain = -24, maxGain = 24;
         private bool isDragging = false;
-        private bool isLoadingPreset = false;
 
         private AnimationValue? _targetFreqKeyframe;
         private AnimationValue? _targetGainKeyframe;
-
-        private readonly ObservableCollection<PresetInfo> allPresets = new();
-        private string currentGroupFilter = "";
 
         private readonly SolidColorBrush gridLineBrush = new(Color.FromArgb(50, 255, 255, 255));
         private readonly SolidColorBrush gridTextBrush = new(Color.FromArgb(100, 255, 255, 255));
@@ -74,25 +53,14 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
         public EqualizerControl()
         {
             InitializeComponent();
-            _presetService = ServiceLocator.PresetService;
+            DataContext = new EqualizerEditorViewModel();
 
-            EditorGrid.DataContext = EqualizerSettings.Default;
-            Loaded += GuiEqualizerControl_Loaded;
-            Unloaded += GuiEqualizerControl_Unloaded;
+            ViewModel.RequestRedraw += (s, e) => DrawAll();
+            ViewModel.BeginEdit += (s, e) => BeginEdit?.Invoke(this, EventArgs.Empty);
+            ViewModel.EndEdit += (s, e) => EndEdit?.Invoke(this, EventArgs.Empty);
+
+            Loaded += (s, e) => DrawAll();
         }
-
-        private void GuiEqualizerControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            _presetService.PresetsChanged += OnPresetsChanged;
-            LoadPresets();
-        }
-
-        private void GuiEqualizerControl_Unloaded(object sender, RoutedEventArgs e)
-        {
-            _presetService.PresetsChanged -= OnPresetsChanged;
-        }
-
-        private void OnPresetsChanged(object? sender, EventArgs e) => LoadPresets();
 
         private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -102,11 +70,14 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
                 oldSource.CollectionChanged -= control.ItemsSource_CollectionChanged;
                 foreach (var band in oldSource) band.PropertyChanged -= control.Band_PropertyChanged;
             }
-            if (e.NewValue is ObservableCollection<EQBand> newSource)
+
+            var newSource = e.NewValue as ObservableCollection<EQBand>;
+            if (newSource != null)
             {
                 newSource.CollectionChanged += control.ItemsSource_CollectionChanged;
                 foreach (var band in newSource) band.PropertyChanged += control.Band_PropertyChanged;
             }
+            control.ViewModel.Bands = newSource;
             control.UpdateDefaultSelection();
             control.UpdateTimeSliderRange();
             control.DrawAll();
@@ -114,9 +85,9 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
 
         private void UpdateDefaultSelection()
         {
-            if (SelectedBand is null && ItemsSource?.Any() == true)
+            if (ViewModel.SelectedBand is null && ItemsSource?.Any() == true)
             {
-                SelectedBand = ItemsSource.OrderBy(b => b.Frequency.Values.FirstOrDefault()?.Value ?? 0).FirstOrDefault();
+                ViewModel.SelectedBand = ItemsSource.OrderBy(b => b.Frequency.Values.FirstOrDefault()?.Value ?? 0).FirstOrDefault();
             }
         }
 
@@ -144,17 +115,17 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
 
         private void Band_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (isDragging || isLoadingPreset) return;
+            if (isDragging) return;
 
-            if (sender is EQBand band && band == SelectedBand)
+            if (sender is EQBand band && band == ViewModel.SelectedBand)
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    var currentSelection = SelectedBand;
+                    var currentSelection = ViewModel.SelectedBand;
                     if (currentSelection == band)
                     {
-                        SelectedBand = null;
-                        SelectedBand = currentSelection;
+                        ViewModel.SelectedBand = null;
+                        ViewModel.SelectedBand = currentSelection;
                     }
                 }));
             }
@@ -173,23 +144,9 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
             DrawAll();
         }
 
-        private void ZoomSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (this.IsLoaded)
-            {
-                maxGain = ZoomSlider.Value;
-                minGain = -ZoomSlider.Value;
-                DrawAll();
-            }
-        }
-
         private void TimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (this.IsLoaded)
-            {
-                currentTime = e.NewValue;
-                if (!isDragging) DrawAll();
-            }
+            if (this.IsLoaded && !isDragging) DrawAll();
         }
 
         private void UpdateTimeSliderRange()
@@ -214,187 +171,6 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
             }
         }
 
-        private void SettingsButton_Click(object sender, RoutedEventArgs e)
-        {
-            var settingsWindow = new EqualizerSettingsWindow
-            {
-                Owner = Window.GetWindow(this),
-                DataContext = new ViewModels.EqualizerSettingsViewModel(),
-                Topmost = true
-            };
-            settingsWindow.ShowDialog();
-        }
-
-        private void LoadPresets()
-        {
-            var selectedPresetName = (PresetListBox.SelectedItem as PresetInfo)?.Name;
-
-            allPresets.Clear();
-            var presetNames = _presetService.GetAllPresetNames();
-            foreach (var name in presetNames)
-            {
-                allPresets.Add(_presetService.GetPresetInfo(name));
-            }
-
-            var groupNames = allPresets.Select(p => p.Group).Where(g => !string.IsNullOrEmpty(g)).Distinct().OrderBy(g => g).ToList();
-            GroupListBox.Items.Clear();
-            GroupListBox.Items.Add(new ListBoxItem { Content = "すべて", Tag = "" });
-            GroupListBox.Items.Add(new ListBoxItem { Content = "お気に入り", Tag = "favorites" });
-
-            var groupKeyToName = new Dictionary<string, string>
-            {
-                {"vocal", "ボーカル"}, {"bgm", "BGM"}, {"sfx", "効果音"}, {"other", "その他"}
-            };
-
-            foreach (var group in groupNames)
-            {
-                GroupListBox.Items.Add(new ListBoxItem { Content = groupKeyToName.GetValueOrDefault(group, group), Tag = group });
-            }
-
-            var itemToSelect = GroupListBox.Items.OfType<ListBoxItem>().FirstOrDefault(i => (i.Tag as string) == currentGroupFilter);
-            GroupListBox.SelectedItem = itemToSelect ?? GroupListBox.Items[0];
-
-            FilterPresets();
-
-            if (selectedPresetName != null)
-            {
-                var presetToSelect = PresetListBox.Items.OfType<PresetInfo>().FirstOrDefault(p => p.Name == selectedPresetName);
-                if (presetToSelect != null)
-                {
-                    PresetListBox.SelectedItem = presetToSelect;
-                }
-            }
-        }
-
-        private void GroupListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (GroupListBox.SelectedItem is ListBoxItem item)
-            {
-                currentGroupFilter = item.Tag as string ?? "";
-                FilterPresets();
-            }
-        }
-
-        private void FilterPresets()
-        {
-            IEnumerable<PresetInfo> filtered;
-            if (currentGroupFilter == "favorites")
-            {
-                filtered = allPresets.Where(p => p.IsFavorite);
-            }
-            else if (!string.IsNullOrEmpty(currentGroupFilter))
-            {
-                filtered = allPresets.Where(p => p.Group == currentGroupFilter);
-            }
-            else
-            {
-                filtered = allPresets;
-            }
-            PresetListBox.ItemsSource = filtered.OrderBy(p => p.Name);
-        }
-
-        private void PresetListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (PresetListBox.SelectedItem is PresetInfo selectedPresetInfo)
-            {
-                var loadedBands = _presetService.LoadPreset(selectedPresetInfo.Name);
-                if (loadedBands != null && ItemsSource != null)
-                {
-                    BeginEdit?.Invoke(this, EventArgs.Empty);
-                    isLoadingPreset = true;
-                    try
-                    {
-                        ItemsSource.Clear();
-                        foreach (var band in loadedBands)
-                        {
-                            ItemsSource.Add(band);
-                        }
-                        SelectedPresetName = selectedPresetInfo.Name;
-                    }
-                    finally
-                    {
-                        isLoadingPreset = false;
-                    }
-                    EndEdit?.Invoke(this, EventArgs.Empty);
-                }
-                PresetPopup.IsOpen = false;
-            }
-        }
-
-        private void SavePresetButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (ItemsSource == null || ItemsSource.Count == 0)
-            {
-                MessageBox.Show("保存するバンドがありません。", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            var dialog = new InputDialogWindow("プリセット名を入力してください", "プリセットの保存");
-            dialog.Owner = Window.GetWindow(this);
-
-            if (dialog.ShowDialog() == true)
-            {
-                string presetName = dialog.InputText;
-                if (!string.IsNullOrWhiteSpace(presetName))
-                {
-                    if (_presetService.SavePreset(presetName, ItemsSource))
-                    {
-                        SelectedPresetName = presetName;
-                        LoadPresets();
-                    }
-                }
-            }
-        }
-
-        private void RenamePresetButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (PresetListBox.SelectedItem is not PresetInfo selectedPreset) return;
-
-            var dialog = new InputDialogWindow("新しいプリセット名を入力してください", "プリセット名の変更", selectedPreset.Name);
-            dialog.Owner = Window.GetWindow(this);
-
-            if (dialog.ShowDialog() == true)
-            {
-                string newName = dialog.InputText;
-                if (!string.IsNullOrWhiteSpace(newName) && newName != selectedPreset.Name)
-                {
-                    if (_presetService.RenamePreset(selectedPreset.Name, newName))
-                    {
-                        if (SelectedPresetName == selectedPreset.Name)
-                        {
-                            SelectedPresetName = newName;
-                        }
-                        LoadPresets();
-                    }
-                }
-            }
-        }
-
-        private void DeletePresetButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (PresetListBox.SelectedItem is not PresetInfo selectedPreset) return;
-
-            if (MessageBox.Show($"プリセット「{selectedPreset.Name}」を削除しますか？", "確認",
-                MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
-            {
-                _presetService.DeletePreset(selectedPreset.Name);
-                if (SelectedPresetName == selectedPreset.Name)
-                {
-                    SelectedPresetName = "プリセットを選択...";
-                }
-                LoadPresets();
-            }
-        }
-
-        private void FavoriteButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.DataContext is PresetInfo preset)
-            {
-                _presetService.SetPresetFavorite(preset.Name, !preset.IsFavorite);
-                LoadPresets();
-            }
-        }
-
         private void UpdateBandHeaders()
         {
             if (ItemsSource is null) return;
@@ -409,6 +185,8 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
         {
             if (ItemsSource is null || MainCanvas.ActualWidth <= 0 || MainCanvas.ActualHeight <= 0) return;
             MainCanvas.Children.Clear();
+            maxGain = ViewModel.Zoom;
+            minGain = -ViewModel.Zoom;
             DrawGrid();
             DrawCurve();
             DrawThumbs();
@@ -444,7 +222,7 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
 
         private void DrawTimeline()
         {
-            double x = MainCanvas.ActualWidth * currentTime;
+            double x = MainCanvas.ActualWidth * ViewModel.CurrentTime;
             var line = new Line
             {
                 X1 = x,
@@ -472,10 +250,9 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
             }
 
             int totalFrames = Math.Max(maxFrames, 1000);
-            int currentFrame = (int)(totalFrames * currentTime);
+            int currentFrame = (int)(totalFrames * ViewModel.CurrentTime);
 
             var activeBands = ItemsSource.Where(b => b.IsEnabled).OrderBy(b => b.Frequency.GetValue(currentFrame, totalFrames, 60)).ToList();
-
             PathGeometry geometry;
 
             if (activeBands.Count == 0)
@@ -530,12 +307,13 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
             }
 
             int totalFrames = Math.Max(maxFrames, 1000);
-            int currentFrame = (int)(totalFrames * currentTime);
+            int currentFrame = (int)(totalFrames * ViewModel.CurrentTime);
 
             foreach (var band in ItemsSource)
             {
-                bool isSelected = band == SelectedBand;
+                bool isSelected = band == ViewModel.SelectedBand;
                 var thumb = new Thumb { Width = 12, Height = 12, DataContext = band, Template = CreateThumbTemplate(band.IsEnabled ? (isSelected ? thumbSelectedFillBrush : thumbFillBrush) : Brushes.Gray) };
+                thumb.Tag = band;
 
                 var freq = band.Frequency.GetValue(currentFrame, totalFrames, 60);
                 var gain = band.Gain.GetValue(currentFrame, totalFrames, 60);
@@ -569,46 +347,18 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
         private void MainCanvas_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             lastRightClickPosition = Mouse.GetPosition(MainCanvas);
-            var contextMenu = new ContextMenu();
-            var fe = e.Source as FrameworkElement;
-
-            var addItem = new MenuItem { Header = "ポイントを追加" };
-            addItem.Click += AddPoint_Click;
-            contextMenu.Items.Add(addItem);
-
-            var deleteItem = new MenuItem { Header = "ポイントを削除" };
-            if (fe?.DataContext is EQBand band)
+            if (e.Source is FrameworkElement fe)
             {
-                deleteItem.DataContext = band;
-                deleteItem.Click += DeletePoint_Click;
-            }
-            else
-            {
-                deleteItem.IsEnabled = false;
-            }
-            contextMenu.Items.Add(deleteItem);
-
-            if (sender is FrameworkElement fwElement)
-            {
-                fwElement.ContextMenu = contextMenu;
-            }
-        }
-
-        private void AddPoint_Click(object sender, RoutedEventArgs e)
-        {
-            BeginEdit?.Invoke(this, EventArgs.Empty);
-            var newBand = new EQBand(true, MIDI.AudioEffect.EQUALIZER.Models.FilterType.Peak, XToFreq(lastRightClickPosition.X), YToGain(lastRightClickPosition.Y), 1.0, StereoMode.Stereo, "");
-            ItemsSource.Add(newBand);
-            EndEdit?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void DeletePoint_Click(object sender, RoutedEventArgs e)
-        {
-            if ((sender as MenuItem)?.DataContext is EQBand band)
-            {
-                BeginEdit?.Invoke(this, EventArgs.Empty);
-                ItemsSource.Remove(band);
-                EndEdit?.Invoke(this, EventArgs.Empty);
+                if (fe.DataContext is EQBand band)
+                {
+                    fe.Tag = band;
+                }
+                else
+                {
+                    var newBandPoint = new Point(XToFreq(lastRightClickPosition.X), YToGain(lastRightClickPosition.Y));
+                    ViewModel.AddPointCommand.Execute(newBandPoint);
+                    e.Handled = true;
+                }
             }
         }
 
@@ -616,7 +366,7 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
         {
             if (sender is Thumb thumb && thumb.DataContext is EQBand band)
             {
-                SelectedBand = band;
+                ViewModel.SelectedBand = band;
                 isDragging = true;
 
                 _targetFreqKeyframe = GetTargetKeyframe(band.Frequency);
@@ -640,11 +390,11 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
 
             if (animation.Values.Count == 2)
             {
-                return currentTime < 0.5 ? animation.Values.First() : animation.Values.Last();
+                return ViewModel.CurrentTime < 0.5 ? animation.Values.First() : animation.Values.Last();
             }
             else
             {
-                int targetIndex = (int)Math.Round(currentTime * (animation.Values.Count - 1));
+                int targetIndex = (int)Math.Round(ViewModel.CurrentTime * (animation.Values.Count - 1));
                 targetIndex = Math.Clamp(targetIndex, 0, animation.Values.Count - 1);
                 return animation.Values[targetIndex];
             }
@@ -717,19 +467,18 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
             return new PathGeometry(new[] { pathFigure });
         }
 
-        private void ResizeThumb_DragStarted(object sender, DragStartedEventArgs e) => BeginEdit?.Invoke(this, EventArgs.Empty);
+        private void ResizeThumb_DragStarted(object sender, DragStartedEventArgs e) => ViewModel.NotifyBeginEdit();
         private void ResizeThumb_DragDelta(object sender, DragDeltaEventArgs e)
         {
             var newHeight = EditorGrid.ActualHeight + e.VerticalChange;
-            EqualizerSettings.Default.EditorHeight = Math.Clamp(newHeight, 150, 600);
+            ViewModel.EditorHeight = Math.Clamp(newHeight, 150, 600);
         }
         private void ResizeThumb_DragCompleted(object sender, DragCompletedEventArgs e)
         {
-            EqualizerSettings.Default.Save();
-            EndEdit?.Invoke(this, EventArgs.Empty);
+            ViewModel.NotifyEndEdit();
         }
 
-        private void Band_BeginEdit(object? sender, EventArgs e) => BeginEdit?.Invoke(this, EventArgs.Empty);
-        private void Band_EndEdit(object? sender, EventArgs e) => EndEdit?.Invoke(this, EventArgs.Empty);
+        private void Band_BeginEdit(object? sender, EventArgs e) => ViewModel.NotifyBeginEdit();
+        private void Band_EndEdit(object? sender, EventArgs e) => ViewModel.NotifyEndEdit();
     }
 }

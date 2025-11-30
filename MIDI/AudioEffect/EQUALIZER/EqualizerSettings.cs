@@ -1,5 +1,5 @@
 ﻿using YukkuriMovieMaker.Plugin;
-using MIDI.AudioEffect.EQUALIZER.UI;
+using MIDI.AudioEffect.EQUALIZER.Views;
 using MIDI.AudioEffect.EQUALIZER.Interfaces;
 
 namespace MIDI.AudioEffect.EQUALIZER

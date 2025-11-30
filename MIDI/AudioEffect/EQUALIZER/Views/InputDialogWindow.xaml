@@ -1,7 +1,12 @@
-﻿<Window x:Class="MIDI.AudioEffect.EQUALIZER.UI.InputDialogWindow"
+﻿<Window x:Class="MIDI.AudioEffect.EQUALIZER.Views.InputDialogWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="名前の入力" Height="150" Width="300"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MIDI.AudioEffect.EQUALIZER.ViewModels"
+        d:DataContext="{d:DesignInstance Type=vm:InputDialogViewModel}"
+        mc:Ignorable="d"
+        Title="{Binding Title}" Height="150" Width="300"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
         Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
         Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
@@ -12,8 +17,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Name="MessageLabel" Text="名前を入力してください:"/>
-        <TextBox Grid.Row="1" Name="InputTextBox" Margin="0,5,0,10" VerticalContentAlignment="Center"/>
+        <TextBlock Grid.Row="0" Text="{Binding Message}"/>
+        <TextBox Grid.Row="1" Name="InputTextBox" Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,10" VerticalContentAlignment="Center"/>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="OK" Width="75" IsDefault="True" Click="OkButton_Click"/>

@@ -3,8 +3,9 @@ using System.Windows.Data;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Views.Converters;
+using MIDI.AudioEffect.EQUALIZER.Views;
 
-namespace MIDI.AudioEffect.EQUALIZER.UI
+namespace MIDI.AudioEffect.EQUALIZER.Views
 {
     internal class EqualizerEditorAttribute : PropertyEditorAttribute2
     {

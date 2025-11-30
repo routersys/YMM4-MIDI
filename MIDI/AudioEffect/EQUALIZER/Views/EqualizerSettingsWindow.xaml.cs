@@ -1,8 +1,7 @@
 ﻿using MIDI.AudioEffect.EQUALIZER.ViewModels;
 using System.Windows;
-using System.Windows.Input;
 
-namespace MIDI.AudioEffect.EQUALIZER.UI
+namespace MIDI.AudioEffect.EQUALIZER.Views
 {
     public partial class EqualizerSettingsWindow : Window
     {
@@ -14,10 +13,6 @@ namespace MIDI.AudioEffect.EQUALIZER.UI
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
-        }
-
-        private void PresetListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
         }
     }
 }
