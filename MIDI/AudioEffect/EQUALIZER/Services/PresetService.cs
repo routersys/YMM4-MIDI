@@ -23,7 +23,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
         public PresetService()
         {
             var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
-            _presetsDir = Path.Combine(assemblyLocation, "preset");
+            _presetsDir = Path.Combine(assemblyLocation, "presets");
             _metadataPath = Path.Combine(_presetsDir, "_metadata.json");
 
             _serializerSettings = new JsonSerializerSettings

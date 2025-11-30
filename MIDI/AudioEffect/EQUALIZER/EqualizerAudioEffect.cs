@@ -18,7 +18,7 @@ namespace MIDI.AudioEffect.EQUALIZER
     {
         public override string Label => "EQUALIZER";
 
-        [Display(Name = "バンド設定")]
+        [Display(GroupName = "", Name = "バンド設定")]
         [EqualizerEditor(PropertyEditorSize = PropertyEditorSize.FullWidth)]
         public ObservableCollection<EQBand> Bands { get; } = new();
 

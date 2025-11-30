@@ -130,7 +130,7 @@
                               HorizontalContentAlignment="Left" Padding="10,0"
                               ToolTip="保存されたプリセットを選択または管理します。"/>
 
-                <Button Grid.Column="1" Name="SavePresetButton" Content="保存" Width="40" Height="24" Margin="5,0,0,0"
+                <Button Grid.Column="1" Name="SavePresetButton" Content="保存" Width="50" Height="24" Margin="5,0,0,0"
                         HorizontalAlignment="Left"
                         Click="SavePresetButton_Click"
                         ToolTip="現在の設定をプリセットとして保存します。"/>

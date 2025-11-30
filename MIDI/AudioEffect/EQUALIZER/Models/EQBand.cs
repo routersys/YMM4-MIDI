@@ -33,15 +33,15 @@ namespace MIDI.AudioEffect.EQUALIZER.Models
         [Display(Name = "チャンネル")]
         public StereoMode StereoMode { get => stereoMode; set => Set(ref stereoMode, value); }
 
-        [Display(Name = "周波数")]
+        [Display(GroupName = "設定", Name = "周波数")]
         [AnimationSlider("F0", "Hz", 20, 20000)]
         public Animation Frequency { get; }
 
-        [Display(Name = "ゲイン")]
+        [Display(GroupName = "設定", Name = "ゲイン")]
         [AnimationSlider("F1", "dB", -48, 48)]
         public Animation Gain { get; }
 
-        [Display(Name = "Q")]
+        [Display(GroupName = "設定", Name = "Q")]
         [AnimationSlider("F2", "", 0.1, 18)]
         public Animation Q { get; }
 

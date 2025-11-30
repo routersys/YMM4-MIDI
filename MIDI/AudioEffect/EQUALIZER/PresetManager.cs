@@ -12,7 +12,7 @@ namespace MIDI.AudioEffect.EQUALIZER
 {
     internal static class PresetManager
     {
-        private static readonly string presetsDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "presets_eq");
+        private static readonly string presetsDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "presets");
         private static readonly string metadataPath = Path.Combine(presetsDir, "_metadata.json");
 
         private static readonly JsonSerializerSettings serializerSettings = new JsonSerializerSettings
