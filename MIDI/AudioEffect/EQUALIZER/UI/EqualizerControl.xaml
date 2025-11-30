@@ -1,0 +1,273 @@
+﻿<UserControl x:Class="MIDI.AudioEffect.EQUALIZER.UI.EqualizerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:local="clr-namespace:MIDI.AudioEffect.EQUALIZER"
+             xmlns:ui="clr-namespace:MIDI.AudioEffect.EQUALIZER.UI"
+             xmlns:theme="clr-namespace:YukkuriMovieMaker.Theme;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:cv="clr-namespace:MIDI.AudioEffect.EQUALIZER.Converters"
+             mc:Ignorable="d"
+             Name="this"
+             Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+             Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
+    <UserControl.Resources>
+        <cv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <cv:BooleanConverter x:Key="NotNullConverter" />
+
+        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+            <Setter Property="Padding" Value="10,2"/>
+        </Style>
+
+        <Style x:Key="CircularSliderThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Height" Value="14"/>
+            <Setter Property="Width" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Grid>
+                            <Ellipse x:Name="ThumbEllipse"
+                                     Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+                                     Stroke="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                     StrokeThickness="1"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ThumbEllipse" Property="Fill" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter TargetName="ThumbEllipse" Property="Stroke" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="True">
+                                <Setter TargetName="ThumbEllipse" Property="Fill" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter TargetName="ThumbEllipse" Property="Stroke" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Slider" BasedOn="{StaticResource {x:Type Slider}}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Slider}">
+                        <Grid>
+                            <Border x:Name="TrackBorder"
+                                    Background="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                                    BorderBrush="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                                    BorderThickness="1"
+                                    Height="4"
+                                    VerticalAlignment="Center"
+                                    CornerRadius="2"/>
+                            <Track x:Name="PART_Track">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.DecreaseLarge}">
+                                        <RepeatButton.Style>
+                                            <Style TargetType="RepeatButton">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="RepeatButton">
+                                                            <Border Background="{TemplateBinding Background}"/>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </RepeatButton.Style>
+                                    </RepeatButton>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.IncreaseLarge}">
+                                        <RepeatButton.Style>
+                                            <Style TargetType="RepeatButton">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="RepeatButton">
+                                                            <Border Background="{TemplateBinding Background}"/>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </RepeatButton.Style>
+                                    </RepeatButton>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource CircularSliderThumb}"/>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Margin="0,0,0,5" Padding="5" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" CornerRadius="3">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <ToggleButton Grid.Column="0" x:Name="PresetToggleButton" Width="180" Height="24"
+                              Content="{Binding SelectedPresetName, ElementName=this, FallbackValue='プリセットを選択...'}"
+                              HorizontalContentAlignment="Left" Padding="10,0"
+                              ToolTip="保存されたプリセットを選択または管理します。"/>
+
+                <Button Grid.Column="1" Name="SavePresetButton" Content="保存" Width="40" Height="24" Margin="5,0,0,0"
+                        HorizontalAlignment="Left"
+                        Click="SavePresetButton_Click"
+                        ToolTip="現在の設定をプリセットとして保存します。"/>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="10,0,10,0" VerticalAlignment="Center">
+                    <TextBlock Text="Zoom" VerticalAlignment="Center" Margin="0,0,5,0" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" FontSize="10"/>
+                    <Slider Name="ZoomSlider" Width="100"
+                            Minimum="6" Maximum="48" Value="24" TickFrequency="6" IsSnapToTickEnabled="True"
+                            ValueChanged="ZoomSlider_ValueChanged"
+                            ToolTip="縦軸（ゲイン）の表示範囲を調整します。"/>
+                </StackPanel>
+
+                <Button Grid.Column="3" Name="SettingsButton" Width="24" Height="24"
+                        Click="SettingsButton_Click" ToolTip="設定">
+                    <Path Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Stretch="Uniform" Margin="2"
+                          Data="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <Popup x:Name="PresetPopup"
+               IsOpen="{Binding IsChecked, ElementName=PresetToggleButton, Mode=TwoWay}"
+               StaysOpen="False"
+               Placement="Bottom"
+               PlacementTarget="{Binding ElementName=PresetToggleButton}"
+               Width="450"
+               Height="400"
+               AllowsTransparency="True" 
+               PopupAnimation="Slide"
+               HorizontalOffset="0"
+               VerticalOffset="0">
+            <Border Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                    BorderBrush="{DynamicResource {x:Static theme:YMM4Colors.IconBorderBrushKey}}"
+                    BorderThickness="1" 
+                    CornerRadius="3">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ListBox Grid.Column="0" Name="GroupListBox"
+                             Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderThickness="0,0,1,0"
+                             BorderBrush="{DynamicResource {x:Static theme:YMM4Colors.IconBorderBrushKey}}"
+                             SelectionChanged="GroupListBox_SelectionChanged"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="10,8"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border Name="Border" Padding="{TemplateBinding Padding}" Background="Transparent" SnapsToDevicePixels="true">
+                                                <ContentPresenter />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="true">
+                                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" />
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="true">
+                                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <ListBox Grid.Row="0" Name="PresetListBox" Background="Transparent" BorderThickness="0"
+                                 MouseDoubleClick="PresetListBox_MouseDoubleClick"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="5" MinWidth="240">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                        <Path Grid.Column="1" Data="M12,17.27L18.18,21L17.27,14.41L22,9.82L15.77,8.89L12,3L8.23,8.89L2,9.82L6.73,14.41L5.82,21L12,17.27Z"
+                                              Fill="Gold" Stretch="Uniform" Width="12" Height="12" Margin="10,0,0,0" VerticalAlignment="Center"
+                                              Visibility="{Binding IsFavorite, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                            <Button Content="名前変更" Margin="0,0,5,0" Click="RenamePresetButton_Click" IsEnabled="{Binding ElementName=PresetListBox, Path=SelectedItem, Converter={StaticResource NotNullConverter}}"/>
+                            <Button Content="削除" Click="DeletePresetButton_Click" IsEnabled="{Binding ElementName=PresetListBox, Path=SelectedItem, Converter={StaticResource NotNullConverter}}"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Popup>
+
+        <Grid Grid.Row="1" Name="EditorGrid" Height="{Binding EditorHeight, Source={x:Static local:EqualizerSettings.Default}}" Margin="0,0,0,5">
+            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Background="#282828" CornerRadius="2">
+                <Canvas Name="MainCanvas" ClipToBounds="True" Background="Transparent"
+                        ContextMenuOpening="MainCanvas_ContextMenuOpening"
+                        ToolTip="右クリック: ポイント操作"/>
+            </Border>
+            <Thumb Name="ResizeThumb" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                   Width="16" Height="16" Cursor="SizeNWSE"
+                   DragStarted="ResizeThumb_DragStarted" DragDelta="ResizeThumb_DragDelta" DragCompleted="ResizeThumb_DragCompleted">
+                <Thumb.Template>
+                    <ControlTemplate TargetType="Thumb">
+                        <Grid Background="Transparent">
+                            <Path Data="M 12,12 L 16,16 M 8,16 L 16,8 M 4,16 L 16,4" Stroke="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" StrokeThickness="1" Margin="2"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Thumb.Template>
+            </Thumb>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Time" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="10"/>
+            <Slider Grid.Column="1" Name="TimeSlider" Minimum="0" Maximum="1" Value="0" TickFrequency="0.1"
+                    ValueChanged="TimeSlider_ValueChanged"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="3" Height="200" VerticalScrollBarVisibility="Auto" Margin="0,5,0,0">
+            <c:PropertiesEditor Target="{Binding ElementName=this, Path=SelectedBand}"
+                                BeginEdit="Band_BeginEdit" EndEdit="Band_EndEdit"/>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
