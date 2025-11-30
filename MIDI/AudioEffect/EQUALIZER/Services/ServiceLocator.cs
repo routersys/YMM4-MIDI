@@ -1,7 +1,6 @@
 ﻿using MIDI.AudioEffect.EQUALIZER.Interfaces;
-using MIDI.AudioEffect.EQUALIZER.Services;
 
-namespace MIDI.AudioEffect.EQUALIZER
+namespace MIDI.AudioEffect.EQUALIZER.Services
 {
     public static class ServiceLocator
     {

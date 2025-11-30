@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using MIDI.AudioEffect.EQUALIZER.Services;
 
 namespace MIDI.AudioEffect.EQUALIZER.ViewModels
 {

@@ -8,7 +8,7 @@ using System.Windows;
 using Newtonsoft.Json;
 using MIDI.AudioEffect.EQUALIZER.Models;
 
-namespace MIDI.AudioEffect.EQUALIZER
+namespace MIDI.AudioEffect.EQUALIZER.Services
 {
     internal static class PresetManager
     {

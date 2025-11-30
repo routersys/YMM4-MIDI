@@ -1,5 +1,6 @@
 ﻿using MIDI.AudioEffect.EQUALIZER.Interfaces;
 using MIDI.AudioEffect.EQUALIZER.Models;
+using MIDI.AudioEffect.EQUALIZER.Services;
 using MIDI.AudioEffect.EQUALIZER.Views;
 using System;
 using System.Collections.Generic;
