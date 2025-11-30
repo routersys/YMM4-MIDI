@@ -139,20 +139,20 @@ namespace MIDI.Shape.MidiStaff
                 RenderingMode = ScoreRenderingModes.SinglePage
             };
 
-            var renderer = new VorticeScoreRenderer(dc, _mainBrush!, _highlightBrush!, _textFormat, settings)
+            using (var renderer = new VorticeScoreRenderer(dc, _mainBrush!, _highlightBrush!, _textFormat, settings))
             {
-                CurrentTime = currentTime
-            };
+                renderer.CurrentTime = currentTime;
 
-            var scale = (float)_parameter.Scale.GetValue(frame, length, fps);
-            var transform = Matrix3x2.CreateScale(scale, scale);
+                var scale = (float)_parameter.Scale.GetValue(frame, length, fps);
+                var transform = Matrix3x2.CreateScale(scale, scale);
 
-            var oldTransform = dc.Transform;
-            dc.Transform = transform * oldTransform;
+                var oldTransform = dc.Transform;
+                dc.Transform = transform * oldTransform;
 
-            renderer.Render(scoreToRender);
+                renderer.Render(scoreToRender);
 
-            dc.Transform = oldTransform;
+                dc.Transform = oldTransform;
+            }
 
             dc.EndDraw();
 
