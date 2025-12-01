@@ -245,7 +245,7 @@
         </Popup>
 
         <Grid Grid.Row="1" Name="EditorGrid" Height="{Binding EditorHeight}" Margin="0,0,0,5">
-            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Background="#282828" CornerRadius="2">
+            <Border x:Name="CanvasBorder" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" CornerRadius="2">
                 <Canvas Name="MainCanvas" ClipToBounds="True" Background="Transparent"
                         ContextMenuOpening="MainCanvas_ContextMenuOpening"
                         MouseLeftButtonDown="MainCanvas_MouseLeftButtonDown"

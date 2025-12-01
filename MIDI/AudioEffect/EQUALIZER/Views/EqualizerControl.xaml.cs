@@ -40,14 +40,14 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
         private AnimationValue? _targetFreqKeyframe;
         private AnimationValue? _targetGainKeyframe;
 
-        private readonly SolidColorBrush gridLineBrush = new(Color.FromArgb(50, 255, 255, 255));
-        private readonly SolidColorBrush gridTextBrush = new(Color.FromArgb(100, 255, 255, 255));
-        private readonly SolidColorBrush thumbFillBrush = new(Color.FromRgb(0, 180, 255));
-        private readonly SolidColorBrush thumbSelectedFillBrush = new(Color.FromRgb(255, 215, 0));
-        private readonly SolidColorBrush thumbStrokeBrush = new(Colors.White);
-        private readonly SolidColorBrush curveBrush = new(Color.FromRgb(0, 200, 255));
-        private readonly SolidColorBrush curveFillBrush = new(Color.FromArgb(30, 0, 200, 255));
-        private readonly SolidColorBrush timelineBrush = new(Color.FromArgb(150, 255, 50, 50));
+        private SolidColorBrush gridLineBrush = new(Color.FromArgb(50, 255, 255, 255));
+        private SolidColorBrush gridTextBrush = new(Color.FromArgb(100, 255, 255, 255));
+        private SolidColorBrush thumbFillBrush = new(Color.FromRgb(0, 180, 255));
+        private SolidColorBrush thumbSelectedFillBrush = new(Color.FromRgb(255, 215, 0));
+        private SolidColorBrush thumbStrokeBrush = new(Colors.White);
+        private SolidColorBrush curveBrush = new(Color.FromRgb(0, 200, 255));
+        private SolidColorBrush curveFillBrush = new(Color.FromArgb(30, 0, 200, 255));
+        private SolidColorBrush timelineBrush = new(Color.FromArgb(150, 255, 50, 50));
         private Path? eqCurvePath;
         private Path? eqCurveFillPath;
 
@@ -67,7 +67,64 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
                 PresetToggleButton.IsHitTestVisible = true;
             };
 
-            Loaded += (s, e) => DrawAll();
+            Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var dp = DependencyPropertyDescriptor.FromProperty(Border.BackgroundProperty, typeof(Border));
+            dp?.AddValueChanged(CanvasBorder, OnBackgroundChanged);
+            UpdateTheme();
+            DrawAll();
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            var dp = DependencyPropertyDescriptor.FromProperty(Border.BackgroundProperty, typeof(Border));
+            dp?.RemoveValueChanged(CanvasBorder, OnBackgroundChanged);
+        }
+
+        private void OnBackgroundChanged(object? sender, EventArgs e)
+        {
+            UpdateTheme();
+            DrawAll();
+        }
+
+        private void UpdateTheme()
+        {
+            if (CanvasBorder.Background is SolidColorBrush bg)
+            {
+                var c = bg.Color;
+                var brightness = (c.R * 0.299 + c.G * 0.587 + c.B * 0.114) / 255;
+                bool isDark = brightness < 0.5;
+
+                if (isDark)
+                {
+                    gridLineBrush = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255));
+                    gridTextBrush = new SolidColorBrush(Color.FromArgb(100, 255, 255, 255));
+                    thumbFillBrush = new SolidColorBrush(Color.FromRgb(0, 180, 255));
+                    thumbStrokeBrush = new SolidColorBrush(Colors.White);
+                    curveBrush = new SolidColorBrush(Color.FromRgb(0, 200, 255));
+                    curveFillBrush = new SolidColorBrush(Color.FromArgb(30, 0, 200, 255));
+                }
+                else
+                {
+                    gridLineBrush = new SolidColorBrush(Color.FromArgb(50, 0, 0, 0));
+                    gridTextBrush = new SolidColorBrush(Color.FromArgb(100, 0, 0, 0));
+                    thumbFillBrush = new SolidColorBrush(Color.FromRgb(0, 120, 215));
+                    thumbStrokeBrush = new SolidColorBrush(Colors.Black);
+                    curveBrush = new SolidColorBrush(Color.FromRgb(0, 100, 200));
+                    curveFillBrush = new SolidColorBrush(Color.FromArgb(30, 0, 100, 200));
+                }
+
+                gridLineBrush.Freeze();
+                gridTextBrush.Freeze();
+                thumbFillBrush.Freeze();
+                thumbStrokeBrush.Freeze();
+                curveBrush.Freeze();
+                curveFillBrush.Freeze();
+            }
         }
 
         private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
