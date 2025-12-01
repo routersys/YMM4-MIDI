@@ -1,5 +1,6 @@
 ﻿using MIDI.AudioEffect.EQUALIZER.Interfaces;
 using MIDI.Utils;
+using System;
 using System.IO;
 using System.Reflection;
 
@@ -23,12 +24,18 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
         public bool HighQualityMode { get; set; }
         public double EditorHeight { get; set; } = 240;
         public string DefaultPreset { get; set; } = "";
+        public EqualizerAlgorithm Algorithm { get; set; } = EqualizerAlgorithm.Biquad;
 
         public void Load()
         {
             _iniFile.Load(_configPath);
             HighQualityMode = bool.TryParse(_iniFile.GetValue(SectionGeneral, "HighQualityMode", "false"), out var hq) && hq;
             DefaultPreset = _iniFile.GetValue(SectionGeneral, "DefaultPreset", "");
+
+            if (Enum.TryParse<EqualizerAlgorithm>(_iniFile.GetValue(SectionGeneral, "Algorithm", "Biquad"), out var alg))
+            {
+                Algorithm = alg;
+            }
 
             if (double.TryParse(_iniFile.GetValue(SectionView, "EditorHeight", "240"), out var height))
             {
@@ -40,6 +47,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
         {
             _iniFile.SetValue(SectionGeneral, "HighQualityMode", HighQualityMode.ToString());
             _iniFile.SetValue(SectionGeneral, "DefaultPreset", DefaultPreset);
+            _iniFile.SetValue(SectionGeneral, "Algorithm", Algorithm.ToString());
             _iniFile.SetValue(SectionView, "EditorHeight", EditorHeight.ToString());
             _iniFile.Save(_configPath);
         }

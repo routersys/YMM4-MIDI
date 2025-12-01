@@ -1,10 +1,17 @@
-﻿using YukkuriMovieMaker.Plugin;
+﻿
+using YukkuriMovieMaker.Plugin;
 using MIDI.AudioEffect.EQUALIZER.Views;
 using MIDI.AudioEffect.EQUALIZER.Interfaces;
 using MIDI.AudioEffect.EQUALIZER.Services;
 
 namespace MIDI.AudioEffect.EQUALIZER
 {
+    public enum EqualizerAlgorithm
+    {
+        Biquad,
+        TPT_SVF
+    }
+
     public class EqualizerSettings : SettingsBase<EqualizerSettings>
     {
         private readonly IConfigService _configService;
@@ -38,6 +45,12 @@ namespace MIDI.AudioEffect.EQUALIZER
         {
             get => _configService.DefaultPreset;
             set => _configService.DefaultPreset = value;
+        }
+
+        public EqualizerAlgorithm Algorithm
+        {
+            get => _configService.Algorithm;
+            set => _configService.Algorithm = value;
         }
 
         public override void Initialize()

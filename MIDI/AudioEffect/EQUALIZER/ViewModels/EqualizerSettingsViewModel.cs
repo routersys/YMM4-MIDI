@@ -2,6 +2,8 @@
 using MIDI.AudioEffect.EQUALIZER.Models;
 using MIDI.AudioEffect.EQUALIZER.Views;
 using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -22,6 +24,8 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
         public ObservableCollection<PresetInfo> Presets { get; } = new();
         public ObservableCollection<string> AllPresetNames { get; } = new();
         public ObservableCollection<GroupItem> Groups { get; } = new();
+
+        public IEnumerable<EqualizerAlgorithm> AlgorithmOptions => Enum.GetValues(typeof(EqualizerAlgorithm)).Cast<EqualizerAlgorithm>();
 
         public GroupItem SelectedGroupItem
         {
@@ -61,6 +65,19 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
                 if (_configService.HighQualityMode != value)
                 {
                     _configService.HighQualityMode = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public EqualizerAlgorithm SelectedAlgorithm
+        {
+            get => _configService.Algorithm;
+            set
+            {
+                if (_configService.Algorithm != value)
+                {
+                    _configService.Algorithm = value;
                     OnPropertyChanged();
                 }
             }

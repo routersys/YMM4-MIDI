@@ -23,6 +23,9 @@
         <TabControl Background="Transparent">
             <TabItem Header="基本設定">
                 <StackPanel Margin="10">
+                    <TextBlock Text="処理アルゴリズム" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding AlgorithmOptions}" SelectedItem="{Binding SelectedAlgorithm, Mode=TwoWay}" Margin="0,0,0,20"/>
+
                     <CheckBox IsChecked="{Binding HighQualityMode}" Content="高音質モードを有効にする" Margin="0,0,0,10" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
                         <CheckBox.ToolTip>
                             <ToolTip>
@@ -49,7 +52,7 @@
                                 ToolTip="デフォルトプリセットの設定をクリアします"/>
                     </Grid>
                     <TextBlock Text="新しいイコライザーを追加した際に自動適用されるプリセットです。"
-                              FontSize="10" Opacity="0.7" Margin="0,5,0,0"/>
+                               FontSize="10" Opacity="0.7" Margin="0,5,0,0"/>
                     <Button Content="設定を保存" Command="{Binding SaveSettingsCommand}" HorizontalAlignment="Left" Margin="0,20,0,0" Width="100"/>
                 </StackPanel>
             </TabItem>
