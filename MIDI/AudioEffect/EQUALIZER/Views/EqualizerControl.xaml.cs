@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -35,7 +36,6 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
         private double minFreq = 20, maxFreq = 20000;
         private double minGain = -24, maxGain = 24;
         private bool isDragging = false;
-        private long _lastCloseTime;
 
         private AnimationValue? _targetFreqKeyframe;
         private AnimationValue? _targetGainKeyframe;
@@ -60,7 +60,12 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
             ViewModel.BeginEdit += (s, e) => BeginEdit?.Invoke(this, EventArgs.Empty);
             ViewModel.EndEdit += (s, e) => EndEdit?.Invoke(this, EventArgs.Empty);
 
-            PresetPopup.Closed += (s, e) => _lastCloseTime = DateTime.Now.Ticks;
+            PresetToggleButton.Unchecked += async (s, e) =>
+            {
+                PresetToggleButton.IsHitTestVisible = false;
+                await Task.Delay(200);
+                PresetToggleButton.IsHitTestVisible = true;
+            };
 
             Loaded += (s, e) => DrawAll();
         }
@@ -521,15 +526,9 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
 
         private void PresetToggleButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (PresetPopup.IsOpen)
+            if (PresetToggleButton.IsChecked == true)
             {
                 ViewModel.IsPopupOpen = false;
-                e.Handled = true;
-                return;
-            }
-
-            if (DateTime.Now.Ticks - _lastCloseTime < 2 * 1000 * 10000)
-            {
                 e.Handled = true;
             }
         }
