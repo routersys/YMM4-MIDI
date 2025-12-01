@@ -131,7 +131,8 @@
                               Content="{Binding SelectedPresetName, FallbackValue='プリセットを選択...'}"
                               IsChecked="{Binding IsPopupOpen, Mode=TwoWay}"
                               HorizontalContentAlignment="Left" Padding="10,0"
-                              ToolTip="保存されたプリセットを選択または管理します。"/>
+                              ToolTip="保存されたプリセットを選択または管理します。"
+                              PreviewMouseDown="PresetToggleButton_PreviewMouseDown"/>
 
                 <Button Grid.Column="1" Command="{Binding SavePresetCommand}" Content="保存" Width="50" Height="24" Margin="5,0,0,0"
                         HorizontalAlignment="Left"
@@ -247,10 +248,11 @@
             <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Background="#282828" CornerRadius="2">
                 <Canvas Name="MainCanvas" ClipToBounds="True" Background="Transparent"
                         ContextMenuOpening="MainCanvas_ContextMenuOpening"
-                        ToolTip="右クリック: ポイント操作">
+                        MouseLeftButtonDown="MainCanvas_MouseLeftButtonDown"
+                        ToolTip="左クリック: ポイント追加 / ダブルクリック: 削除 / 右クリック: メニュー">
                     <Canvas.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="ポイントを追加" Command="{Binding AddPointCommand}"/>
+                            <MenuItem Header="ポイントを追加" Command="{Binding AddPointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag}"/>
                             <MenuItem Header="ポイントを削除" Command="{Binding DeletePointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag}"/>
                         </ContextMenu>
                     </Canvas.ContextMenu>
@@ -279,7 +281,7 @@
                     ValueChanged="TimeSlider_ValueChanged"/>
         </Grid>
 
-        <ScrollViewer Grid.Row="3" Height="200" VerticalScrollBarVisibility="Auto" Margin="0,5,0,0">
+        <ScrollViewer Grid.Row="3" Height="200" VerticalScrollBarVisibility="Auto" Margin="0,5,0,0" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <c:PropertiesEditor Target="{Binding SelectedBand}"
                                 BeginEdit="Band_BeginEdit" EndEdit="Band_EndEdit"/>
         </ScrollViewer>

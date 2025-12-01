@@ -35,6 +35,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
         private double minFreq = 20, maxFreq = 20000;
         private double minGain = -24, maxGain = 24;
         private bool isDragging = false;
+        private long _lastCloseTime;
 
         private AnimationValue? _targetFreqKeyframe;
         private AnimationValue? _targetGainKeyframe;
@@ -58,6 +59,8 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
             ViewModel.RequestRedraw += (s, e) => DrawAll();
             ViewModel.BeginEdit += (s, e) => BeginEdit?.Invoke(this, EventArgs.Empty);
             ViewModel.EndEdit += (s, e) => EndEdit?.Invoke(this, EventArgs.Empty);
+
+            PresetPopup.Closed += (s, e) => _lastCloseTime = DateTime.Now.Ticks;
 
             Loaded += (s, e) => DrawAll();
         }
@@ -336,6 +339,11 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
                 thumb.DragStarted += Thumb_DragStarted;
                 thumb.DragDelta += Thumb_DragDelta;
                 thumb.DragCompleted += Thumb_DragCompleted;
+                thumb.MouseDoubleClick += (s, e) =>
+                {
+                    ViewModel.DeletePointCommand.Execute(band);
+                    e.Handled = true;
+                };
 
                 Canvas.SetLeft(thumb, FreqToX(freq) - thumb.Width / 2);
                 Canvas.SetTop(thumb, GainToY(gain) - thumb.Height / 2);
@@ -347,19 +355,42 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
         private void MainCanvas_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             lastRightClickPosition = Mouse.GetPosition(MainCanvas);
-            if (e.Source is FrameworkElement fe)
+            MainCanvas.Tag = null;
+
+            if (e.Source is FrameworkElement fe && fe.DataContext is EQBand band)
             {
-                if (fe.DataContext is EQBand band)
-                {
-                    fe.Tag = band;
-                }
-                else
-                {
-                    var newBandPoint = new Point(XToFreq(lastRightClickPosition.X), YToGain(lastRightClickPosition.Y));
-                    ViewModel.AddPointCommand.Execute(newBandPoint);
-                    e.Handled = true;
-                }
+                MainCanvas.Tag = band;
             }
+            else
+            {
+                MainCanvas.Tag = new Point(XToFreq(lastRightClickPosition.X), YToGain(lastRightClickPosition.Y));
+            }
+        }
+
+        private void MainCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2) return;
+
+            if (e.OriginalSource == MainCanvas || e.OriginalSource is Path)
+            {
+                var pos = e.GetPosition(MainCanvas);
+
+                if (e.OriginalSource is DependencyObject obj && FindVisualParent<Thumb>(obj) != null)
+                {
+                    return;
+                }
+
+                var point = new Point(XToFreq(pos.X), YToGain(pos.Y));
+                ViewModel.AddPointCommand.Execute(point);
+            }
+        }
+
+        private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+            if (parentObject == null) return null;
+            if (parentObject is T parent) return parent;
+            return FindVisualParent<T>(parentObject);
         }
 
         private void Thumb_DragStarted(object sender, DragStartedEventArgs e)
@@ -480,5 +511,27 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
 
         private void Band_BeginEdit(object? sender, EventArgs e) => ViewModel.NotifyBeginEdit();
         private void Band_EndEdit(object? sender, EventArgs e) => ViewModel.NotifyEndEdit();
+
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var scv = (ScrollViewer)sender;
+            scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);
+            e.Handled = true;
+        }
+
+        private void PresetToggleButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (PresetPopup.IsOpen)
+            {
+                ViewModel.IsPopupOpen = false;
+                e.Handled = true;
+                return;
+            }
+
+            if (DateTime.Now.Ticks - _lastCloseTime < 2 * 1000 * 10000)
+            {
+                e.Handled = true;
+            }
+        }
     }
 }

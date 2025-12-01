@@ -130,8 +130,8 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
             LoadPresetCommand = new RelayCommand(LoadPreset);
             ToggleFavoriteCommand = new RelayCommand(ToggleFavorite);
             OpenSettingsCommand = new RelayCommand(p => OpenSettings());
-            AddPointCommand = new RelayCommand(AddPoint);
-            DeletePointCommand = new RelayCommand(DeletePoint);
+            AddPointCommand = new RelayCommand(AddPoint, p => p is Point);
+            DeletePointCommand = new RelayCommand(DeletePoint, p => p is EQBand);
 
             InitializeGroups();
             LoadPresets();
