@@ -10,6 +10,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using YukkuriMovieMaker.Commons;
 using MIDI.AudioEffect.EQUALIZER.Models;
@@ -36,6 +37,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
         private double minFreq = 20, maxFreq = 20000;
         private double minGain = -24, maxGain = 24;
         private bool isDragging = false;
+        private bool isCompactMode = false;
 
         private AnimationValue? _targetFreqKeyframe;
         private AnimationValue? _targetGainKeyframe;
@@ -83,6 +85,75 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
         {
             var dp = DependencyPropertyDescriptor.FromProperty(Border.BackgroundProperty, typeof(Border));
             dp?.RemoveValueChanged(CanvasBorder, OnBackgroundChanged);
+        }
+
+        private void HeaderGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateHeaderLayout(e.NewSize.Width);
+        }
+
+        private void UpdateHeaderLayout(double width)
+        {
+            bool shouldBeCompact = width < 420;
+            if (shouldBeCompact == isCompactMode) return;
+            isCompactMode = shouldBeCompact;
+
+            var animationDuration = TimeSpan.FromMilliseconds(200);
+            var fadeOut = new DoubleAnimation(0, TimeSpan.FromMilliseconds(100));
+            var fadeIn = new DoubleAnimation(1, animationDuration) { BeginTime = TimeSpan.FromMilliseconds(100) };
+
+            void AnimateTransition(UIElement element, Action action)
+            {
+                var sb = new Storyboard();
+                Storyboard.SetTarget(fadeOut, element);
+                Storyboard.SetTargetProperty(fadeOut, new PropertyPath("Opacity"));
+
+                fadeOut.Completed += (s, e) =>
+                {
+                    action();
+                    element.BeginAnimation(OpacityProperty, fadeIn);
+                };
+
+                element.BeginAnimation(OpacityProperty, fadeOut);
+            }
+
+            AnimateTransition(ZoomPanel, () =>
+            {
+                if (isCompactMode)
+                {
+                    Grid.SetRow(ZoomPanel, 1);
+                    Grid.SetColumn(ZoomPanel, 0);
+                    Grid.SetColumnSpan(ZoomPanel, 1);
+                    ZoomPanel.HorizontalAlignment = HorizontalAlignment.Left;
+                    ZoomPanel.Margin = new Thickness(0, 5, 0, 0);
+                }
+                else
+                {
+                    Grid.SetRow(ZoomPanel, 0);
+                    Grid.SetColumn(ZoomPanel, 2);
+                    Grid.SetColumnSpan(ZoomPanel, 1);
+                    ZoomPanel.HorizontalAlignment = HorizontalAlignment.Right;
+                    ZoomPanel.Margin = new Thickness(10, 0, 10, 0);
+                }
+            });
+
+            AnimateTransition(SettingsButton, () =>
+            {
+                if (isCompactMode)
+                {
+                    Grid.SetRow(SettingsButton, 1);
+                    Grid.SetColumn(SettingsButton, 1);
+                    SettingsButton.HorizontalAlignment = HorizontalAlignment.Left;
+                    SettingsButton.Margin = new Thickness(5, 5, 0, 0);
+                }
+                else
+                {
+                    Grid.SetRow(SettingsButton, 0);
+                    Grid.SetColumn(SettingsButton, 3);
+                    SettingsButton.HorizontalAlignment = HorizontalAlignment.Right;
+                    SettingsButton.Margin = new Thickness(0);
+                }
+            });
         }
 
         private void OnBackgroundChanged(object? sender, EventArgs e)
