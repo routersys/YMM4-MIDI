@@ -17,14 +17,188 @@
         <cv:BooleanConverter x:Key="NotNullConverter" />
         <cv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <cv:FavoriteToColorConverter x:Key="FavoriteToColorConverter" />
+
+        <Style x:Key="ResponsiveTabControlStyle" TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TabPanel x:Name="HeaderPanel"
+                                      Grid.Row="0"
+                                      IsItemsHost="true"
+                                      Background="Transparent"/>
+                            <Border x:Name="ContentPanel"
+                                    Grid.Row="1"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter x:Name="PART_SelectedContentHost"
+                                                  ContentSource="SelectedContent"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Border"
+                                BorderThickness="0,0,0,2"
+                                BorderBrush="Transparent"
+                                Background="Transparent"
+                                Margin="0,0,10,0">
+                            <ContentPresenter x:Name="ContentSite"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"
+                                              ContentSource="Header"
+                                              Margin="{TemplateBinding Padding}">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=TabItem}, Path=Foreground}"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RichButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Focusable="False"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.56"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ScrollBarThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border x:Name="rectangle"
+                                SnapsToDevicePixels="True"
+                                Background="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                                CornerRadius="3"
+                                Opacity="0.6"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="rectangle" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="true">
+                                <Setter TargetName="rectangle" Property="Opacity" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="false"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="MinWidth" Value="8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="{TemplateBinding Background}">
+                            <Track x:Name="PART_Track"
+                                   IsDirectionReversed="true"
+                                   IsEnabled="{TemplateBinding IsMouseOver}">
+                                <Track.Thumb>
+                                    <Thumb Style="{DynamicResource ScrollBarThumbStyle}"/>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Width" Value="Auto"/>
+                    <Setter Property="MinWidth" Value="0"/>
+                    <Setter Property="Height" Value="8"/>
+                    <Setter Property="MinHeight" Value="8"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ScrollBar}">
+                                <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="{TemplateBinding Background}">
+                                    <Track x:Name="PART_Track" IsEnabled="{TemplateBinding IsMouseOver}">
+                                        <Track.Thumb>
+                                            <Thumb Style="{DynamicResource ScrollBarThumbStyle}"/>
+                                        </Track.Thumb>
+                                    </Track>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="10">
-        <TabControl Background="Transparent">
+        <TabControl Style="{StaticResource ResponsiveTabControlStyle}">
             <TabItem Header="基本設定">
                 <StackPanel Margin="10">
                     <TextBlock Text="処理アルゴリズム" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <ComboBox ItemsSource="{Binding AlgorithmOptions}" SelectedItem="{Binding SelectedAlgorithm, Mode=TwoWay}" Margin="0,0,0,20"/>
+                    <ComboBox ItemsSource="{Binding AlgorithmOptions}" SelectedItem="{Binding SelectedAlgorithm, Mode=TwoWay}" Margin="0,0,0,20" Height="30" VerticalContentAlignment="Center"/>
 
                     <CheckBox IsChecked="{Binding HighQualityMode}" Content="高音質モードを有効にする" Margin="0,0,0,10" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
                         <CheckBox.ToolTip>
@@ -46,14 +220,15 @@
                         </Grid.ColumnDefinitions>
                         <ComboBox ItemsSource="{Binding AllPresetNames}"
                                   SelectedItem="{Binding SelectedDefaultPreset, Mode=TwoWay}"
-                                  Margin="0,0,10,0"/>
-                        <Button Grid.Column="1" Content="クリア" Width="60"
+                                  Margin="0,0,10,0" Height="30" VerticalContentAlignment="Center"/>
+                        <Button Grid.Column="1" Content="クリア" Width="60" Height="30"
                                 Command="{Binding ClearDefaultPresetCommand}"
-                                ToolTip="デフォルトプリセットの設定をクリアします"/>
+                                ToolTip="デフォルトプリセットの設定をクリアします"
+                                Style="{StaticResource RichButtonStyle}"/>
                     </Grid>
                     <TextBlock Text="新しいイコライザーを追加した際に自動適用されるプリセットです。"
                                FontSize="10" Opacity="0.7" Margin="0,5,0,0"/>
-                    <Button Content="設定を保存" Command="{Binding SaveSettingsCommand}" HorizontalAlignment="Left" Margin="0,20,0,0" Width="100"/>
+                    <Button Content="設定を保存" Command="{Binding SaveSettingsCommand}" HorizontalAlignment="Left" Margin="0,20,0,0" Width="100" Style="{StaticResource RichButtonStyle}"/>
                 </StackPanel>
             </TabItem>
 
@@ -115,17 +290,19 @@
                             <TextBlock Grid.Column="0" Text="プリセット一覧" FontWeight="Bold" VerticalAlignment="Center"/>
                             <Button Grid.Column="1" Content="インポート"
                                     Command="{Binding ImportCommand}" Margin="0,0,10,0"
-                                    ToolTip="プリセットファイルをインポートします"/>
+                                    ToolTip="プリセットファイルをインポートします"
+                                    Style="{StaticResource RichButtonStyle}"/>
                             <Button Grid.Column="2" Content="エクスポート"
                                     Command="{Binding ExportCommand}"
-                                    ToolTip="選択したプリセットをエクスポートします"/>
+                                    ToolTip="選択したプリセットをエクスポートします"
+                                    Style="{StaticResource RichButtonStyle}"/>
                         </Grid>
 
                         <Grid Grid.Row="1" Margin="0,10,0,0" AllowDrop="True">
                             <ListBox Name="PresetListBox" ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid>
+                                        <Grid Height="36">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="*"/>
@@ -145,7 +322,7 @@
                                                       Width="12" Height="12"/>
                                             </Button>
                                             <TextBlock Grid.Column="1" Text="{Binding Name}"
-                                                       VerticalAlignment="Center" Margin="5,0"/>
+                                                       VerticalAlignment="Center" Margin="5,0" FontSize="14"/>
                                             <TextBlock Grid.Column="2" Text="{Binding Group}"
                                                        FontSize="10" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
                                                        VerticalAlignment="Center"/>
@@ -157,11 +334,14 @@
 
                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                             <Button Content="名前変更"
-                                    Command="{Binding RenameCommand}" Margin="0,0,10,0"/>
+                                    Command="{Binding RenameCommand}" Margin="0,0,10,0"
+                                    Style="{StaticResource RichButtonStyle}"/>
                             <Button Content="グループ変更"
-                                    Command="{Binding ChangeGroupCommand}" Margin="0,0,10,0"/>
+                                    Command="{Binding ChangeGroupCommand}" Margin="0,0,10,0"
+                                    Style="{StaticResource RichButtonStyle}"/>
                             <Button Content="削除"
-                                    Command="{Binding DeleteCommand}"/>
+                                    Command="{Binding DeleteCommand}"
+                                    Style="{StaticResource RichButtonStyle}"/>
                         </StackPanel>
                     </Grid>
                 </Grid>
