@@ -1,5 +1,6 @@
 ﻿using MIDI.AudioEffect.EQUALIZER.Interfaces;
 using MIDI.AudioEffect.EQUALIZER.Models;
+using MIDI.AudioEffect.EQUALIZER.Services;
 using MIDI.AudioEffect.EQUALIZER.Views;
 using Microsoft.Win32;
 using System;
@@ -9,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using MIDI.AudioEffect.EQUALIZER.Services;
 
 namespace MIDI.AudioEffect.EQUALIZER.ViewModels
 {
@@ -17,6 +17,7 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
     {
         private readonly IPresetService _presetService;
         private readonly IConfigService _configService;
+        private readonly IGroupService _groupService;
         private PresetInfo? _selectedPreset;
         private string? _selectedDefaultPreset;
         private GroupItem _selectedGroupItem = default!;
@@ -104,11 +105,16 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
         public ICommand ToggleFavoriteCommand { get; }
         public ICommand SaveSettingsCommand { get; }
         public ICommand ClearDefaultPresetCommand { get; }
+        public ICommand AddGroupCommand { get; }
+        public ICommand DeleteGroupCommand { get; }
+        public ICommand MoveGroupUpCommand { get; }
+        public ICommand MoveGroupDownCommand { get; }
 
         public EqualizerSettingsViewModel()
         {
             _presetService = ServiceLocator.PresetService;
             _configService = ServiceLocator.ConfigService;
+            _groupService = ServiceLocator.GroupService;
 
             RenameCommand = new RelayCommand(p => RenamePreset(), p => SelectedPreset != null);
             DeleteCommand = new RelayCommand(p => DeletePreset(), p => SelectedPreset != null);
@@ -119,20 +125,50 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
             SaveSettingsCommand = new RelayCommand(p => _configService.Save());
             ClearDefaultPresetCommand = new RelayCommand(p => SelectedDefaultPreset = "なし");
 
-            InitializeGroups();
+            AddGroupCommand = new RelayCommand(p => AddGroup());
+            DeleteGroupCommand = new RelayCommand(p => DeleteGroup(), p => IsUserGroup(SelectedGroupItem));
+            MoveGroupUpCommand = new RelayCommand(p => MoveGroupUp(), p => IsUserGroup(SelectedGroupItem) && CanMoveUp(SelectedGroupItem));
+            MoveGroupDownCommand = new RelayCommand(p => MoveGroupDown(), p => IsUserGroup(SelectedGroupItem) && CanMoveDown(SelectedGroupItem));
+
+            RefreshGroups();
             _presetService.PresetsChanged += (s, e) => LoadData();
+            _groupService.UserGroups.CollectionChanged += (s, e) => RefreshGroups();
             LoadData();
         }
 
-        private void InitializeGroups()
+        private bool IsUserGroup(GroupItem? item)
         {
+            if (item == null) return false;
+            return item.Tag != "" && item.Tag != "favorites" && item.Tag != "other";
+        }
+
+        private bool CanMoveUp(GroupItem item)
+        {
+            var index = _groupService.UserGroups.IndexOf(item);
+            return index > 0;
+        }
+
+        private bool CanMoveDown(GroupItem item)
+        {
+            var index = _groupService.UserGroups.IndexOf(item);
+            return index >= 0 && index < _groupService.UserGroups.Count - 2;
+        }
+
+        private void RefreshGroups()
+        {
+            var currentTag = SelectedGroupItem?.Tag;
+
+            Groups.Clear();
             Groups.Add(new GroupItem("すべて", ""));
             Groups.Add(new GroupItem("お気に入り", "favorites"));
-            Groups.Add(new GroupItem("ボーカル", "vocal"));
-            Groups.Add(new GroupItem("BGM", "bgm"));
-            Groups.Add(new GroupItem("効果音", "sfx"));
-            Groups.Add(new GroupItem("その他", "other"));
-            _selectedGroupItem = Groups[0];
+
+            foreach (var group in _groupService.UserGroups)
+            {
+                Groups.Add(group);
+            }
+
+            var nextSelection = Groups.FirstOrDefault(g => g.Tag == currentTag);
+            SelectedGroupItem = nextSelection ?? Groups[0];
         }
 
         private void LoadData()
@@ -240,14 +276,57 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
         private void ChangeGroup()
         {
             if (SelectedPreset == null) return;
-            var groups = new[] { "vocal", "bgm", "sfx", "other" };
-            var groupNames = new[] { "ボーカル", "BGM", "効果音", "その他" };
             var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current.MainWindow;
-            var dialog = new GroupSelectionWindow(groups, groupNames, SelectedPreset.Group) { Owner = window };
+            var dialog = new GroupSelectionWindow(SelectedPreset.Group) { Owner = window };
 
             if (dialog.ShowDialog() == true)
             {
-                _presetService.SetPresetGroup(SelectedPreset.Name, dialog.SelectedGroup);
+                _presetService.SetPresetGroup(SelectedPreset.Name, dialog.SelectedGroup?.Tag ?? "");
+            }
+        }
+
+        private void AddGroup()
+        {
+            var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current.MainWindow;
+            var dialog = new InputDialogWindow("グループ名を入力してください", "グループ追加") { Owner = window };
+
+            if (dialog.ShowDialog() == true)
+            {
+                string name = dialog.InputText;
+                _groupService.AddGroup(name);
+            }
+        }
+
+        private void DeleteGroup()
+        {
+            if (SelectedGroupItem != null)
+            {
+                if (!IsUserGroup(SelectedGroupItem))
+                {
+                    MessageBox.Show("このグループは削除できません。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (MessageBox.Show($"グループ「{SelectedGroupItem.Name}」を削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    _groupService.DeleteGroup(SelectedGroupItem);
+                }
+            }
+        }
+
+        private void MoveGroupUp()
+        {
+            if (SelectedGroupItem != null)
+            {
+                _groupService.MoveGroupUp(SelectedGroupItem);
+            }
+        }
+
+        private void MoveGroupDown()
+        {
+            if (SelectedGroupItem != null)
+            {
+                _groupService.MoveGroupDown(SelectedGroupItem);
             }
         }
 

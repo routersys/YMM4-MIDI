@@ -1,38 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using MIDI.AudioEffect.EQUALIZER.Models;
+using MIDI.AudioEffect.EQUALIZER.Services;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace MIDI.AudioEffect.EQUALIZER.ViewModels
 {
-    public class GroupOption
-    {
-        public string Key { get; set; } = "";
-        public string DisplayName { get; set; } = "";
-    }
-
     public class GroupSelectionViewModel : ViewModelBase
     {
-        private GroupOption? _selectedGroup;
+        private GroupItem? _selectedGroup;
 
-        public List<GroupOption> GroupOptions { get; }
+        public ObservableCollection<GroupItem> GroupOptions { get; } = new();
 
-        public GroupOption? SelectedGroup
+        public GroupItem? SelectedGroup
         {
             get => _selectedGroup;
             set => SetProperty(ref _selectedGroup, value);
         }
 
-        public GroupSelectionViewModel(string[] groupKeys, string[] groupNames, string currentGroup)
+        public GroupSelectionViewModel(string currentGroup)
         {
-            GroupOptions = new List<GroupOption>();
-            for (int i = 0; i < groupKeys.Length; i++)
+            var groupService = ServiceLocator.GroupService;
+
+            foreach (var g in groupService.UserGroups)
             {
-                GroupOptions.Add(new GroupOption
+                if (g.Tag != "favorites" && g.Tag != "")
                 {
-                    Key = groupKeys[i],
-                    DisplayName = groupNames[i]
-                });
+                    GroupOptions.Add(g);
+                }
             }
-            SelectedGroup = GroupOptions.FirstOrDefault(g => g.Key == currentGroup) ?? GroupOptions.FirstOrDefault();
+
+            SelectedGroup = GroupOptions.FirstOrDefault(g => g.Tag == currentGroup) ?? GroupOptions.FirstOrDefault(g => g.Tag == "other") ?? GroupOptions.FirstOrDefault();
         }
     }
 }

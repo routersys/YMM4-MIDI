@@ -49,7 +49,7 @@
         <ListBox Grid.Row="1" ItemsSource="{Binding GroupOptions}" SelectedItem="{Binding SelectedGroup}" SelectionMode="Single" Margin="0,0,0,10">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding DisplayName}"/>
+                    <TextBlock Text="{Binding Name}"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

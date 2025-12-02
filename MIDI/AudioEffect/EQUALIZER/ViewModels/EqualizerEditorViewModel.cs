@@ -15,6 +15,7 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
     public class EqualizerEditorViewModel : ViewModelBase
     {
         private readonly IPresetService _presetService;
+        private readonly IGroupService _groupService;
         private ObservableCollection<EQBand>? _bands;
         private EQBand? _selectedBand;
         private string _selectedPresetName = "プリセットを選択...";
@@ -121,11 +122,15 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
         public ICommand DeletePointCommand { get; }
         public ICommand ChangeGroupCommand { get; }
         public ICommand ExportCommand { get; }
+        public ICommand AddGroupCommand { get; }
+        public ICommand DeleteGroupCommand { get; }
 
         public EqualizerEditorViewModel()
         {
             _presetService = ServiceLocator.PresetService;
+            _groupService = ServiceLocator.GroupService;
             _presetService.PresetsChanged += (s, e) => LoadPresets();
+            _groupService.UserGroups.CollectionChanged += (s, e) => RefreshGroups();
 
             SavePresetCommand = new RelayCommand(p => SavePreset(), p => HasBands);
             RenamePresetCommand = new RelayCommand(RenamePreset, p => p is PresetInfo);
@@ -138,19 +143,28 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
             ChangeGroupCommand = new RelayCommand(ChangeGroup, p => p is PresetInfo);
             ExportCommand = new RelayCommand(ExportPreset, p => p is PresetInfo);
 
-            InitializeGroups();
+            AddGroupCommand = new RelayCommand(p => AddGroup());
+            DeleteGroupCommand = new RelayCommand(DeleteGroup, p => p is GroupItem item && !string.IsNullOrEmpty(item.Tag) && item.Tag != "favorites" && item.Tag != "other");
+
+            RefreshGroups();
             LoadPresets();
         }
 
-        private void InitializeGroups()
+        private void RefreshGroups()
         {
+            var currentTag = SelectedGroupItem?.Tag;
+
+            Groups.Clear();
             Groups.Add(new GroupItem("すべて", ""));
             Groups.Add(new GroupItem("お気に入り", "favorites"));
-            Groups.Add(new GroupItem("ボーカル", "vocal"));
-            Groups.Add(new GroupItem("BGM", "bgm"));
-            Groups.Add(new GroupItem("効果音", "sfx"));
-            Groups.Add(new GroupItem("その他", "other"));
-            _selectedGroupItem = Groups[0];
+
+            foreach (var group in _groupService.UserGroups)
+            {
+                Groups.Add(group);
+            }
+
+            var nextSelection = Groups.FirstOrDefault(g => g.Tag == currentTag);
+            _selectedGroupItem = nextSelection ?? Groups[0];
             _currentGroupFilter = _selectedGroupItem.Tag;
             OnPropertyChanged(nameof(SelectedGroupItem));
         }
@@ -272,14 +286,41 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
         {
             if (parameter is not PresetInfo info) return;
 
-            var groups = new[] { "vocal", "bgm", "sfx", "other" };
-            var groupNames = new[] { "ボーカル", "BGM", "効果音", "その他" };
             var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current.MainWindow;
-            var dialog = new GroupSelectionWindow(groups, groupNames, info.Group) { Owner = window };
+            var dialog = new GroupSelectionWindow(info.Group) { Owner = window };
 
             if (dialog.ShowDialog() == true)
             {
-                _presetService.SetPresetGroup(info.Name, dialog.SelectedGroup);
+                _presetService.SetPresetGroup(info.Name, dialog.SelectedGroup?.Tag ?? "");
+            }
+        }
+
+        private void AddGroup()
+        {
+            var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current.MainWindow;
+            var dialog = new InputDialogWindow("グループ名を入力してください", "グループ追加") { Owner = window };
+
+            if (dialog.ShowDialog() == true)
+            {
+                string name = dialog.InputText;
+                _groupService.AddGroup(name);
+            }
+        }
+
+        private void DeleteGroup(object? parameter)
+        {
+            if (parameter is GroupItem item)
+            {
+                if (item.Tag == "favorites" || item.Tag == "" || item.Tag == "other")
+                {
+                    MessageBox.Show("このグループは削除できません。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (MessageBox.Show($"グループ「{item.Name}」を削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    _groupService.DeleteGroup(item);
+                }
             }
         }
 
@@ -328,12 +369,5 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
 
         public void NotifyBeginEdit() => BeginEdit?.Invoke(this, EventArgs.Empty);
         public void NotifyEndEdit() => EndEdit?.Invoke(this, EventArgs.Empty);
-    }
-
-    public class GroupItem
-    {
-        public string Name { get; }
-        public string Tag { get; }
-        public GroupItem(string name, string tag) { Name = name; Tag = tag; }
     }
 }

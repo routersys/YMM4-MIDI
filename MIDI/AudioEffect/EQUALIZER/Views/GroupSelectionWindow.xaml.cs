@@ -5,12 +5,12 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
 {
     public partial class GroupSelectionWindow : Window
     {
-        public string SelectedGroup => ((GroupSelectionViewModel)DataContext).SelectedGroup?.Key ?? "";
+        public Models.GroupItem? SelectedGroup => ((GroupSelectionViewModel)DataContext).SelectedGroup;
 
-        public GroupSelectionWindow(string[] groupKeys, string[] groupNames, string currentGroup)
+        public GroupSelectionWindow(string currentGroup)
         {
             InitializeComponent();
-            DataContext = new GroupSelectionViewModel(groupKeys, groupNames, currentGroup);
+            DataContext = new GroupSelectionViewModel(currentGroup);
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)

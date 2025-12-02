@@ -184,6 +184,9 @@
 
                         <ListBox.ContextMenu>
                             <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                <MenuItem Header="グループを追加" Command="{Binding AddGroupCommand}"/>
+                                <MenuItem Header="選択したグループを削除" Command="{Binding DeleteGroupCommand}" CommandParameter="{Binding SelectedGroupItem}"/>
+                                <Separator/>
                                 <MenuItem Header="設定を開く" Command="{Binding OpenSettingsCommand}"/>
                             </ContextMenu>
                         </ListBox.ContextMenu>
