@@ -312,11 +312,25 @@
                                             <Button Grid.Column="0" 
                                                     Background="Transparent" 
                                                     BorderThickness="0"
+                                                    BorderBrush="Transparent"
                                                     Width="20" Height="20"
                                                     Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                     CommandParameter="{Binding}"
                                                     ToolTip="お気に入りに追加/削除"
                                                     Margin="0,0,5,0">
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border Background="Transparent" BorderBrush="Transparent" BorderThickness="0">
+                                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </Button.Style>
                                                 <Path Data="M12,17.27L18.18,21L17.27,14.41L22,9.82L15.77,8.89L12,3L8.23,8.89L2,9.82L6.73,14.41L5.82,21L12,17.27Z"
                                                       Fill="{Binding IsFavorite, Converter={StaticResource FavoriteToColorConverter}}"
                                                       Stretch="Uniform" 
