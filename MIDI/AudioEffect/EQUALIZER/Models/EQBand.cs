@@ -15,6 +15,10 @@ namespace MIDI.AudioEffect.EQUALIZER.Models
         [Display(Name = "有効")]
         public bool IsEnabled { get => isEnabled; set => Set(ref isEnabled, value); }
 
+        bool isUsed;
+        [Display(AutoGenerateField = false)]
+        public bool IsUsed { get => isUsed; set => Set(ref isUsed, value); }
+
         FilterType type;
         [Display(Name = "種類")]
         public FilterType Type
@@ -60,6 +64,16 @@ namespace MIDI.AudioEffect.EQUALIZER.Models
             Frequency.PropertyChanged += (s, e) => OnPropertyChanged(nameof(Frequency));
             Gain.PropertyChanged += (s, e) => OnPropertyChanged(nameof(Gain));
             Q.PropertyChanged += (s, e) => OnPropertyChanged(nameof(Q));
+        }
+
+        public void CopyFrom(EQBand other)
+        {
+            IsEnabled = other.IsEnabled;
+            Type = other.Type;
+            StereoMode = other.StereoMode;
+            if (other.Frequency.Values.Count > 0) Frequency.Values[0].Value = other.Frequency.Values[0].Value;
+            if (other.Gain.Values.Count > 0) Gain.Values[0].Value = other.Gain.Values[0].Value;
+            if (other.Q.Values.Count > 0) Q.Values[0].Value = other.Q.Values[0].Value;
         }
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => [Frequency, Gain, Q];

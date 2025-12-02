@@ -16,6 +16,9 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
     {
         private readonly IPresetService _presetService;
         private readonly IGroupService _groupService;
+
+        private EqualizerAudioEffect? _effect;
+
         private ObservableCollection<EQBand>? _bands;
         private EQBand? _selectedBand;
         private string _selectedPresetName = "プリセットを選択...";
@@ -28,6 +31,21 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
         public event EventHandler? RequestRedraw;
         public event EventHandler? BeginEdit;
         public event EventHandler? EndEdit;
+
+        public EqualizerAudioEffect? Effect
+        {
+            get => _effect;
+            set
+            {
+                if (SetProperty(ref _effect, value))
+                {
+                    if (_effect != null)
+                    {
+                        Bands = _effect.Bands;
+                    }
+                }
+            }
+        }
 
         public ObservableCollection<EQBand>? Bands
         {
@@ -193,17 +211,13 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
 
         private void LoadPreset(object? parameter)
         {
-            if (parameter is PresetInfo presetInfo && Bands != null)
+            if (parameter is PresetInfo presetInfo && Effect != null)
             {
                 var loadedBands = _presetService.LoadPreset(presetInfo.Name);
                 if (loadedBands != null)
                 {
                     BeginEdit?.Invoke(this, EventArgs.Empty);
-                    Bands.Clear();
-                    foreach (var band in loadedBands)
-                    {
-                        Bands.Add(band);
-                    }
+                    Effect.ApplyBands(loadedBands);
                     SelectedPresetName = presetInfo.Name;
                     IsPopupOpen = false;
                     EndEdit?.Invoke(this, EventArgs.Empty);
@@ -346,11 +360,28 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
 
         private void AddPoint(object? parameter)
         {
-            if (parameter is Point point && Bands != null)
+            if (parameter is Point point && Effect != null)
             {
                 BeginEdit?.Invoke(this, EventArgs.Empty);
-                var newBand = new EQBand(true, MIDI.AudioEffect.EQUALIZER.Models.FilterType.Peak, point.X, point.Y, 1.0, StereoMode.Stereo, "");
-                Bands.Add(newBand);
+
+                var unusedBand = Effect.Items.FirstOrDefault(b => !b.IsUsed);
+                if (unusedBand != null)
+                {
+                    unusedBand.IsUsed = true;
+                    unusedBand.IsEnabled = true;
+                    unusedBand.Type = (Models.FilterType)FilterType.Peak;
+                    unusedBand.Frequency.Values[0].Value = point.X;
+                    unusedBand.Gain.Values[0].Value = point.Y;
+                    unusedBand.Q.Values[0].Value = 1.0;
+                    unusedBand.StereoMode = StereoMode.Stereo;
+
+                    Effect.UpdateBandsCollection();
+                }
+                else
+                {
+                    MessageBox.Show("これ以上ポイントを追加できません（最大32個）");
+                }
+
                 EndEdit?.Invoke(this, EventArgs.Empty);
                 RequestRedraw?.Invoke(this, EventArgs.Empty);
             }
@@ -358,10 +389,13 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
 
         private void DeletePoint(object? parameter)
         {
-            if (parameter is EQBand band && Bands != null)
+            if (parameter is EQBand band && Effect != null)
             {
                 BeginEdit?.Invoke(this, EventArgs.Empty);
-                Bands.Remove(band);
+
+                band.IsUsed = false;
+                Effect.UpdateBandsCollection();
+
                 EndEdit?.Invoke(this, EventArgs.Empty);
                 RequestRedraw?.Invoke(this, EventArgs.Empty);
             }

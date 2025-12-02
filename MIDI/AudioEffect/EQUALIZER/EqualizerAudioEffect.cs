@@ -13,6 +13,7 @@ using YukkuriMovieMaker.Player.Audio.Effects;
 using YukkuriMovieMaker.Plugin.Effects;
 using System;
 using System.Text.Json.Serialization;
+using System.Linq;
 
 namespace MIDI.AudioEffect.EQUALIZER
 {
@@ -21,6 +22,38 @@ namespace MIDI.AudioEffect.EQUALIZER
     {
         public override string Label => "EQUALIZER";
 
+        private EQBand[] _items = new EQBand[32];
+
+        public EQBand[] Items
+        {
+            get => _items;
+            set
+            {
+                if (_items != value)
+                {
+                    if (value == null || value.Length == 0)
+                    {
+                        _items = new EQBand[32];
+                        for (int i = 0; i < 32; i++) _items[i] = new EQBand { IsUsed = false };
+                    }
+                    else if (value.Length < 32)
+                    {
+                        _items = new EQBand[32];
+                        Array.Copy(value, _items, value.Length);
+                        for (int i = value.Length; i < 32; i++) _items[i] = new EQBand { IsUsed = false };
+                    }
+                    else
+                    {
+                        _items = value;
+                    }
+
+                    UpdateBandsCollection();
+                    OnPropertyChanged(nameof(Items));
+                }
+            }
+        }
+
+        [JsonIgnore]
         [Display(GroupName = "Equalizer", Name = "")]
         [EqualizerEditor(PropertyEditorSize = PropertyEditorSize.FullWidth)]
         public ObservableCollection<EQBand> Bands { get; } = new();
@@ -29,9 +62,16 @@ namespace MIDI.AudioEffect.EQUALIZER
         public double CurrentProgress { get => _currentProgress; set => Set(ref _currentProgress, value); }
         private double _currentProgress = 0.0;
 
-
         public EqualizerAudioEffect()
         {
+            for (int i = 0; i < _items.Length; i++)
+            {
+                if (_items[i] == null)
+                    _items[i] = new EQBand { IsUsed = false, Header = $"バンド {i + 1}" };
+            }
+
+            Bands.CollectionChanged += (s, e) => OnPropertyChanged(nameof(Bands));
+
             LoadDefaultPreset();
         }
 
@@ -43,19 +83,61 @@ namespace MIDI.AudioEffect.EQUALIZER
                 var loadedBands = ServiceLocator.PresetService.LoadPreset(defaultPreset);
                 if (loadedBands != null)
                 {
-                    Bands.Clear();
-                    foreach (var band in loadedBands)
-                    {
-                        Bands.Add(band);
-                    }
+                    ApplyBands(loadedBands);
                     return;
                 }
             }
 
-            if (Bands.Count == 0)
+            ResetAllBands();
+            var b = Items[0];
+            b.IsUsed = true;
+            b.IsEnabled = true;
+            b.Type = (Models.FilterType)FilterType.Peak;
+            b.Frequency.Values[0].Value = 500;
+            b.Gain.Values[0].Value = 0;
+            b.Q.Values[0].Value = 1.0;
+
+            UpdateBandsCollection();
+        }
+
+        public void ApplyBands(IEnumerable<EQBand> sourceBands)
+        {
+            ResetAllBands();
+            int index = 0;
+            foreach (var src in sourceBands)
             {
-                Bands.Add(new EQBand(true, MIDI.AudioEffect.EQUALIZER.Models.FilterType.Peak, 500, 0, 1.0, StereoMode.Stereo, "バンド 1"));
+                if (index >= Items.Length) break;
+
+                var target = Items[index];
+                target.IsUsed = true;
+                target.CopyFrom(src);
+                index++;
             }
+            UpdateBandsCollection();
+        }
+
+        private void ResetAllBands()
+        {
+            foreach (var item in Items)
+            {
+                if (item != null)
+                {
+                    item.IsUsed = false;
+                }
+            }
+        }
+
+        public void UpdateBandsCollection()
+        {
+            Bands.Clear();
+            foreach (var item in Items)
+            {
+                if (item != null && item.IsUsed)
+                {
+                    Bands.Add(item);
+                }
+            }
+            OnPropertyChanged(nameof(Bands));
         }
 
         public override IAudioEffectProcessor CreateAudioEffect(TimeSpan duration)
@@ -63,7 +145,8 @@ namespace MIDI.AudioEffect.EQUALIZER
             return new EqualizerProcessor(this, duration);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => Bands;
+        protected override IEnumerable<IAnimatable> GetAnimatables() => Items.Where(x => x != null);
+
         public override IEnumerable<string> CreateExoAudioFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription) => [];
     }
 }

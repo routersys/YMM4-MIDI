@@ -16,6 +16,7 @@ using YukkuriMovieMaker.Commons;
 using MIDI.AudioEffect.EQUALIZER.Models;
 using MIDI.AudioEffect.EQUALIZER.ViewModels;
 using MIDI.AudioEffect.EQUALIZER;
+using System.Windows.Threading;
 
 namespace MIDI.AudioEffect.EQUALIZER.Views
 {
@@ -50,6 +51,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
                         if (ViewModel != null)
                         {
                             ViewModel.CurrentTime = _effect.CurrentProgress;
+                            ViewModel.Effect = _effect;
                         }
                     }
                 }
@@ -125,6 +127,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
             if (_effect != null && ViewModel != null)
             {
                 ViewModel.CurrentTime = _effect.CurrentProgress;
+                ViewModel.Effect = _effect;
             }
         }
 
@@ -296,21 +299,28 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
             DrawAll();
         }
 
-        private void Band_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private async void Band_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (isDragging) return;
 
             if (sender is EQBand band && band == ViewModel.SelectedBand)
             {
-                Dispatcher.BeginInvoke(new Action(() =>
+                if (e.PropertyName == nameof(EQBand.Frequency) || e.PropertyName == nameof(EQBand.Gain) || e.PropertyName == nameof(EQBand.Q))
                 {
                     var currentSelection = ViewModel.SelectedBand;
-                    if (currentSelection == band)
+
+                    if (ViewModel.SelectedBand == currentSelection)
                     {
                         ViewModel.SelectedBand = null;
-                        ViewModel.SelectedBand = currentSelection;
+
+                        await Task.Delay(1);
+
+                        if (ViewModel.SelectedBand == null)
+                        {
+                            ViewModel.SelectedBand = currentSelection;
+                        }
                     }
-                }));
+                }
             }
 
             if (e.PropertyName == nameof(EQBand.Frequency) || e.PropertyName == nameof(EQBand.Gain) || e.PropertyName == nameof(EQBand.Q))
