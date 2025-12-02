@@ -1,8 +1,6 @@
 ﻿using MIDI.AudioEffect.EQUALIZER.Interfaces;
 using MIDI.AudioEffect.EQUALIZER.Models;
 using Newtonsoft.Json;
-using MessagePack;
-using MessagePack.Resolvers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -102,11 +100,8 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
 
             try
             {
-                var bytes = File.ReadAllBytes(filePath);
-                var options = MessagePackSerializerOptions.Standard
-                    .WithResolver(ContractlessStandardResolver.Instance)
-                    .WithCompression(MessagePackCompression.Lz4Block);
-                return MessagePackSerializer.Deserialize<ObservableCollection<EQBand>>(bytes, options);
+                var json = File.ReadAllText(filePath);
+                return JsonConvert.DeserializeObject<ObservableCollection<EQBand>>(json, _serializerSettings);
             }
             catch (Exception ex)
             {
@@ -125,11 +120,8 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
 
             try
             {
-                var options = MessagePackSerializerOptions.Standard
-                    .WithResolver(ContractlessStandardResolver.Instance)
-                    .WithCompression(MessagePackCompression.Lz4Block);
-                var bytes = MessagePackSerializer.Serialize(bands, options);
-                File.WriteAllBytes(Path.Combine(_presetsDir, $"{name}.eqp"), bytes);
+                var json = JsonConvert.SerializeObject(bands, _serializerSettings);
+                File.WriteAllText(Path.Combine(_presetsDir, $"{name}.eqp"), json);
 
                 if (!_presetMetadata.ContainsKey(name))
                 {
@@ -241,16 +233,13 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
 
             try
             {
-                var bytes = File.ReadAllBytes(importPath);
-                var options = MessagePackSerializerOptions.Standard
-                    .WithResolver(ContractlessStandardResolver.Instance)
-                    .WithCompression(MessagePackCompression.Lz4Block);
-                var bands = MessagePackSerializer.Deserialize<ObservableCollection<EQBand>>(bytes, options);
+                var json = File.ReadAllText(importPath);
+                var bands = JsonConvert.DeserializeObject<ObservableCollection<EQBand>>(json, _serializerSettings);
 
                 if (bands == null) return false;
 
                 var targetPath = Path.Combine(_presetsDir, $"{name}.eqp");
-                File.WriteAllBytes(targetPath, bytes);
+                File.WriteAllText(targetPath, json);
 
                 if (!_presetMetadata.ContainsKey(name))
                 {
