@@ -83,10 +83,18 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
         private Path? eqCurvePath;
         private Path? eqCurveFillPath;
 
+        private readonly DispatcherTimer _refreshTimer;
+
         public EqualizerControl()
         {
             InitializeComponent();
             DataContext = new EqualizerEditorViewModel();
+
+            _refreshTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(33)
+            };
+            _refreshTimer.Tick += (s, e) => DrawAll();
 
             ViewModel.RequestRedraw += (s, e) => DrawAll();
             ViewModel.BeginEdit += (s, e) => BeginEdit?.Invoke(this, EventArgs.Empty);
@@ -679,8 +687,18 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
             ViewModel.NotifyEndEdit();
         }
 
-        private void Band_BeginEdit(object? sender, EventArgs e) => ViewModel.NotifyBeginEdit();
-        private void Band_EndEdit(object? sender, EventArgs e) => ViewModel.NotifyEndEdit();
+        private void Band_BeginEdit(object? sender, EventArgs e)
+        {
+            ViewModel.NotifyBeginEdit();
+            _refreshTimer.Start();
+        }
+
+        private void Band_EndEdit(object? sender, EventArgs e)
+        {
+            ViewModel.NotifyEndEdit();
+            _refreshTimer.Stop();
+            DrawAll();
+        }
 
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
