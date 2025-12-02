@@ -258,8 +258,8 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
             var dialog = new SaveFileDialog
             {
                 Title = "プリセットをエクスポート",
-                Filter = "JSONファイル (*.json)|*.json",
-                FileName = $"{info.Name}.json"
+                Filter = "EQPファイル (*.eqp)|*.eqp",
+                FileName = $"{info.Name}.eqp"
             };
 
             if (dialog.ShowDialog() == true)

@@ -1,6 +1,8 @@
 ﻿using MIDI.AudioEffect.EQUALIZER.Interfaces;
 using MIDI.AudioEffect.EQUALIZER.Models;
 using Newtonsoft.Json;
+using MessagePack;
+using MessagePack.Resolvers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +16,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
     public class PresetService : IPresetService
     {
         private readonly string _presetsDir;
+        private readonly string _configDir;
         private readonly string _metadataPath;
         private Dictionary<string, PresetMetadata> _presetMetadata = new();
         private readonly JsonSerializerSettings _serializerSettings;
@@ -24,7 +27,8 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
         {
             var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
             _presetsDir = Path.Combine(assemblyLocation, "presets");
-            _metadataPath = Path.Combine(_presetsDir, "_metadata.json");
+            _configDir = Path.Combine(assemblyLocation, "Config");
+            _metadataPath = Path.Combine(_configDir, "_metadata.json");
 
             _serializerSettings = new JsonSerializerSettings
             {
@@ -35,6 +39,10 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
             if (!Directory.Exists(_presetsDir))
             {
                 Directory.CreateDirectory(_presetsDir);
+            }
+            if (!Directory.Exists(_configDir))
+            {
+                Directory.CreateDirectory(_configDir);
             }
             LoadMetadata();
         }
@@ -69,8 +77,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
         {
             if (!Directory.Exists(_presetsDir)) return new List<string>();
 
-            return Directory.GetFiles(_presetsDir, "*.json")
-                            .Where(f => Path.GetFileName(f) != "_metadata.json")
+            return Directory.GetFiles(_presetsDir, "*.eqp")
                             .Select(Path.GetFileNameWithoutExtension)
                             .Where(name => name != null)
                             .OrderBy(name => name)
@@ -90,13 +97,16 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
 
         public ObservableCollection<EQBand>? LoadPreset(string name)
         {
-            var filePath = Path.Combine(_presetsDir, $"{name}.json");
+            var filePath = Path.Combine(_presetsDir, $"{name}.eqp");
             if (!File.Exists(filePath)) return null;
 
             try
             {
-                var json = File.ReadAllText(filePath);
-                return JsonConvert.DeserializeObject<ObservableCollection<EQBand>>(json, _serializerSettings);
+                var bytes = File.ReadAllBytes(filePath);
+                var options = MessagePackSerializerOptions.Standard
+                    .WithResolver(ContractlessStandardResolver.Instance)
+                    .WithCompression(MessagePackCompression.Lz4Block);
+                return MessagePackSerializer.Deserialize<ObservableCollection<EQBand>>(bytes, options);
             }
             catch (Exception ex)
             {
@@ -115,8 +125,11 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
 
             try
             {
-                var json = JsonConvert.SerializeObject(bands, _serializerSettings);
-                File.WriteAllText(Path.Combine(_presetsDir, $"{name}.json"), json);
+                var options = MessagePackSerializerOptions.Standard
+                    .WithResolver(ContractlessStandardResolver.Instance)
+                    .WithCompression(MessagePackCompression.Lz4Block);
+                var bytes = MessagePackSerializer.Serialize(bands, options);
+                File.WriteAllBytes(Path.Combine(_presetsDir, $"{name}.eqp"), bytes);
 
                 if (!_presetMetadata.ContainsKey(name))
                 {
@@ -136,7 +149,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
 
         public void DeletePreset(string name)
         {
-            var filePath = Path.Combine(_presetsDir, $"{name}.json");
+            var filePath = Path.Combine(_presetsDir, $"{name}.eqp");
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -154,8 +167,8 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
                 return false;
             }
 
-            var oldPath = Path.Combine(_presetsDir, $"{oldName}.json");
-            var newPath = Path.Combine(_presetsDir, $"{newName}.json");
+            var oldPath = Path.Combine(_presetsDir, $"{oldName}.eqp");
+            var newPath = Path.Combine(_presetsDir, $"{newName}.eqp");
 
             if (File.Exists(newPath))
             {
@@ -204,7 +217,7 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
 
         public bool ExportPreset(string name, string exportPath)
         {
-            var sourcePath = Path.Combine(_presetsDir, $"{name}.json");
+            var sourcePath = Path.Combine(_presetsDir, $"{name}.eqp");
             if (!File.Exists(sourcePath)) return false;
 
             try
@@ -228,13 +241,16 @@ namespace MIDI.AudioEffect.EQUALIZER.Services
 
             try
             {
-                var json = File.ReadAllText(importPath);
-                var bands = JsonConvert.DeserializeObject<ObservableCollection<EQBand>>(json, _serializerSettings);
+                var bytes = File.ReadAllBytes(importPath);
+                var options = MessagePackSerializerOptions.Standard
+                    .WithResolver(ContractlessStandardResolver.Instance)
+                    .WithCompression(MessagePackCompression.Lz4Block);
+                var bands = MessagePackSerializer.Deserialize<ObservableCollection<EQBand>>(bytes, options);
 
                 if (bands == null) return false;
 
-                var targetPath = Path.Combine(_presetsDir, $"{name}.json");
-                File.WriteAllText(targetPath, json);
+                var targetPath = Path.Combine(_presetsDir, $"{name}.eqp");
+                File.WriteAllBytes(targetPath, bytes);
 
                 if (!_presetMetadata.ContainsKey(name))
                 {

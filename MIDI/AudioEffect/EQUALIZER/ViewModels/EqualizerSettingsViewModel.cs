@@ -208,7 +208,7 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
             var dialog = new OpenFileDialog
             {
                 Title = "プリセットファイルを選択",
-                Filter = "JSONファイル (*.json)|*.json|すべてのファイル (*.*)|*.*",
+                Filter = "EQPファイル (*.eqp)|*.eqp|すべてのファイル (*.*)|*.*",
                 Multiselect = true
             };
 
@@ -227,8 +227,8 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
             var dialog = new SaveFileDialog
             {
                 Title = "プリセットをエクスポート",
-                Filter = "JSONファイル (*.json)|*.json",
-                FileName = $"{SelectedPreset.Name}.json"
+                Filter = "EQPファイル (*.eqp)|*.eqp",
+                FileName = $"{SelectedPreset.Name}.eqp"
             };
 
             if (dialog.ShowDialog() == true)
