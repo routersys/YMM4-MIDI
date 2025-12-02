@@ -173,10 +173,17 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <ListBox Grid.Column="0" ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroupItem}"
+                    <ListBox Grid.Column="0" Name="GroupListBox" ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroupItem}"
                              Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderThickness="0,0,1,0"
                              BorderBrush="{DynamicResource {x:Static theme:YMM4Colors.IconBorderBrushKey}}"
                              ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                        <ListBox.ContextMenu>
+                            <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                <MenuItem Header="設定を開く" Command="{Binding OpenSettingsCommand}"/>
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Padding" Value="10,8"/>
@@ -211,9 +218,44 @@
                         <ListBox Grid.Row="0" Name="PresetListBox" ItemsSource="{Binding FilteredPresets}"
                                  Background="Transparent" BorderThickness="0"
                                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                            <ListBox.ContextMenu>
+                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                    <MenuItem Header="現在の設定をプリセットとして保存" Command="{Binding SavePresetCommand}"/>
+                                    <Separator/>
+                                    <MenuItem Header="設定を開く" Command="{Binding OpenSettingsCommand}"/>
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}" />
+                                    <Setter Property="ContextMenu">
+                                        <Setter.Value>
+                                            <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                                <MenuItem Header="プリセットを適用" 
+                                                          Command="{Binding LoadPresetCommand}" 
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                <MenuItem Header="名前の変更" 
+                                                          Command="{Binding RenamePresetCommand}" 
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                <MenuItem Header="グループの変更" 
+                                                          Command="{Binding ChangeGroupCommand}" 
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                <MenuItem Header="お気に入りに追加/削除" 
+                                                          Command="{Binding ToggleFavoriteCommand}" 
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                <MenuItem Header="エクスポート" 
+                                                          Command="{Binding ExportCommand}" 
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                <Separator/>
+                                                <MenuItem Header="削除" 
+                                                          Command="{Binding DeletePresetCommand}" 
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            </ContextMenu>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Style>
                             </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
@@ -223,21 +265,33 @@
                                             <MouseBinding Gesture="LeftDoubleClick" Command="{Binding DataContext.LoadPresetCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}"/>
                                         </Grid.InputBindings>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                                        <Path Grid.Column="1" Data="M12,17.27L18.18,21L17.27,14.41L22,9.82L15.77,8.89L12,3L8.23,8.89L2,9.82L6.73,14.41L5.82,21L12,17.27Z"
-                                              Fill="Gold" Stretch="Uniform" Width="12" Height="12" Margin="10,0,0,0" VerticalAlignment="Center"
-                                              Visibility="{Binding IsFavorite, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                                        <Button Grid.Column="0"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Width="24" Height="24"
+                                                VerticalAlignment="Center"
+                                                Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="お気に入りに追加/削除"
+                                                Style="{x:Null}"
+                                                Padding="0">
+                                            <Path Data="M12,17.27L18.18,21L17.27,14.41L22,9.82L15.77,8.89L12,3L8.23,8.89L2,9.82L6.73,14.41L5.82,21L12,17.27Z"
+                                                  Fill="{Binding IsFavorite, Converter={StaticResource FavoriteToColorConverter}}"
+                                                  Stretch="Uniform"
+                                                  Width="12" Height="12"/>
+                                        </Button>
+
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" Margin="5,0"/>
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
 
                         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
-                            <Button Content="名前変更" Margin="0,0,5,0" Command="{Binding RenamePresetCommand}" CommandParameter="{Binding ElementName=PresetListBox, Path=SelectedItem}" IsEnabled="{Binding ElementName=PresetListBox, Path=SelectedItem, Converter={StaticResource NotNullConverter}}"/>
-                            <Button Content="削除" Command="{Binding DeletePresetCommand}" CommandParameter="{Binding ElementName=PresetListBox, Path=SelectedItem}" IsEnabled="{Binding ElementName=PresetListBox, Path=SelectedItem, Converter={StaticResource NotNullConverter}}"/>
                         </StackPanel>
                     </Grid>
                 </Grid>

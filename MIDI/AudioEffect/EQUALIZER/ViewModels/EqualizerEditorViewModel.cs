@@ -2,6 +2,7 @@
 using MIDI.AudioEffect.EQUALIZER.Models;
 using MIDI.AudioEffect.EQUALIZER.Services;
 using MIDI.AudioEffect.EQUALIZER.Views;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -118,6 +119,8 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
         public ICommand OpenSettingsCommand { get; }
         public ICommand AddPointCommand { get; }
         public ICommand DeletePointCommand { get; }
+        public ICommand ChangeGroupCommand { get; }
+        public ICommand ExportCommand { get; }
 
         public EqualizerEditorViewModel()
         {
@@ -127,11 +130,13 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
             SavePresetCommand = new RelayCommand(p => SavePreset(), p => HasBands);
             RenamePresetCommand = new RelayCommand(RenamePreset, p => p is PresetInfo);
             DeletePresetCommand = new RelayCommand(DeletePreset, p => p is PresetInfo);
-            LoadPresetCommand = new RelayCommand(LoadPreset);
-            ToggleFavoriteCommand = new RelayCommand(ToggleFavorite);
+            LoadPresetCommand = new RelayCommand(LoadPreset, p => p is PresetInfo);
+            ToggleFavoriteCommand = new RelayCommand(ToggleFavorite, p => p is PresetInfo);
             OpenSettingsCommand = new RelayCommand(p => OpenSettings());
-            AddPointCommand = new RelayCommand(AddPoint, p => p is Point);
+            AddPointCommand = new RelayCommand(AddPoint, p => p is Point || p is null);
             DeletePointCommand = new RelayCommand(DeletePoint, p => p is EQBand);
+            ChangeGroupCommand = new RelayCommand(ChangeGroup, p => p is PresetInfo);
+            ExportCommand = new RelayCommand(ExportPreset, p => p is PresetInfo);
 
             InitializeGroups();
             LoadPresets();
@@ -215,20 +220,20 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
 
         private void RenamePreset(object? parameter)
         {
-            if (parameter is PresetInfo info)
+            if (parameter is not PresetInfo info) return;
+
+            var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current.MainWindow;
+            var dialog = new InputDialogWindow("新しいプリセット名を入力してください", "プリセット名の変更", info.Name) { Owner = window };
+
+            if (dialog.ShowDialog() == true)
             {
-                var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current.MainWindow;
-                var dialog = new InputDialogWindow("新しいプリセット名を入力してください", "プリセット名の変更", info.Name) { Owner = window };
-                if (dialog.ShowDialog() == true)
+                string newName = dialog.InputText;
+                if (!string.IsNullOrWhiteSpace(newName) && newName != info.Name)
                 {
-                    string newName = dialog.InputText;
-                    if (!string.IsNullOrWhiteSpace(newName) && newName != info.Name)
+                    if (_presetService.RenamePreset(info.Name, newName))
                     {
-                        if (_presetService.RenamePreset(info.Name, newName))
-                        {
-                            if (SelectedPresetName == info.Name) SelectedPresetName = newName;
-                            LoadPresets();
-                        }
+                        if (SelectedPresetName == info.Name) SelectedPresetName = newName;
+                        LoadPresets();
                     }
                 }
             }
@@ -236,14 +241,45 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
 
         private void DeletePreset(object? parameter)
         {
-            if (parameter is PresetInfo info)
+            if (parameter is not PresetInfo info) return;
+
+            if (MessageBox.Show($"プリセット「{info.Name}」を削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                if (MessageBox.Show($"プリセット「{info.Name}」を削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
-                {
-                    _presetService.DeletePreset(info.Name);
-                    if (SelectedPresetName == info.Name) SelectedPresetName = "プリセットを選択...";
-                    LoadPresets();
-                }
+                _presetService.DeletePreset(info.Name);
+                if (SelectedPresetName == info.Name) SelectedPresetName = "プリセットを選択...";
+                LoadPresets();
+            }
+        }
+
+        private void ExportPreset(object? parameter)
+        {
+            if (parameter is not PresetInfo info) return;
+
+            var dialog = new SaveFileDialog
+            {
+                Title = "プリセットをエクスポート",
+                Filter = "JSONファイル (*.json)|*.json",
+                FileName = $"{info.Name}.json"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                _presetService.ExportPreset(info.Name, dialog.FileName);
+            }
+        }
+
+        private void ChangeGroup(object? parameter)
+        {
+            if (parameter is not PresetInfo info) return;
+
+            var groups = new[] { "vocal", "bgm", "sfx", "other" };
+            var groupNames = new[] { "ボーカル", "BGM", "効果音", "その他" };
+            var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? Application.Current.MainWindow;
+            var dialog = new GroupSelectionWindow(groups, groupNames, info.Group) { Owner = window };
+
+            if (dialog.ShowDialog() == true)
+            {
+                _presetService.SetPresetGroup(info.Name, dialog.SelectedGroup);
             }
         }
 
