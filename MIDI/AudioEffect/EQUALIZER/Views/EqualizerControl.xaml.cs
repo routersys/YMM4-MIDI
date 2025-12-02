@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using YukkuriMovieMaker.Commons;
 using MIDI.AudioEffect.EQUALIZER.Models;
 using MIDI.AudioEffect.EQUALIZER.ViewModels;
+using MIDI.AudioEffect.EQUALIZER;
 
 namespace MIDI.AudioEffect.EQUALIZER.Views
 {
@@ -26,6 +27,33 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
         {
             get => (ObservableCollection<EQBand>)GetValue(ItemsSourceProperty);
             set => SetValue(ItemsSourceProperty, value);
+        }
+
+        private EqualizerAudioEffect? _effect;
+        public new EqualizerAudioEffect? Effect
+        {
+            get => _effect;
+            set
+            {
+                if (_effect != value)
+                {
+                    if (_effect is INotifyPropertyChanged oldNotifier)
+                    {
+                        oldNotifier.PropertyChanged -= OnEffectPropertyChanged;
+                    }
+
+                    _effect = value;
+
+                    if (_effect is INotifyPropertyChanged newNotifier)
+                    {
+                        newNotifier.PropertyChanged += OnEffectPropertyChanged;
+                        if (ViewModel != null)
+                        {
+                            ViewModel.CurrentTime = _effect.CurrentProgress;
+                        }
+                    }
+                }
+            }
         }
 
         public event EventHandler? BeginEdit;
@@ -73,12 +101,31 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
             Unloaded += OnUnloaded;
         }
 
+        private void OnEffectPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(EqualizerAudioEffect.CurrentProgress))
+            {
+                if (_effect != null && !isDragging)
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        ViewModel.CurrentTime = _effect.CurrentProgress;
+                    }));
+                }
+            }
+        }
+
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             var dp = DependencyPropertyDescriptor.FromProperty(Border.BackgroundProperty, typeof(Border));
             dp?.AddValueChanged(CanvasBorder, OnBackgroundChanged);
             UpdateTheme();
             DrawAll();
+
+            if (_effect != null && ViewModel != null)
+            {
+                ViewModel.CurrentTime = _effect.CurrentProgress;
+            }
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)

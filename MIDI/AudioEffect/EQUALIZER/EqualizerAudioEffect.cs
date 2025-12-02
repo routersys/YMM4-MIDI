@@ -11,6 +11,8 @@ using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Audio.Effects;
 using YukkuriMovieMaker.Plugin.Effects;
+using System;
+using System.Text.Json.Serialization;
 
 namespace MIDI.AudioEffect.EQUALIZER
 {
@@ -22,6 +24,11 @@ namespace MIDI.AudioEffect.EQUALIZER
         [Display(GroupName = "Equalizer", Name = "")]
         [EqualizerEditor(PropertyEditorSize = PropertyEditorSize.FullWidth)]
         public ObservableCollection<EQBand> Bands { get; } = new();
+
+        [JsonIgnore]
+        public double CurrentProgress { get => _currentProgress; set => Set(ref _currentProgress, value); }
+        private double _currentProgress = 0.0;
+
 
         public EqualizerAudioEffect()
         {

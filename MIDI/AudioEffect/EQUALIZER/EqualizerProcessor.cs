@@ -1,4 +1,5 @@
-﻿using MIDI.AudioEffect.EQUALIZER.Models;
+﻿
+using MIDI.AudioEffect.EQUALIZER.Models;
 using MIDI.Configuration.Models;
 using System;
 using System.Buffers;
@@ -57,6 +58,17 @@ namespace MIDI.AudioEffect.EQUALIZER
             if (Input is null) return 0;
             int readCount = Input.Read(destBuffer, offset, count);
 
+            int frames = readCount / 2;
+            long startFrame = Position / 2;
+            long totalFrames = Duration / 2;
+            int hz = Hz;
+
+            if (readCount > 0)
+            {
+                double currentProgress = (double)startFrame / totalFrames;
+                item.CurrentProgress = currentProgress;
+            }
+
             bool useHighQuality = EqualizerSettings.Default.HighQualityMode;
             int bandCount = bands.Count;
 
@@ -70,11 +82,6 @@ namespace MIDI.AudioEffect.EQUALIZER
                     if (filtersR[k] == null) filtersR[k] = algorithm == EqualizerAlgorithm.TPT_SVF ? new TptSvfFilter() : new BiquadFilter();
                 }
             }
-
-            int frames = readCount / 2;
-            long startFrame = Position / 2;
-            long totalFrames = Duration / 2;
-            int hz = Hz;
 
             float[] bufL = ArrayPool<float>.Shared.Rent(frames);
             float[] bufR = ArrayPool<float>.Shared.Rent(frames);
