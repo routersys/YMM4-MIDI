@@ -376,6 +376,7 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
                     unusedBand.StereoMode = StereoMode.Stereo;
 
                     Effect.UpdateBandsCollection();
+                    SelectedBand = unusedBand;
                 }
                 else
                 {
@@ -393,8 +394,22 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
             {
                 BeginEdit?.Invoke(this, EventArgs.Empty);
 
+                var index = Bands?.IndexOf(band) ?? -1;
+
                 band.IsUsed = false;
                 Effect.UpdateBandsCollection();
+
+                if (Bands != null && Bands.Count > 0)
+                {
+                    if (index > 0)
+                        SelectedBand = Bands[index - 1];
+                    else
+                        SelectedBand = Bands.FirstOrDefault();
+                }
+                else
+                {
+                    SelectedBand = null;
+                }
 
                 EndEdit?.Invoke(this, EventArgs.Empty);
                 RequestRedraw?.Invoke(this, EventArgs.Empty);

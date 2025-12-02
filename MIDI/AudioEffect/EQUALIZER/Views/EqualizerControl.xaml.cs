@@ -299,29 +299,9 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
             DrawAll();
         }
 
-        private async void Band_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void Band_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (isDragging) return;
-
-            if (sender is EQBand band && band == ViewModel.SelectedBand)
-            {
-                if (e.PropertyName == nameof(EQBand.Frequency) || e.PropertyName == nameof(EQBand.Gain) || e.PropertyName == nameof(EQBand.Q))
-                {
-                    var currentSelection = ViewModel.SelectedBand;
-
-                    if (ViewModel.SelectedBand == currentSelection)
-                    {
-                        ViewModel.SelectedBand = null;
-
-                        await Task.Delay(1);
-
-                        if (ViewModel.SelectedBand == null)
-                        {
-                            ViewModel.SelectedBand = currentSelection;
-                        }
-                    }
-                }
-            }
 
             if (e.PropertyName == nameof(EQBand.Frequency) || e.PropertyName == nameof(EQBand.Gain) || e.PropertyName == nameof(EQBand.Q))
             {
