@@ -493,12 +493,106 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
             foreach (var band in ItemsSource)
             {
                 bool isSelected = band == ViewModel.SelectedBand;
-                var thumb = new Thumb { Width = 12, Height = 12, DataContext = band, Template = CreateThumbTemplate(band.IsEnabled ? (isSelected ? thumbSelectedFillBrush : thumbFillBrush) : Brushes.Gray) };
+                Brush fillBrush = band.IsEnabled ? (isSelected ? thumbSelectedFillBrush : thumbFillBrush) : Brushes.Gray;
+
+                ControlTemplate template;
+                if (band.Type == MIDI.AudioEffect.EQUALIZER.Models.FilterType.Peak)
+                    template = CreateThumbTemplate(fillBrush);
+                else
+                    template = CreateSquareThumbTemplate(fillBrush);
+
+                var thumb = new Thumb { Width = 12, Height = 12, DataContext = band, Template = template };
                 thumb.Tag = band;
+
+                var menu = new ContextMenu();
+
+                var enableItem = new MenuItem { Header = "有効", IsCheckable = true, IsChecked = band.IsEnabled };
+                enableItem.Click += (s, e) =>
+                {
+                    ViewModel.NotifyBeginEdit();
+                    band.IsEnabled = !band.IsEnabled;
+                    ViewModel.NotifyEndEdit();
+                };
+                menu.Items.Add(enableItem);
+
+                menu.Items.Add(new Separator());
+
+                var typeItem = new MenuItem { Header = "フィルタの種類" };
+                foreach (MIDI.AudioEffect.EQUALIZER.Models.FilterType type in Enum.GetValues(typeof(MIDI.AudioEffect.EQUALIZER.Models.FilterType)))
+                {
+                    string header = type switch
+                    {
+                        MIDI.AudioEffect.EQUALIZER.Models.FilterType.Peak => "ピーク",
+                        MIDI.AudioEffect.EQUALIZER.Models.FilterType.LowShelf => "ローシェルフ",
+                        MIDI.AudioEffect.EQUALIZER.Models.FilterType.HighShelf => "ハイシェルフ",
+                        _ => type.ToString()
+                    };
+                    var subItem = new MenuItem { Header = header, IsCheckable = true, IsChecked = band.Type == type };
+                    subItem.Click += (s, e) =>
+                    {
+                        if (band.Type != type)
+                        {
+                            ViewModel.NotifyBeginEdit();
+                            band.Type = type;
+                            ViewModel.NotifyEndEdit();
+                        }
+                    };
+                    typeItem.Items.Add(subItem);
+                }
+                menu.Items.Add(typeItem);
+
+                var modeItem = new MenuItem { Header = "ステレオモード" };
+                foreach (StereoMode mode in Enum.GetValues(typeof(StereoMode)))
+                {
+                    string header = mode switch
+                    {
+                        StereoMode.Stereo => "ステレオ",
+                        StereoMode.Left => "L (左)",
+                        StereoMode.Right => "R (右)",
+                        _ => mode.ToString()
+                    };
+                    var subItem = new MenuItem { Header = header, IsCheckable = true, IsChecked = band.StereoMode == mode };
+                    subItem.Click += (s, e) =>
+                    {
+                        if (band.StereoMode != mode)
+                        {
+                            ViewModel.NotifyBeginEdit();
+                            band.StereoMode = mode;
+                            ViewModel.NotifyEndEdit();
+                        }
+                    };
+                    modeItem.Items.Add(subItem);
+                }
+                menu.Items.Add(modeItem);
+
+                menu.Items.Add(new Separator());
+
+                var deleteItem = new MenuItem { Header = "削除" };
+                deleteItem.Click += (s, e) => ViewModel.DeletePointCommand.Execute(band);
+                menu.Items.Add(deleteItem);
+
+                thumb.ContextMenu = menu;
 
                 var freq = band.Frequency.GetValue(currentFrame, totalFrames, 60);
                 var gain = band.Gain.GetValue(currentFrame, totalFrames, 60);
                 var q = band.Q.GetValue(currentFrame, totalFrames, 60);
+
+                string typeStr = band.Type switch
+                {
+                    MIDI.AudioEffect.EQUALIZER.Models.FilterType.Peak => "ピーク",
+                    MIDI.AudioEffect.EQUALIZER.Models.FilterType.LowShelf => "ローシェルフ",
+                    MIDI.AudioEffect.EQUALIZER.Models.FilterType.HighShelf => "ハイシェルフ",
+                    _ => band.Type.ToString()
+                };
+
+                string modeStr = band.StereoMode switch
+                {
+                    StereoMode.Stereo => "ステレオ",
+                    StereoMode.Left => "L (左)",
+                    StereoMode.Right => "R (右)",
+                    _ => band.StereoMode.ToString()
+                };
+
                 thumb.ToolTip = new TextBlock
                 {
                     Inlines =
@@ -510,7 +604,13 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
                         new System.Windows.Documents.Run($"{gain:F1} dB"),
                         new System.Windows.Documents.LineBreak(),
                         new System.Windows.Documents.Run("Q: ") { FontWeight = FontWeights.Bold },
-                        new System.Windows.Documents.Run($"{q:F2}")
+                        new System.Windows.Documents.Run($"{q:F2}"),
+                        new System.Windows.Documents.LineBreak(),
+                        new System.Windows.Documents.Run("種類: ") { FontWeight = FontWeights.Bold },
+                        new System.Windows.Documents.Run(typeStr),
+                        new System.Windows.Documents.LineBreak(),
+                        new System.Windows.Documents.Run("CH: ") { FontWeight = FontWeights.Bold },
+                        new System.Windows.Documents.Run(modeStr)
                     }
                 };
 
@@ -646,6 +746,15 @@ namespace MIDI.AudioEffect.EQUALIZER.Views
         private ControlTemplate CreateThumbTemplate(Brush fill)
         {
             var factory = new FrameworkElementFactory(typeof(Ellipse));
+            factory.SetValue(System.Windows.Shapes.Shape.FillProperty, fill);
+            factory.SetValue(System.Windows.Shapes.Shape.StrokeProperty, thumbStrokeBrush);
+            factory.SetValue(System.Windows.Shapes.Shape.StrokeThicknessProperty, 1.5);
+            return new ControlTemplate(typeof(Thumb)) { VisualTree = factory };
+        }
+
+        private ControlTemplate CreateSquareThumbTemplate(Brush fill)
+        {
+            var factory = new FrameworkElementFactory(typeof(Rectangle));
             factory.SetValue(System.Windows.Shapes.Shape.FillProperty, fill);
             factory.SetValue(System.Windows.Shapes.Shape.StrokeProperty, thumbStrokeBrush);
             factory.SetValue(System.Windows.Shapes.Shape.StrokeThicknessProperty, 1.5);
