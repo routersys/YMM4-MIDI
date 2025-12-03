@@ -92,7 +92,7 @@ namespace MIDI.AudioEffect.EQUALIZER
             var b = Items[0];
             b.IsUsed = true;
             b.IsEnabled = true;
-            b.Type = (Models.FilterType)FilterType.Peak;
+            b.Type = MIDI.AudioEffect.EQUALIZER.Models.FilterType.Peak;
             b.Frequency.Values[0].Value = 500;
             b.Gain.Values[0].Value = 0;
             b.Q.Values[0].Value = 1.0;

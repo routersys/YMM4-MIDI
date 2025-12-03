@@ -369,7 +369,7 @@ namespace MIDI.AudioEffect.EQUALIZER.ViewModels
                 {
                     unusedBand.IsUsed = true;
                     unusedBand.IsEnabled = true;
-                    unusedBand.Type = (Models.FilterType)FilterType.Peak;
+                    unusedBand.Type = MIDI.AudioEffect.EQUALIZER.Models.FilterType.Peak;
                     unusedBand.Frequency.Values[0].Value = point.X;
                     unusedBand.Gain.Values[0].Value = point.Y;
                     unusedBand.Q.Values[0].Value = 1.0;
