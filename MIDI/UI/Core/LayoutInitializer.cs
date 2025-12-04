@@ -1,26 +1,56 @@
 ﻿using AvalonDock;
 using AvalonDock.Layout;
-using MIDI.UI.Views.MidiEditor.Panel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace MIDI.UI.Core
 {
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
+    public class LayoutContentAttribute : Attribute
+    {
+        public string ContentId { get; }
+        public string Title { get; }
+
+        public LayoutContentAttribute(string contentId, string title)
+        {
+            ContentId = contentId;
+            Title = title;
+        }
+    }
+
     public static class LayoutInitializer
     {
         public static void EnsurePanelsExist(DockingManager dockingManager)
         {
-            var requiredPanels = new Dictionary<string, (string Title, object Content)>
+            var requiredPanels = new Dictionary<string, (string Title, object Content)>();
+
+            var assembly = Assembly.GetExecutingAssembly();
+            var types = assembly.GetTypes()
+                .Where(t => t.GetCustomAttribute<LayoutContentAttribute>() != null && typeof(UserControl).IsAssignableFrom(t));
+
+            foreach (var type in types)
             {
-                { "noteEditor", ("編集", new NoteEditorPanel()) },
-                { "quantizeSettings", ("クオンタイズ設定", new QuantizeSettingsPanel()) },
-                { "playbackSettings", ("再生設定", new PlaybackSettingsPanel()) },
-                { "metronome", ("メトロノーム", new MetronomePanel()) },
-                { "tempoEditor", ("テンポ", new TempoEditorPanel()) },
-                { "controlChangeEditor", ("コントロールチェンジ", new ControlChangeEditorPanel()) }
-            };
+                var attr = type.GetCustomAttribute<LayoutContentAttribute>();
+                if (attr != null)
+                {
+                    try
+                    {
+                        var content = Activator.CreateInstance(type);
+                        if (content != null)
+                        {
+                            requiredPanels[attr.ContentId] = (attr.Title, content);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to create panel {type.Name}: {ex.Message}");
+                    }
+                }
+            }
 
             var layout = dockingManager.Layout;
             if (layout?.RootPanel == null) return;
@@ -51,6 +81,7 @@ namespace MIDI.UI.Core
                 if (!currentPanels.Contains(panelInfo.Key))
                 {
                     var content = panelInfo.Value.Content;
+
                     if (content == null)
                     {
                         var existingContent = layout.Descendents().OfType<LayoutContent>().FirstOrDefault(lc => lc.ContentId == panelInfo.Key);

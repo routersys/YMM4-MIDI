@@ -1,4 +1,5 @@
 ﻿using MIDI.UI.ViewModels.MidiEditor;
+using MIDI.UI.Core;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -9,6 +10,7 @@ using System.Windows.Media.Animation;
 
 namespace MIDI.UI.Views.MidiEditor.Panel
 {
+    [LayoutContent("metronome", "メトロノーム")]
     public partial class MetronomePanel : UserControl
     {
         private bool _isDraggingWeight = false;
