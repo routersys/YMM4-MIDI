@@ -3,7 +3,9 @@ using MIDI.UI.ViewModels.MidiEditor;
 using MIDI.UI.ViewModels.MidiEditor.Logic;
 using MIDI.UI.ViewModels.MidiEditor.Rendering;
 using NAudio.Midi;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
@@ -349,5 +351,23 @@ namespace MIDI.UI.ViewModels
         }
 
         public PianoRollMouseHandler MouseHandler => _pianoRollMouseHandler;
+
+        public string SelectedSoundFont
+        {
+            get => MidiConfiguration.Default.SoundFont.PreferredSoundFont;
+            set
+            {
+                if (MidiConfiguration.Default.SoundFont.PreferredSoundFont != value)
+                {
+                    MidiConfiguration.Default.SoundFont.PreferredSoundFont = value;
+                    MidiConfiguration.Default.Save();
+                    OnPropertyChanged();
+                    PlaybackService.InitializePlayback(value);
+                }
+            }
+        }
+
+        public ICollectionView FilteredTempoEvents => TrackEventManager.FilteredTempoEvents;
+        public ICollectionView FilteredControlEvents => TrackEventManager.FilteredControlEvents;
     }
 }
