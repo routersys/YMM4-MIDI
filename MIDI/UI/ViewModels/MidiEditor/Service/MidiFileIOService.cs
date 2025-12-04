@@ -359,6 +359,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                     events.AddTrack();
                     foreach (var ev in _vm.MidiFile.Events[i])
                     {
+                        if (ev is NAudioMidi.NoteOnEvent noteOn && noteOn.OffEvent == null) continue;
                         if (ev is NAudioMidi.TextEvent te && te.Text.StartsWith("CENT_OFFSET:")) continue;
                         events[i].Add(ev.Clone());
                     }
@@ -366,12 +367,18 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
 
                 foreach (var note in _vm.AllNotes)
                 {
-                    if (note.CentOffset != 0)
+                    if (note.CentOffset != 0 && note.NoteOnEvent.OffEvent != null)
                     {
                         string text = $"CENT_OFFSET:{note.NoteOnEvent.Channel},{note.NoteNumber},{note.CentOffset}";
-                        byte[] data = System.Text.Encoding.UTF8.GetBytes(text);
-                        events[0].Add(new NAudioMidi.MetaEvent(NAudioMidi.MetaEventType.TextEvent, data.Length, note.StartTicks));
+                        events[0].Add(new NAudioMidi.TextEvent(text, NAudioMidi.MetaEventType.TextEvent, note.StartTicks));
                     }
+                }
+
+                foreach (var track in events)
+                {
+                    var sortedEvents = track.OrderBy(e => e.AbsoluteTime).ToList();
+                    track.Clear();
+                    foreach (var e in sortedEvents) track.Add(e);
                 }
 
                 NAudioMidi.MidiFile.Export(_vm.FilePath, events);
@@ -405,8 +412,19 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
         public async Task SaveProjectAsync(string? path = null, bool isBackup = false)
         {
             if (_vm.MidiFile == null || _vm.OriginalMidiFile == null) return;
-            var project = await ProjectService.CreateProjectFileAsync(_vm.FilePath, _vm.OriginalMidiFile, _vm.MidiFile, _vm.AllNotes, _vm.Flags, false, _vm.IsNewFile);
-            await ProjectService.SaveProjectAsync(project, path ?? _vm.ProjectPath, false);
+
+            string targetPath = path ?? _vm.ProjectPath;
+
+            if (isBackup && string.IsNullOrEmpty(targetPath))
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(targetPath)) return;
+
+            var validNotes = _vm.AllNotes.Where(n => n.NoteOnEvent != null && n.NoteOnEvent.OffEvent != null).ToList();
+            var project = await ProjectService.CreateProjectFileAsync(_vm.FilePath, _vm.OriginalMidiFile, _vm.MidiFile, validNotes, _vm.Flags, false, _vm.IsNewFile);
+            await ProjectService.SaveProjectAsync(project, targetPath, false);
             if (!isBackup)
             {
                 _vm.StatusText = "プロジェクトを保存しました。";
@@ -422,7 +440,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
             if (saveFileDialog.ShowDialog() == true && !string.IsNullOrEmpty(saveFileDialog.FilePath))
             {
                 _vm.ProjectPath = saveFileDialog.FilePath;
-                var project = await ProjectService.CreateProjectFileAsync(_vm.FilePath, _vm.OriginalMidiFile, _vm.MidiFile, _vm.AllNotes, _vm.Flags, saveFileDialog.SaveAllData, _vm.IsNewFile);
+                var validNotes = _vm.AllNotes.Where(n => n.NoteOnEvent != null && n.NoteOnEvent.OffEvent != null).ToList();
+                var project = await ProjectService.CreateProjectFileAsync(_vm.FilePath, _vm.OriginalMidiFile, _vm.MidiFile, validNotes, _vm.Flags, saveFileDialog.SaveAllData, _vm.IsNewFile);
                 await ProjectService.SaveProjectAsync(project, _vm.ProjectPath, saveFileDialog.CompressProject);
                 _vm.StatusText = "プロジェクトを名前を付けて保存しました。";
                 _vm.OnPropertyChanged(nameof(_vm.FileName));
@@ -454,10 +473,41 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
             };
             progressWindow.Show();
 
+            string tempMidiPath = Path.GetTempFileName();
+
             try
             {
+                var events = new NAudioMidi.MidiEventCollection(_vm.MidiFile.FileFormat, _vm.MidiFile.DeltaTicksPerQuarterNote);
+                for (int i = 0; i < _vm.MidiFile.Tracks; i++)
+                {
+                    events.AddTrack();
+                    foreach (var ev in _vm.MidiFile.Events[i])
+                    {
+                        if (ev is NAudioMidi.TextEvent te && te.Text.StartsWith("CENT_OFFSET:")) continue;
+                        events[i].Add(ev.Clone());
+                    }
+                }
+
+                foreach (var note in _vm.AllNotes)
+                {
+                    if (note.CentOffset != 0)
+                    {
+                        string text = $"CENT_OFFSET:{note.NoteOnEvent.Channel},{note.NoteNumber},{note.CentOffset}";
+                        events[0].Add(new NAudioMidi.TextEvent(text, NAudioMidi.MetaEventType.TextEvent, note.StartTicks));
+                    }
+                }
+
+                foreach (var track in events)
+                {
+                    var sortedEvents = track.OrderBy(e => e.AbsoluteTime).ToList();
+                    track.Clear();
+                    foreach (var e in sortedEvents) track.Add(e);
+                }
+
+                NAudioMidi.MidiFile.Export(tempMidiPath, events);
+
                 progressViewModel.StatusMessage = "オーディオをレンダリング中...";
-                using var audioSource = new MidiAudioSource(_vm.FilePath, MidiConfiguration.Default);
+                using var audioSource = new MidiAudioSource(tempMidiPath, MidiConfiguration.Default);
                 var audioBuffer = await audioSource.ReadAllAsync();
 
                 progressViewModel.IsIndeterminate = false;
@@ -481,6 +531,13 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                 progressViewModel.StatusMessage = $"エラー: {ex.Message}";
                 progressViewModel.IsComplete = true;
                 MessageBox.Show($"書き出し中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                if (File.Exists(tempMidiPath))
+                {
+                    try { File.Delete(tempMidiPath); } catch { }
+                }
             }
         }
     }

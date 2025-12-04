@@ -136,7 +136,19 @@ namespace MIDI.UI.ViewModels
             };
 
             Metronome.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(MetronomeViewModel.Tempo)) UpdateTempoStatus(); };
-            PlaybackService.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(PlaybackService.IsPlaying)) OnPropertyChanged(nameof(PlayButtonIcon)); };
+            PlaybackService.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(PlaybackService.IsPlaying)) OnPropertyChanged(nameof(PlayButtonIcon));
+                else if (e.PropertyName == nameof(PlaybackService.CurrentTime))
+                {
+                    OnPropertyChanged(nameof(CurrentTime));
+                    OnPropertyChanged(nameof(PlaybackCursorPosition));
+                }
+                else if (e.PropertyName == nameof(PlaybackService.MasterVolume))
+                {
+                    OnPropertyChanged(nameof(MasterVolume));
+                }
+            };
         }
 
         private void RefreshPianoKeys()

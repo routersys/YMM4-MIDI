@@ -93,13 +93,17 @@ namespace MIDI.UI.ViewModels.MidiEditor
                 {
                     if (!isCtrlPressed)
                     {
-                        foreach (var note in _vm.SelectedNotes.ToList()) note.IsSelected = false;
-                        _vm.SelectedNotes.Clear();
+                        _vm.SelectionManager.ClearSelections();
                     }
+                    noteUnderCursor.IsSelected = true;
+                    _vm.SelectedNotes.Add(noteUnderCursor);
+                    _vm.SelectedNote = noteUnderCursor;
                     NoteSelected?.Invoke(noteUnderCursor, isCtrlPressed);
                 }
                 else if (isCtrlPressed)
                 {
+                    noteUnderCursor.IsSelected = false;
+                    _vm.SelectedNotes.Remove(noteUnderCursor);
                     NoteSelected?.Invoke(noteUnderCursor, isCtrlPressed);
                 }
 

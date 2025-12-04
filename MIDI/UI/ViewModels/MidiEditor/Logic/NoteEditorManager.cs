@@ -142,6 +142,13 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
             _vm.UndoRedoService.Execute(new RemoveNoteCommand(_vm, noteViewModel));
         }
 
+        public void DeleteSelectedNotes()
+        {
+            if (!_vm.SelectedNotes.Any()) return;
+            var commands = _vm.SelectedNotes.Select(n => new RemoveNoteCommand(_vm, n)).ToList();
+            _vm.UndoRedoService.Execute(new CompositeCommand(commands));
+        }
+
         public void RemoveNoteInternal(NoteViewModel noteViewModel)
         {
             if (_vm.MidiFile == null) return;

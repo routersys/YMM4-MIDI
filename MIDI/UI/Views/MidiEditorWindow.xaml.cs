@@ -485,7 +485,8 @@ namespace MIDI.UI.Views
             if (DataContext is MidiEditorViewModel vm && e.Source is FrameworkElement element)
             {
                 element.Focus();
-                vm.MouseHandler.OnTimeBarMouseDown(e.GetPosition(element));
+                var contentPosition = e.GetPosition(RulerScrollViewer.Content as IInputElement);
+                vm.MouseHandler.OnTimeBarMouseDown(contentPosition);
                 element.CaptureMouse();
                 e.Handled = true;
             }
@@ -497,7 +498,7 @@ namespace MIDI.UI.Views
             {
                 if (element.IsMouseCaptured)
                 {
-                    var contentPosition = e.GetPosition(element);
+                    var contentPosition = e.GetPosition(RulerScrollViewer.Content as IInputElement);
                     vm.MouseHandler.OnTimeBarMouseMove(contentPosition);
 
                     var scrollViewerPosition = e.GetPosition(RulerScrollViewer);

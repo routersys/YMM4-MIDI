@@ -124,7 +124,7 @@ namespace MIDI.UI.ViewModels
 
             AddNoteCommand = new RelayCommand(_ => NoteEditorManager.AddNoteAt(RightClickPosition), _ => CanAddNote && MidiFile != null);
             DeleteNoteCommand = new RelayCommand(_ => { if (SelectedNotes.Count > 0) DeleteSelectedNotesCommand.Execute(null); else if (NoteUnderCursor != null) NoteEditorManager.RemoveNote(NoteUnderCursor); }, _ => CanDeleteNote && MidiFile != null);
-            DeleteSelectedNotesCommand = new RelayCommand(_ => NoteEditorManager.RemoveOverlappingNotes(0, 0, 0), _ => SelectedNotes.Count > 0 && MidiFile != null);
+            DeleteSelectedNotesCommand = new RelayCommand(_ => NoteEditorManager.DeleteSelectedNotes(), _ => SelectedNotes.Count > 0 && MidiFile != null);
             CopyCommand = new RelayCommand(_ => SelectionManager.CopySelectedNotes(), _ => SelectedNotes.Count > 0 && MidiFile != null);
             PasteCommand = new RelayCommand(_ => NoteEditorManager.PasteNotes(SelectionManager.GetClipboard()), _ => SelectionManager.GetClipboard().Count > 0 && MidiFile != null);
 
@@ -175,10 +175,10 @@ namespace MIDI.UI.ViewModels
             DeleteAllFlagsCommand = new RelayCommand(_ => Flags.Clear(), _ => Flags.Count > 0);
             AddFlagAtSelectionStartCommand = new RelayCommand(_ => CreateFlagsFromSelectionCommand.Execute(null));
             AddFlagAtSelectionEndCommand = new RelayCommand(_ => { if (SelectedNotes.Count > 0) { Flags.Add(new FlagViewModel(this, ViewManager.TicksToTime(SelectedNotes[SelectedNotes.Count - 1].StartTicks + SelectedNotes[SelectedNotes.Count - 1].DurationTicks), "End")); } });
-            GoToNextFlagCommand = new RelayCommand(_ => {});
-            GoToPreviousFlagCommand = new RelayCommand(_ => {});
+            GoToNextFlagCommand = new RelayCommand(_ => { });
+            GoToPreviousFlagCommand = new RelayCommand(_ => { });
             RenameFlagCommand = new RelayCommand(_ => SelectionManager.RenameFlag(), _ => SelectedFlags.Count == 1);
-            SnapFlagToNearestTempoCommand = new RelayCommand(_ => {}, _ => SelectedFlag != null);
+            SnapFlagToNearestTempoCommand = new RelayCommand(_ => { }, _ => SelectedFlag != null);
         }
     }
 }

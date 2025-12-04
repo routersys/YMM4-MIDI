@@ -104,6 +104,19 @@ namespace MIDI.UI.ViewModels
         public double LoopStartX => PlaybackService.LoopStart.TotalSeconds * HorizontalZoom;
         public double LoopDurationWidth => (PlaybackService.LoopEnd - PlaybackService.LoopStart).TotalSeconds * HorizontalZoom;
 
+        public double MasterVolume
+        {
+            get => PlaybackService.MasterVolume;
+            set
+            {
+                if (PlaybackService.MasterVolume != value)
+                {
+                    PlaybackService.MasterVolume = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public string PlayButtonIcon => PlaybackService.IsPlaying ? "M18,18H6V6H18V18Z" : "M8,5.14V19.14L19,12.14L8,5.14Z";
 
         private string _statusText = "準備完了";
