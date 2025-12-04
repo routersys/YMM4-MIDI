@@ -1,8 +1,8 @@
-﻿using System.Windows;
+﻿using System.Windows.Controls;
 
 namespace MIDI.Tool.EMEL.View
 {
-    public partial class EmelEditorWindow : Window
+    public partial class EmelEditorWindow : UserControl
     {
         public EmelEditorWindow()
         {

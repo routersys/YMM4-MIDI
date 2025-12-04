@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -6,6 +7,8 @@ using System.Windows;
 using MIDI.UI.Commands;
 using MIDI.UI.Views;
 using MIDI.Tool.EMEL.View;
+using MIDI.UI.Interface;
+using MIDI.UI.Services;
 
 namespace MIDI.Tool.ViewModel
 {
@@ -15,7 +18,7 @@ namespace MIDI.Tool.ViewModel
         public ICommand OpenEmelEditorCommand { get; }
 
         private static MidiEditorWindow? midiEditorWindowInstance;
-        private static EmelEditorWindow? emelEditorWindowInstance;
+        private readonly IDockingWindowService _windowService;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -23,6 +26,7 @@ namespace MIDI.Tool.ViewModel
         {
             OpenMidiEditorCommand = new RelayCommand(OpenMidiEditor);
             OpenEmelEditorCommand = new RelayCommand(OpenEmelEditor);
+            _windowService = new DockingWindowService();
         }
 
         private void OpenMidiEditor(object? parameter)
@@ -53,23 +57,8 @@ namespace MIDI.Tool.ViewModel
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                if (emelEditorWindowInstance != null && emelEditorWindowInstance.IsLoaded)
-                {
-                    if (emelEditorWindowInstance.WindowState == WindowState.Minimized)
-                    {
-                        emelEditorWindowInstance.WindowState = WindowState.Normal;
-                    }
-                    emelEditorWindowInstance.Activate();
-                    return;
-                }
-
-                emelEditorWindowInstance = new EmelEditorWindow()
-                {
-                    Owner = Application.Current.MainWindow,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner
-                };
-                emelEditorWindowInstance.Closed += (s, e) => { emelEditorWindowInstance = null; };
-                emelEditorWindowInstance.Show();
+                var content = new EmelEditorWindow();
+                _windowService.ShowWindow(content, "EMELエディタ", 800, 450);
             });
         }
 
