@@ -2,9 +2,9 @@
 using System.Windows;
 using System.Windows.Input;
 
-namespace MIDI.UI.ViewModels.MidiEditor
+namespace MIDI.UI.ViewModels.MidiEditor.Logic
 {
-    public class PianoRollMouseHandler
+    public class PianoRollInputHandler
     {
         public enum DragMode { None, Move, ResizeLeft, ResizeRight, Scrub, Select, DragFlag }
         public event Action<NoteViewModel?, bool>? NoteSelected;
@@ -16,7 +16,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
         public DragMode CurrentDragMode { get; internal set; } = DragMode.None;
         private const double ResizeHandleWidth = 8.0;
 
-        public PianoRollMouseHandler(MidiEditorViewModel vm)
+        public PianoRollInputHandler(MidiEditorViewModel vm)
         {
             _vm = vm;
         }
@@ -25,8 +25,8 @@ namespace MIDI.UI.ViewModels.MidiEditor
         {
             if (note != null)
             {
-                double noteX = _vm.TicksToTime(note.StartTicks).TotalSeconds * _vm.HorizontalZoom;
-                double noteWidth = _vm.TicksToTime(note.DurationTicks).TotalSeconds * _vm.HorizontalZoom;
+                double noteX = _vm.ViewManager.TicksToTime(note.StartTicks).TotalSeconds * _vm.HorizontalZoom;
+                double noteWidth = _vm.ViewManager.TicksToTime(note.DurationTicks).TotalSeconds * _vm.HorizontalZoom;
 
                 if (position.X <= noteX + ResizeHandleWidth) return DragMode.ResizeLeft;
                 if (position.X >= noteX + noteWidth - ResizeHandleWidth) return DragMode.ResizeRight;
@@ -57,8 +57,8 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
             if (e.ClickCount == 2)
             {
-                if (noteUnderCursor != null) _vm.RemoveNote(noteUnderCursor);
-                else _vm.AddNoteAt(position);
+                if (noteUnderCursor != null) _vm.NoteEditorManager.RemoveNote(noteUnderCursor);
+                else _vm.NoteEditorManager.AddNoteAt(position);
                 e.Handled = true;
                 return;
             }
@@ -66,7 +66,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
             if (flagUnderCursor != null)
             {
                 CurrentDragMode = DragMode.DragFlag;
-                _vm.ClearSelections(clearNotes: true, clearFlags: false);
+                _vm.SelectionManager.ClearSelections(clearNotes: true, clearFlags: false);
                 if (!flagUnderCursor.IsSelected)
                 {
                     if (!isCtrlPressed)
@@ -88,7 +88,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
             }
             else if (noteUnderCursor != null)
             {
-                _vm.ClearSelections(clearNotes: false, clearFlags: true);
+                _vm.SelectionManager.ClearSelections(clearNotes: false, clearFlags: true);
                 if (!noteUnderCursor.IsSelected)
                 {
                     if (!isCtrlPressed)
@@ -107,8 +107,8 @@ namespace MIDI.UI.ViewModels.MidiEditor
                 _dragStartNoteData.Clear();
                 foreach (var note in _vm.SelectedNotes)
                 {
-                    var startTime = _vm.TicksToTime(note.StartTicks);
-                    var durationTime = _vm.TicksToTime(note.StartTicks + note.DurationTicks) - startTime;
+                    var startTime = _vm.ViewManager.TicksToTime(note.StartTicks);
+                    var durationTime = _vm.ViewManager.TicksToTime(note.StartTicks + note.DurationTicks) - startTime;
                     _dragStartNoteData[note] = (note.StartTicks, startTime, note.DurationTicks, durationTime, note.NoteNumber, note.CentOffset, note.Channel, note.Velocity);
                     note.IsEditing = true;
                 }
@@ -121,35 +121,35 @@ namespace MIDI.UI.ViewModels.MidiEditor
             {
                 if (MidiEditorSettings.Default.Input.PianoRollMouseMode == PianoRollMouseMode.Editor && !isShiftPressed && !isCtrlPressed)
                 {
-                    var newNote = _vm.AddNoteAt(position);
+                    var newNote = _vm.NoteEditorManager.AddNoteAt(position);
                     if (newNote != null)
                     {
-                        _vm.ClearSelections();
+                        _vm.SelectionManager.ClearSelections();
                         newNote.IsSelected = true;
                         _vm.SelectedNotes.Add(newNote);
                         _vm.SelectedNote = newNote;
 
                         CurrentDragMode = DragMode.ResizeRight;
                         _dragStartNoteData.Clear();
-                        var startTime = _vm.TicksToTime(newNote.StartTicks);
-                        var durationTime = _vm.TicksToTime(newNote.StartTicks + newNote.DurationTicks) - startTime;
+                        var startTime = _vm.ViewManager.TicksToTime(newNote.StartTicks);
+                        var durationTime = _vm.ViewManager.TicksToTime(newNote.StartTicks + newNote.DurationTicks) - startTime;
                         _dragStartNoteData[newNote] = (newNote.StartTicks, startTime, newNote.DurationTicks, durationTime, newNote.NoteNumber, newNote.CentOffset, newNote.Channel, newNote.Velocity);
                         newNote.IsEditing = true;
                     }
                 }
                 else if (isShiftPressed)
                 {
-                    if (!isCtrlPressed) _vm.ClearSelections();
+                    if (!isCtrlPressed) _vm.SelectionManager.ClearSelections();
                     CurrentDragMode = DragMode.Select;
                     _vm.SelectionRectangle = new Rect(_dragStartPoint, new Size(0, 0));
                 }
                 else
                 {
-                    if (!isCtrlPressed) _vm.ClearSelections();
+                    if (!isCtrlPressed) _vm.SelectionManager.ClearSelections();
                     CurrentDragMode = DragMode.Scrub;
                     if (_vm.IsPlaying) _vm.PlayPauseCommand.Execute(null);
-                    _vm.BeginScrub();
-                    _vm.CurrentTime = _vm.PositionToTime(position.X);
+                    _vm.PlaybackService.BeginScrub();
+                    _vm.CurrentTime = _vm.ViewManager.PositionToTime(position.X);
                 }
             }
             e.Handled = true;
@@ -159,8 +159,8 @@ namespace MIDI.UI.ViewModels.MidiEditor
         {
             if (e.LeftButton != MouseButtonState.Pressed || _vm.MidiFile == null) return;
 
-            var dragStartTimeOnScreen = _vm.PositionToTime(_dragStartPoint.X);
-            var dragCurrentTimeOnScreen = _vm.PositionToTime(position.X);
+            var dragStartTimeOnScreen = _vm.ViewManager.PositionToTime(_dragStartPoint.X);
+            var dragCurrentTimeOnScreen = _vm.ViewManager.PositionToTime(position.X);
             var timeDelta = dragCurrentTimeOnScreen - dragStartTimeOnScreen;
 
             if (CurrentDragMode == DragMode.DragFlag)
@@ -177,7 +177,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
             if (CurrentDragMode == DragMode.Scrub)
             {
-                _vm.CurrentTime = _vm.PositionToTime(position.X);
+                _vm.CurrentTime = _vm.ViewManager.PositionToTime(position.X);
                 return;
             }
 
@@ -193,9 +193,9 @@ namespace MIDI.UI.ViewModels.MidiEditor
                 var deltaX = position.X - _dragStartPoint.X;
                 var deltaY = position.Y - _dragStartPoint.Y;
 
-                var timeAtZero = _vm.PositionToTime(0);
-                var timeAtDeltaX = _vm.PositionToTime(deltaX);
-                var tickDelta = _vm.TimeToTicks(timeAtDeltaX - timeAtZero);
+                var timeAtZero = _vm.ViewManager.PositionToTime(0);
+                var timeAtDeltaX = _vm.ViewManager.PositionToTime(deltaX);
+                var tickDelta = _vm.ViewManager.TimeToTicks(timeAtDeltaX - timeAtZero);
 
                 bool isAltPressed = Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt);
                 var noteToResize = _vm.SelectedNotes.FirstOrDefault();
@@ -210,7 +210,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
                             if (_vm.EditorSettings.Grid.EnableSnapToGrid && !(Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)))
                             {
-                                var ticksPerGrid = _vm.GetTicksPerGrid();
+                                var ticksPerGrid = _vm.ViewManager.GetTicksPerGrid();
                                 if (ticksPerGrid > 0) newStartTicks = (long)(Math.Round((double)newStartTicks / ticksPerGrid) * ticksPerGrid);
                             }
 
@@ -236,7 +236,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
                             if (_vm.EditorSettings.Grid.EnableSnapToGrid && !(Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)))
                             {
-                                var ticksPerGrid = _vm.GetTicksPerGrid();
+                                var ticksPerGrid = _vm.ViewManager.GetTicksPerGrid();
                                 if (ticksPerGrid > 0) newEndTicks = (long)(Math.Round((double)newEndTicks / ticksPerGrid) * ticksPerGrid);
                             }
                             var newDurationTicks = Math.Max(1, newEndTicks - startTicks);
@@ -251,7 +251,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
                             if (_vm.EditorSettings.Grid.EnableSnapToGrid && !(Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)))
                             {
-                                var ticksPerGrid = _vm.GetTicksPerGrid();
+                                var ticksPerGrid = _vm.ViewManager.GetTicksPerGrid();
                                 if (ticksPerGrid > 0) newStartTicks = (long)(Math.Round((double)newStartTicks / ticksPerGrid) * ticksPerGrid);
                             }
 
@@ -293,7 +293,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                 }
                 else if (originalDragMode == DragMode.Scrub)
                 {
-                    _vm.EndScrub();
+                    _vm.PlaybackService.EndScrub();
                 }
                 else if (originalDragMode == DragMode.Select)
                 {
@@ -348,7 +348,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
         {
             if (_vm.IsPlaying) _vm.PlayPauseCommand.Execute(null);
             CurrentDragMode = DragMode.Scrub;
-            _vm.BeginScrub();
+            _vm.PlaybackService.BeginScrub();
             OnTimeBarMouseMove(position);
         }
 
@@ -356,7 +356,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
         {
             if (CurrentDragMode == DragMode.Scrub)
             {
-                _vm.CurrentTime = _vm.PositionToTime(position.X);
+                _vm.CurrentTime = _vm.ViewManager.PositionToTime(position.X);
             }
         }
 
@@ -364,7 +364,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
         {
             if (CurrentDragMode == DragMode.Scrub)
             {
-                _vm.EndScrub();
+                _vm.PlaybackService.EndScrub();
                 CurrentDragMode = DragMode.None;
             }
         }
