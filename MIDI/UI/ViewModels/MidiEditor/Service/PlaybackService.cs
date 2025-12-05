@@ -21,6 +21,8 @@ namespace MIDI.UI.ViewModels.MidiEditor
     public class PlaybackService : ViewModelBase, IDisposable
     {
         private MeltySynth.MidiFile? _meltyMidiFile;
+        private NAudioMidi.MidiFile? _internalMidiFile;
+        private TimeSpan _playbackDuration;
         private IWavePlayer? _waveOut;
         private Synthesizer? _sequencerSynthesizer;
         private Synthesizer? _keyboardSynthesizer;
@@ -168,9 +170,9 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
             if (wasPlaying)
             {
+                IsPlaying = false;
                 _playbackCts?.Cancel();
                 _waveOut?.Pause();
-                IsPlaying = false;
                 _stopwatch.Stop();
             }
 
@@ -236,19 +238,30 @@ namespace MIDI.UI.ViewModels.MidiEditor
             lock (_sequencerLock)
             {
                 _meltyMidiFile = newMeltyMidiFile;
-                if (newNaudioMidiFile != null)
+                _internalMidiFile = newNaudioMidiFile;
+
+                if (_internalMidiFile != null)
                 {
-                    GenerateCheckpoints(newNaudioMidiFile);
+                    GenerateCheckpoints(_internalMidiFile);
+                    if (_sortedNaudioEvents.Any())
+                    {
+                        _playbackDuration = _sortedNaudioEvents.Last().Time + TimeSpan.FromSeconds(1);
+                    }
+                    else
+                    {
+                        _playbackDuration = TimeSpan.FromSeconds(1);
+                    }
                 }
                 else
                 {
                     _checkpoints.Clear();
                     _sortedNaudioEvents.Clear();
                     _checkpoints.Add(new PlaybackStateSnapshot(TimeSpan.Zero));
+                    _playbackDuration = _meltyMidiFile?.Length ?? TimeSpan.Zero;
                 }
             }
 
-            var targetTime = startTime ?? TimeSpan.Zero;
+            var targetTime = startTime ?? _currentTime;
 
             if (_sequencerSynthesizer != null)
             {
@@ -310,7 +323,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                     MasterVolume = masterVolume;
                 }
 
-                if (_meltyMidiFile != null)
+                if (_internalMidiFile != null || _meltyMidiFile != null)
                 {
                     Seek(CurrentTime);
                 }
@@ -340,14 +353,11 @@ namespace MIDI.UI.ViewModels.MidiEditor
         public void PlayPause()
         {
             InitializePlayback();
-            if (_waveOut == null || _sequencerSynthesizer == null || _meltyMidiFile == null) return;
+            if (_waveOut == null || _sequencerSynthesizer == null || (_meltyMidiFile == null && _internalMidiFile == null)) return;
 
             if (IsPlaying)
             {
-                _playbackCts?.Cancel();
-                _waveOut.Pause();
-                IsPlaying = false;
-                _stopwatch.Stop();
+                Stop();
             }
             else
             {
@@ -356,6 +366,11 @@ namespace MIDI.UI.ViewModels.MidiEditor
                 if (IsLooping && (startTime < LoopStart || startTime >= LoopEnd))
                 {
                     startTime = LoopStart;
+                }
+
+                if (startTime >= _playbackDuration)
+                {
+                    startTime = TimeSpan.Zero;
                 }
 
                 Seek(startTime);
@@ -384,7 +399,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
         {
             while (!token.IsCancellationRequested)
             {
-                if (_meltyMidiFile == null || _sequencerSynthesizer == null || _waveProvider == null) break;
+                if (_sequencerSynthesizer == null || _waveProvider == null) break;
 
                 var newTime = _timeAtLastUpdate + _stopwatch.Elapsed;
 
@@ -428,7 +443,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                     continue;
                 }
 
-                if (!IsLooping && newTime >= _meltyMidiFile.Length)
+                if (!IsLooping && newTime >= _playbackDuration)
                 {
                     Application.Current.Dispatcher.Invoke(Stop);
                     break;
@@ -471,18 +486,16 @@ namespace MIDI.UI.ViewModels.MidiEditor
 
         public void Stop()
         {
+            IsPlaying = false;
             _playbackCts?.Cancel();
             _waveOut?.Stop();
             lock (_sequencerLock)
             {
                 _sequencerSynthesizer?.Reset();
             }
-            CurrentTime = TimeSpan.Zero;
-            _timeAtLastUpdate = TimeSpan.Zero;
             _stopwatch.Reset();
-            if (_waveProvider != null) _waveProvider.SetSamplePosition(0);
-            IsPlaying = false;
             _nextBeatTime = 0;
+            if (_waveProvider != null && !IsPlaying) _waveProvider.SetSamplePosition(0);
         }
 
         public void Seek(TimeSpan time)
@@ -494,7 +507,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
             {
                 lock (_sequencerLock)
                 {
-                    if (_sequencerSynthesizer is null || _meltyMidiFile is null || ParentViewModel.MidiFile is null) return;
+                    if (_sequencerSynthesizer is null || _internalMidiFile is null) return;
 
                     _sequencerSynthesizer.Reset();
 
@@ -505,6 +518,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                         _sequencerSynthesizer.ProcessMidiMessage(i, 0xB0, 10, 64);
                         _sequencerSynthesizer.ProcessMidiMessage(i, 0xE0, 0, 64);
                         _sequencerSynthesizer.ProcessMidiMessage(i, 0xB0, 64, 0);
+                        _sequencerSynthesizer.ProcessMidiMessage(i, 0xC0, 0, 0);
                     }
 
                     var checkpoint = _checkpoints.LastOrDefault(c => c.Time <= time);
@@ -537,9 +551,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                     for (int i = firstEventIndex; i < _sortedNaudioEvents.Count; i++)
                     {
                         var timedEvent = _sortedNaudioEvents[i];
-                        if (timedEvent.Time >= time) break;
-
-                        ProcessNaudioEventOnSynthesizer(timedEvent.Event);
+                        if (timedEvent.Time > time) break;
 
                         var message = timedEvent.Event;
                         if (message.Channel >= 1 && message.Channel <= 16)
@@ -558,10 +570,14 @@ namespace MIDI.UI.ViewModels.MidiEditor
                                 activeNotesAtSeekTime.Remove(noteKey);
                                 activeNoteStartTimesAtSeekTime.Remove(noteKey);
                             }
+                            else
+                            {
+                                ProcessNaudioEventOnSynthesizer(timedEvent.Event);
+                            }
                         }
                     }
 
-                    var currentTempoMap = MidiProcessor.ExtractTempoMap(ParentViewModel.MidiFile, MidiConfiguration.Default);
+                    var currentTempoMap = MidiProcessor.ExtractTempoMap(_internalMidiFile, MidiConfiguration.Default);
                     foreach (var noteKey in activeNotesAtSeekTime)
                     {
                         TimeSpan noteStartTime;
@@ -570,7 +586,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                             var noteOnEvent = FindNoteOnEvent(_sortedNaudioEvents, noteKey.Channel + 1, noteKey.NoteNumber, noteStartTime);
                             if (noteOnEvent != null && noteOnEvent.OffEvent != null)
                             {
-                                var noteOffTime = MidiProcessor.TicksToTimeSpan(noteOnEvent.OffEvent.AbsoluteTime, ParentViewModel.MidiFile.DeltaTicksPerQuarterNote, currentTempoMap);
+                                var noteOffTime = MidiProcessor.TicksToTimeSpan(noteOnEvent.OffEvent.AbsoluteTime, _internalMidiFile.DeltaTicksPerQuarterNote, currentTempoMap);
 
                                 if (noteOffTime >= time)
                                 {
@@ -579,7 +595,6 @@ namespace MIDI.UI.ViewModels.MidiEditor
                             }
                         }
                     }
-
 
                     if (_waveProvider != null)
                     {
@@ -710,7 +725,10 @@ namespace MIDI.UI.ViewModels.MidiEditor
             }
 
 
-            _sortedNaudioEvents = allEvents.OrderBy(e => e.Time).ThenBy(e => e.Event.AbsoluteTime).ToList();
+            _sortedNaudioEvents = allEvents.OrderBy(e => e.Time)
+                                           .ThenBy(e => e.Event.AbsoluteTime)
+                                           .ThenBy(e => e.Event.CommandCode == NAudioMidi.MidiCommandCode.NoteOn ? 1 : 0)
+                                           .ToList();
 
             _checkpoints.Add(new PlaybackStateSnapshot(TimeSpan.Zero));
             if (!_sortedNaudioEvents.Any()) return;

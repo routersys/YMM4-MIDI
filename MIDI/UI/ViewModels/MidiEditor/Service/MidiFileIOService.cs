@@ -116,6 +116,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
             _loadCts = new CancellationTokenSource();
             var token = _loadCts.Token;
 
+            _vm.PlaybackService.Stop();
+
             var loadingViewModel = new ProjectLoadingViewModel();
             var loadingWindow = new ProjectLoadingWindow(loadingViewModel)
             {
@@ -243,65 +245,6 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
 
                         ApplyTempoChanges(midiFile, loadedProject.TempoChanges);
                         ApplyControlChanges(midiFile, loadedProject.ControlChangeOperations);
-                    }
-
-                    long newTotalTicks = 0;
-                    try
-                    {
-                        if (midiFile.Events != null)
-                        {
-                            newTotalTicks = midiFile.Events.SelectMany(t => t).Any() ? midiFile.Events.SelectMany(t => t).Max(e => e.AbsoluteTime) : 0;
-                        }
-                    }
-                    catch { }
-
-                    var newTempoMap = MidiProcessor.ExtractTempoMap(midiFile, MidiConfiguration.Default);
-                    if (newTempoMap == null) newTempoMap = new List<NAudioMidi.TempoEvent>();
-
-                    var newDuration = MidiProcessor.TicksToTimeSpan(newTotalTicks, midiFile.DeltaTicksPerQuarterNote, newTempoMap);
-
-                    string tempExportPath = Path.GetTempFileName();
-                    try
-                    {
-                        var events = new NAudioMidi.MidiEventCollection(midiFile.FileFormat, midiFile.DeltaTicksPerQuarterNote);
-                        for (int i = 0; i < midiFile.Tracks; i++)
-                        {
-                            events.AddTrack();
-                            foreach (var ev in midiFile.Events[i])
-                            {
-                                try
-                                {
-                                    if (ev == null) continue;
-                                    if (ev is NAudioMidi.TextEvent te && te.Text != null && te.Text.StartsWith("CENT_OFFSET:")) continue;
-
-                                    var clone = ev.Clone();
-                                    if (clone != null) events[i].Add(clone);
-                                }
-                                catch { }
-                            }
-                        }
-                        NAudioMidi.MidiFile.Export(tempExportPath, events);
-
-                        TimeSpan targetTime = oldCurrentTime;
-                        if (Math.Abs((oldDuration - newDuration).TotalSeconds) > 0.5)
-                        {
-                            targetTime = TimeSpan.Zero;
-                        }
-
-                        using (var fs = new FileStream(tempExportPath, FileMode.Open, FileAccess.Read))
-                        {
-                            var ms = new MemoryStream();
-                            await fs.CopyToAsync(ms);
-                            ms.Position = 0;
-                            await Application.Current.Dispatcher.InvokeAsync(() => {
-                                _vm.PlaybackService.LoadMidiData(ms, targetTime);
-                                _vm.PlaybackService.InitializePlayback(_vm.SelectedSoundFont);
-                            });
-                        }
-                    }
-                    finally
-                    {
-                        if (File.Exists(tempExportPath)) File.Delete(tempExportPath);
                     }
 
                     int num = 4;
@@ -459,6 +402,18 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                 _vm.OnPropertyChanged(nameof(_vm.MaxTime));
                 _vm.ViewManager.UpdateTimeRuler();
                 _vm.ViewManager.RenderThumbnail();
+
+                var newDuration = _vm.MaxTime;
+                TimeSpan targetTime = oldCurrentTime;
+                if (Math.Abs((oldDuration - newDuration).TotalSeconds) > 0.5)
+                {
+                    targetTime = TimeSpan.Zero;
+                }
+                _vm.CurrentTime = targetTime;
+
+                _vm.PlaybackService.InitializePlayback(_vm.SelectedSoundFont);
+                _vm.UpdatePlaybackMidiData();
+
                 _vm.IsMidiFileLoaded = true;
                 _vm.RaiseNotesLoaded();
                 _vm.RequestRedraw(true);

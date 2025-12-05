@@ -218,7 +218,7 @@ namespace MIDI.UI.ViewModels
                 NAudio.Midi.MidiFile.Export(tempFile, MidiFile.Events);
                 using (var stream = new System.IO.MemoryStream(System.IO.File.ReadAllBytes(tempFile)))
                 {
-                    PlaybackService.LoadMidiData(stream);
+                    PlaybackService.LoadMidiData(stream, CurrentTime);
                 }
             }
             catch (Exception ex) { MessageBox.Show($"MIDIデータの更新に失敗しました: {ex.Message}"); }
