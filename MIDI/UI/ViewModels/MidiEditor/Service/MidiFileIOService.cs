@@ -134,6 +134,9 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                     return;
                 }
 
+                var oldDuration = _vm.MaxTime;
+                var oldCurrentTime = _vm.CurrentTime;
+
                 var result = await Task.Run(async () =>
                 {
                     token.ThrowIfCancellationRequested();
@@ -146,36 +149,46 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                     if (extension == ".ymidi")
                     {
                         loadingViewModel.StatusMessage = "プロジェクトファイルを解析中...";
-                        loadedProject = await ProjectService.LoadProjectAsync(path);
-
-                        if (loadedProject.IsNewFile)
+                        try
                         {
-                            isNewProject = true;
-                            var tempPath = Path.GetTempFileName();
-                            var blankMidi = new MidiEventCollection(1, 480);
-                            blankMidi.AddTrack();
-                            blankMidi[0].Add(new TimeSignatureEvent(0, 4, 2, 24, 8));
-                            blankMidi[0].Add(new TempoEvent(500000, 0));
-                            blankMidi[0].Add(new MetaEvent(MetaEventType.EndTrack, 0, 0));
-                            NAudioMidi.MidiFile.Export(tempPath, blankMidi);
-                            midiPathToLoad = tempPath;
+                            loadedProject = await ProjectService.LoadProjectAsync(path);
                         }
-                        else
+                        catch
                         {
-                            midiPathToLoad = loadedProject.MidiFilePath;
-                            if (!File.Exists(midiPathToLoad))
+                            loadedProject = null;
+                        }
+
+                        if (loadedProject != null)
+                        {
+                            if (loadedProject.IsNewFile)
                             {
-                                bool found = false;
-                                await Application.Current.Dispatcher.InvokeAsync(() => {
-                                    var missingFileDialog = new MissingMidiFileDialog(new MissingMidiFileViewModel(midiPathToLoad)) { Owner = Application.Current.MainWindow };
-                                    if (missingFileDialog.ShowDialog() == true)
-                                    {
-                                        midiPathToLoad = missingFileDialog.ViewModel.NewPath;
-                                        loadedProject.MidiFilePath = midiPathToLoad;
-                                        found = true;
-                                    }
-                                });
-                                if (!found) throw new FileNotFoundException("プロジェクトに関連付けられたMIDIファイルが見つかりません。", midiPathToLoad);
+                                isNewProject = true;
+                                var tempPath = Path.GetTempFileName();
+                                var blankMidi = new MidiEventCollection(1, 480);
+                                blankMidi.AddTrack();
+                                blankMidi[0].Add(new TimeSignatureEvent(0, 4, 2, 24, 8));
+                                blankMidi[0].Add(new TempoEvent(500000, 0));
+                                blankMidi[0].Add(new MetaEvent(MetaEventType.EndTrack, 0, 0));
+                                NAudioMidi.MidiFile.Export(tempPath, blankMidi);
+                                midiPathToLoad = tempPath;
+                            }
+                            else
+                            {
+                                midiPathToLoad = loadedProject.MidiFilePath;
+                                if (!File.Exists(midiPathToLoad))
+                                {
+                                    bool found = false;
+                                    await Application.Current.Dispatcher.InvokeAsync(() => {
+                                        var missingFileDialog = new MissingMidiFileDialog(new MissingMidiFileViewModel(midiPathToLoad)) { Owner = Application.Current.MainWindow };
+                                        if (missingFileDialog.ShowDialog() == true)
+                                        {
+                                            midiPathToLoad = missingFileDialog.ViewModel.NewPath;
+                                            loadedProject.MidiFilePath = midiPathToLoad;
+                                            found = true;
+                                        }
+                                    });
+                                    if (!found) throw new FileNotFoundException("プロジェクトに関連付けられたMIDIファイルが見つかりません。", midiPathToLoad);
+                                }
                             }
                         }
                     }
@@ -183,8 +196,45 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                     if (!File.Exists(midiPathToLoad)) throw new FileNotFoundException("MIDIファイルが見つかりません。", midiPathToLoad);
 
                     loadingViewModel.StatusMessage = "MIDIデータを読み込み中...";
-                    var midiFile = new NAudioMidi.MidiFile(midiPathToLoad, false);
-                    var originalMidi = new NAudioMidi.MidiFile(midiPathToLoad, false);
+
+                    NAudioMidi.MidiFile midiFile;
+                    NAudioMidi.MidiFile originalMidi;
+
+                    try
+                    {
+                        midiFile = new NAudioMidi.MidiFile(midiPathToLoad, false);
+                        originalMidi = new NAudioMidi.MidiFile(midiPathToLoad, false);
+                    }
+                    catch
+                    {
+                        var tempPath = Path.GetTempFileName();
+                        var blankMidi = new MidiEventCollection(1, 480);
+                        blankMidi.AddTrack();
+                        blankMidi[0].Add(new TimeSignatureEvent(0, 4, 2, 24, 8));
+                        blankMidi[0].Add(new TempoEvent(500000, 0));
+                        blankMidi[0].Add(new MetaEvent(MetaEventType.EndTrack, 0, 0));
+                        NAudioMidi.MidiFile.Export(tempPath, blankMidi);
+
+                        midiFile = new NAudioMidi.MidiFile(tempPath, false);
+                        originalMidi = new NAudioMidi.MidiFile(tempPath, false);
+                    }
+
+                    if (midiFile.Events == null)
+                    {
+                        var tempPath = Path.GetTempFileName();
+                        var blankMidi = new MidiEventCollection(1, 480);
+                        blankMidi.AddTrack();
+                        blankMidi[0].Add(new MetaEvent(MetaEventType.EndTrack, 0, 0));
+                        NAudioMidi.MidiFile.Export(tempPath, blankMidi);
+                        midiFile = new NAudioMidi.MidiFile(tempPath, false);
+                        originalMidi = new NAudioMidi.MidiFile(tempPath, false);
+                    }
+
+                    if (midiFile.Events.Tracks == 0)
+                    {
+                        midiFile.Events.AddTrack();
+                        midiFile.Events[0].Add(new MetaEvent(MetaEventType.EndTrack, 0, 0));
+                    }
 
                     if (loadedProject != null)
                     {
@@ -195,6 +245,21 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                         ApplyControlChanges(midiFile, loadedProject.ControlChangeOperations);
                     }
 
+                    long newTotalTicks = 0;
+                    try
+                    {
+                        if (midiFile.Events != null)
+                        {
+                            newTotalTicks = midiFile.Events.SelectMany(t => t).Any() ? midiFile.Events.SelectMany(t => t).Max(e => e.AbsoluteTime) : 0;
+                        }
+                    }
+                    catch { }
+
+                    var newTempoMap = MidiProcessor.ExtractTempoMap(midiFile, MidiConfiguration.Default);
+                    if (newTempoMap == null) newTempoMap = new List<NAudioMidi.TempoEvent>();
+
+                    var newDuration = MidiProcessor.TicksToTimeSpan(newTotalTicks, midiFile.DeltaTicksPerQuarterNote, newTempoMap);
+
                     string tempExportPath = Path.GetTempFileName();
                     try
                     {
@@ -202,16 +267,36 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                         for (int i = 0; i < midiFile.Tracks; i++)
                         {
                             events.AddTrack();
-                            foreach (var ev in midiFile.Events[i]) events[i].Add(ev.Clone());
+                            foreach (var ev in midiFile.Events[i])
+                            {
+                                try
+                                {
+                                    if (ev == null) continue;
+                                    if (ev is NAudioMidi.TextEvent te && te.Text != null && te.Text.StartsWith("CENT_OFFSET:")) continue;
+
+                                    var clone = ev.Clone();
+                                    if (clone != null) events[i].Add(clone);
+                                }
+                                catch { }
+                            }
                         }
                         NAudioMidi.MidiFile.Export(tempExportPath, events);
+
+                        TimeSpan targetTime = oldCurrentTime;
+                        if (Math.Abs((oldDuration - newDuration).TotalSeconds) > 0.5)
+                        {
+                            targetTime = TimeSpan.Zero;
+                        }
 
                         using (var fs = new FileStream(tempExportPath, FileMode.Open, FileAccess.Read))
                         {
                             var ms = new MemoryStream();
                             await fs.CopyToAsync(ms);
                             ms.Position = 0;
-                            await Application.Current.Dispatcher.InvokeAsync(() => _vm.PlaybackService.LoadMidiData(ms));
+                            await Application.Current.Dispatcher.InvokeAsync(() => {
+                                _vm.PlaybackService.LoadMidiData(ms, targetTime);
+                                _vm.PlaybackService.InitializePlayback(_vm.SelectedSoundFont);
+                            });
                         }
                     }
                     finally
@@ -219,37 +304,97 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                         if (File.Exists(tempExportPath)) File.Delete(tempExportPath);
                     }
 
-                    var timeSig = midiFile.Events[0].OfType<NAudioMidi.TimeSignatureEvent>().FirstOrDefault();
-                    int num = timeSig?.Numerator ?? 4;
-                    int den = timeSig?.Denominator ?? 4;
+                    int num = 4;
+                    int den = 4;
+                    try
+                    {
+                        if (midiFile.Events.Tracks > 0)
+                        {
+                            var timeSig = midiFile.Events[0].OfType<NAudioMidi.TimeSignatureEvent>().FirstOrDefault();
+                            if (timeSig != null)
+                            {
+                                num = timeSig.Numerator;
+                                den = timeSig.Denominator;
+                            }
+                        }
+                    }
+                    catch { }
 
                     var tempoMap = MidiProcessor.ExtractTempoMap(midiFile, MidiConfiguration.Default);
+                    if (tempoMap == null) tempoMap = new List<NAudioMidi.TempoEvent>();
+
                     var tempoEvent = tempoMap.FirstOrDefault();
                     double tempoValue = tempoEvent != null ? 60000000.0 / tempoEvent.MicrosecondsPerQuarterNote : 120.0;
 
-                    var tempos = midiFile.Events[0].OfType<NAudioMidi.TempoEvent>().Select(e => new TempoEventViewModel(e)).ToList();
-                    var ccs = midiFile.Events.SelectMany(track => track).OfType<NAudioMidi.ControlChangeEvent>().Select(e => new ControlChangeEventViewModel(e)).ToList();
+                    var tempos = new List<TempoEventViewModel>();
+                    try
+                    {
+                        if (midiFile.Events.Tracks > 0)
+                            tempos = midiFile.Events[0].OfType<NAudioMidi.TempoEvent>().Select(e => new TempoEventViewModel(e)).ToList();
+                    }
+                    catch { }
 
-                    var centOffsetEvents = midiFile.Events
-                        .SelectMany(track => track.OfType<TextEvent>())
-                        .Where(e => e.Text.StartsWith("CENT_OFFSET:"))
-                        .ToDictionary(e => (e.AbsoluteTime, e.Channel, int.Parse(e.Text.Split(':')[1].Split(',')[1])), e => int.Parse(e.Text.Split(':')[1].Split(',')[2]));
+                    var ccs = new List<ControlChangeEventViewModel>();
+                    try
+                    {
+                        if (midiFile.Events != null)
+                            ccs = midiFile.Events.SelectMany(track => track).OfType<NAudioMidi.ControlChangeEvent>().Select(e => new ControlChangeEventViewModel(e)).ToList();
+                    }
+                    catch { }
 
-                    var noteOnEvents = midiFile.Events
-                        .SelectMany((track, trackIndex) => track.OfType<NAudioMidi.NoteOnEvent>()
-                        .Select(noteOn => new { noteOn, trackIndex }))
-                        .Where(item => item.noteOn.OffEvent != null)
-                        .OrderBy(item => item.noteOn.AbsoluteTime)
-                        .ToList();
-
-                    var notes = noteOnEvents.Select(item => {
-                        var noteVm = new NoteViewModel(item.noteOn, midiFile.DeltaTicksPerQuarterNote, tempoMap, _vm);
-                        if (centOffsetEvents.TryGetValue((item.noteOn.AbsoluteTime, item.noteOn.Channel, item.noteOn.NoteNumber), out var offset))
+                    var centOffsetEvents = new Dictionary<(long, int, int), int>();
+                    try
+                    {
+                        if (midiFile.Events != null)
                         {
-                            noteVm.CentOffset = offset;
+                            centOffsetEvents = midiFile.Events
+                                .SelectMany(track => track.OfType<TextEvent>())
+                                .Where(e => e != null && !string.IsNullOrEmpty(e.Text) && e.Text.StartsWith("CENT_OFFSET:"))
+                                .ToDictionary(e => {
+                                    try
+                                    {
+                                        var parts = e.Text.Split(':')[1].Split(',');
+                                        return (e.AbsoluteTime, e.Channel, int.Parse(parts[1]));
+                                    }
+                                    catch { return (0L, 0, 0); }
+                                }, e => {
+                                    try
+                                    {
+                                        return int.Parse(e.Text.Split(':')[1].Split(',')[2]);
+                                    }
+                                    catch { return 0; }
+                                });
                         }
-                        return noteVm;
-                    }).ToList();
+                    }
+                    catch { }
+
+                    var notes = new List<NoteViewModel>();
+                    try
+                    {
+                        if (midiFile.Events != null)
+                        {
+                            var noteOnEvents = midiFile.Events
+                                .SelectMany((track, trackIndex) => track.OfType<NAudioMidi.NoteOnEvent>()
+                                .Select(noteOn => new { noteOn, trackIndex }))
+                                .Where(item => item.noteOn != null && item.noteOn.OffEvent != null)
+                                .OrderBy(item => item.noteOn.AbsoluteTime)
+                                .ToList();
+
+                            notes = noteOnEvents.Select(item => {
+                                try
+                                {
+                                    var noteVm = new NoteViewModel(item.noteOn, midiFile.DeltaTicksPerQuarterNote, tempoMap, _vm);
+                                    if (centOffsetEvents.TryGetValue((item.noteOn.AbsoluteTime, item.noteOn.Channel, item.noteOn.NoteNumber), out var offset))
+                                    {
+                                        noteVm.CentOffset = offset;
+                                    }
+                                    return noteVm;
+                                }
+                                catch { return null; }
+                            }).Where(n => n != null).Select(n => n!).ToList();
+                        }
+                    }
+                    catch { }
 
                     return (notes, midiFile, originalMidi, num, den, tempoValue, tempos, ccs, loadedProject, midiPathToLoad, isNewProject);
                 }, token);
@@ -333,6 +478,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
 
         private void ApplyTempoChanges(MidiFile midiFile, List<TempoChange> changes)
         {
+            if (midiFile.Events.Tracks == 0) midiFile.Events.AddTrack();
             var tempoTrack = midiFile.Events[0];
             foreach (var change in changes)
             {
@@ -368,6 +514,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
         {
             foreach (var op in operations)
             {
+                if (midiFile.Events.Tracks == 0) midiFile.Events.AddTrack();
                 var track = midiFile.Events.Tracks > 1 ? midiFile.Events[1] : midiFile.Events[0];
                 if (op.IsDeleted)
                 {
@@ -442,9 +589,13 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                     events.AddTrack();
                     foreach (var ev in _vm.MidiFile.Events[i])
                     {
-                        if (ev is NAudioMidi.NoteOnEvent noteOn && noteOn.OffEvent == null) continue;
-                        if (ev is NAudioMidi.TextEvent te && te.Text.StartsWith("CENT_OFFSET:")) continue;
-                        events[i].Add(ev.Clone());
+                        try
+                        {
+                            if (ev is NAudioMidi.NoteOnEvent noteOn && noteOn.OffEvent == null) continue;
+                            if (ev is NAudioMidi.TextEvent te && te.Text != null && te.Text.StartsWith("CENT_OFFSET:")) continue;
+                            events[i].Add(ev.Clone());
+                        }
+                        catch { }
                     }
                 }
 
@@ -643,9 +794,13 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                     events.AddTrack();
                     foreach (var ev in _vm.MidiFile.Events[i])
                     {
-                        if (ev is NAudioMidi.NoteOnEvent noteOn && noteOn.OffEvent == null) continue;
-                        if (ev is NAudioMidi.TextEvent te && te.Text.StartsWith("CENT_OFFSET:")) continue;
-                        events[i].Add(ev.Clone());
+                        try
+                        {
+                            if (ev is NAudioMidi.NoteOnEvent noteOn && noteOn.OffEvent == null) continue;
+                            if (ev is NAudioMidi.TextEvent te && te.Text.StartsWith("CENT_OFFSET:")) continue;
+                            events[i].Add(ev.Clone());
+                        }
+                        catch { }
                     }
                 }
 
