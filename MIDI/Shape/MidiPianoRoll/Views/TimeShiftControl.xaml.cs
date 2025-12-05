@@ -86,7 +86,6 @@ namespace MIDI.Shape.MidiPianoRoll.Views
         {
             if (HourUpButton == null) return;
 
-            // 制限機能を完全に無効化し、常にボタンを有効にする
             HourUpButton.IsEnabled = true;
             HourDownButton.IsEnabled = true;
             MinuteUpButton.IsEnabled = true;

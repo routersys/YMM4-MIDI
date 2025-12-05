@@ -78,13 +78,10 @@ namespace MidiPlugin.Services
         {
             var categories = new Dictionary<string, List<string>>();
 
-            // コメントを除去
             settingsContent = Regex.Replace(settingsContent, @"//.*", "");
 
-            // 全てのトップレベルカテゴリを抽出
             var categoryRegex = new Regex(@"""(?<name>\w+)"":\s*\{(?<content>[\s\S]*?)\}(?=[,\r\n\s]*""\w+""|[\r\n\s]*\}$)", RegexOptions.Multiline);
 
-            // "instrumentPresets" や "customInstruments" のような配列カテゴリを抽出
             var arrayCategoryRegex = new Regex(@"""(?<name>\w+)"":\s*\[(?<content>[\s\S]*?)\](?=[,\r\n\s]*""\w+""|[\r\n\s]*\}$)", RegexOptions.Multiline);
 
             var matches = categoryRegex.Matches(settingsContent);
@@ -94,7 +91,6 @@ namespace MidiPlugin.Services
                 var content = match.Groups["content"].Value;
                 var items = new List<string>();
 
-                // カテゴリ内のキーと値を抽出
                 var itemRegex = new Regex(@"""(\w+)"":\s*([^,{[\n\r]+)");
                 var itemMatches = itemRegex.Matches(content);
 
