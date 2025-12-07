@@ -57,6 +57,13 @@ namespace MIDI.UI.ViewModels.MidiEditor
             set => SetField(ref _isVisible, value);
         }
 
+        private bool _isMatch;
+        public bool IsMatch
+        {
+            get => _isMatch;
+            set => SetField(ref _isMatch, value);
+        }
+
         public PatchChangeEvent PatchChangeEvent { get; }
 
         public ProgramChangeEventViewModel(PatchChangeEvent patchChangeEvent)

@@ -65,6 +65,7 @@ namespace MIDI.UI.ViewModels
         public ICommand RemoveProgramChangeEventCommand { get; private set; } = null!;
         public ICommand ResetCcSearchCommand { get; private set; } = null!;
         public ICommand ResetTempoSearchCommand { get; private set; } = null!;
+        public ICommand ResetPcSearchCommand { get; private set; } = null!;
 
         public ICommand SplitSelectedNotesCommand { get; private set; } = null!;
         public ICommand MergeSelectedNotesCommand { get; private set; } = null!;
@@ -155,6 +156,7 @@ namespace MIDI.UI.ViewModels
             RemoveProgramChangeEventCommand = new RelayCommand(p => TrackEventManager.RemoveProgramChangeEvent(p as ProgramChangeEventViewModel), p => p is ProgramChangeEventViewModel);
             ResetCcSearchCommand = new RelayCommand(_ => CcSearchText = string.Empty);
             ResetTempoSearchCommand = new RelayCommand(_ => TempoSearchText = string.Empty);
+            ResetPcSearchCommand = new RelayCommand(_ => PcSearchText = string.Empty);
 
             SplitSelectedNotesCommand = new RelayCommand(_ => NoteEditorManager.SplitSelectedNotes(RightClickPosition), _ => CanSplitNotes);
             MergeSelectedNotesCommand = new RelayCommand(_ => NoteEditorManager.MergeSelectedNotes(), _ => CanMergeNotes);

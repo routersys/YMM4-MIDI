@@ -26,6 +26,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
 
             FilteredProgramChangeEvents = CollectionViewSource.GetDefaultView(_vm.ProgramChangeEvents);
             FilteredProgramChangeEvents.SortDescriptions.Add(new SortDescription(nameof(ProgramChangeEventViewModel.AbsoluteTime), ListSortDirection.Ascending));
+            FilteredProgramChangeEvents.Filter = FilterPcEvents;
         }
 
         private bool FilterCcEvents(object item)
@@ -71,6 +72,36 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
                 {
                     isMatch = vm.AbsoluteTime.ToString().Contains(searchText);
                 }
+                vm.IsMatch = isMatch;
+                return isMatch;
+            }
+            return false;
+        }
+
+        private bool FilterPcEvents(object item)
+        {
+            if (string.IsNullOrEmpty(_vm.PcSearchText))
+            {
+                (item as ProgramChangeEventViewModel)!.IsMatch = false;
+                return true;
+            }
+
+            if (item is ProgramChangeEventViewModel vm)
+            {
+                var searchText = _vm.PcSearchText.ToLower();
+                bool isMatch = vm.AbsoluteTime.ToString().Contains(searchText) ||
+                               vm.Channel.ToString().Contains(searchText) ||
+                               vm.Patch.ToString().Contains(searchText);
+
+                if (!isMatch)
+                {
+                    var instrument = _vm.AvailableInstruments.FirstOrDefault(i => i.PatchNumber == vm.Patch);
+                    if (instrument != null && instrument.Name.ToLower().Contains(searchText))
+                    {
+                        isMatch = true;
+                    }
+                }
+
                 vm.IsMatch = isMatch;
                 return isMatch;
             }

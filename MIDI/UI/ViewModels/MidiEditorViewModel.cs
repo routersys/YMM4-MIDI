@@ -205,18 +205,34 @@ namespace MIDI.UI.ViewModels
             try
             {
                 var sf = new MeltySynth.SoundFont(path);
+                var instruments = new List<MidiInstrumentViewModel>();
                 foreach (var preset in sf.Presets)
                 {
-                    AvailableInstruments.Add(new MidiInstrumentViewModel
+                    instruments.Add(new MidiInstrumentViewModel
                     {
                         Name = preset.Name,
                         PatchNumber = preset.PatchNumber,
                         BankNumber = preset.BankNumber
                     });
                 }
+
+                foreach (var inst in instruments.OrderBy(i => i.PatchNumber).ThenBy(i => i.BankNumber))
+                {
+                    AvailableInstruments.Add(inst);
+                }
             }
             catch
             {
+            }
+        }
+
+        private string _pcSearchText = string.Empty;
+        public string PcSearchText
+        {
+            get => _pcSearchText;
+            set
+            {
+                if (SetField(ref _pcSearchText, value)) TrackEventManager.RefreshFiltering();
             }
         }
     }
