@@ -111,7 +111,7 @@ namespace MIDI.UI.Core
                     }
                     targetPane.Children.Add(newAnchorable);
 
-                    newAnchorable.Hide();
+                    newAnchorable.Show();
                 }
             }
         }
