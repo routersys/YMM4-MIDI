@@ -1,0 +1,78 @@
+﻿<UserControl x:Class="MIDI.UI.Views.MidiEditor.Panel.ProgramChangeEditorPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MIDI.UI.Views.MidiEditor.Panel"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="400">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/MidiEditorResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+            <Style x:Key="ThemedDataGridComboBox" TargetType="{x:Type ComboBox}">
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="4,3"/>
+            </Style>
+            <Style TargetType="ComboBoxItem">
+                <Setter Property="Padding" Value="4,3"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ComboBoxItem">
+                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                                <ContentPresenter/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsHighlighted" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <DockPanel Margin="10">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="追加" Command="{Binding AddProgramChangeEventCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,0,5,0"/>
+            <Button Content="削除" Command="{Binding RemoveProgramChangeEventCommand}" CommandParameter="{Binding SelectedItem, ElementName=PcGrid}" Style="{StaticResource RichButtonStyle}"/>
+        </StackPanel>
+        <DataGrid x:Name="PcGrid" ItemsSource="{Binding FilteredProgramChangeEvents}" AutoGenerateColumns="False" CanUserAddRows="False" SelectionMode="Single">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Tick" Binding="{Binding AbsoluteTime}" Width="*"/>
+                <DataGridTextColumn Header="Ch" Binding="{Binding Channel}" Width="50"/>
+                <DataGridComboBoxColumn Header="楽器 (Program)" SelectedValueBinding="{Binding Patch}" SelectedValuePath="PatchNumber" DisplayMemberPath="DisplayName" Width="3*">
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="ComboBox" BasedOn="{StaticResource ThemedDataGridComboBox}">
+                            <Setter Property="ItemsSource" Value="{Binding DataContext.AvailableInstruments, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </Style>
+                    </DataGridComboBoxColumn.ElementStyle>
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="ComboBox" BasedOn="{StaticResource ThemedDataGridComboBox}">
+                            <Setter Property="ItemsSource" Value="{Binding DataContext.AvailableInstruments, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                </DataGridComboBoxColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

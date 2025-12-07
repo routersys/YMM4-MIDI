@@ -61,6 +61,8 @@ namespace MIDI.UI.ViewModels
         public ICommand RemoveTempoEventCommand { get; private set; } = null!;
         public ICommand AddControlChangeEventCommand { get; private set; } = null!;
         public ICommand RemoveControlChangeEventCommand { get; private set; } = null!;
+        public ICommand AddProgramChangeEventCommand { get; private set; } = null!;
+        public ICommand RemoveProgramChangeEventCommand { get; private set; } = null!;
         public ICommand ResetCcSearchCommand { get; private set; } = null!;
         public ICommand ResetTempoSearchCommand { get; private set; } = null!;
 
@@ -149,6 +151,8 @@ namespace MIDI.UI.ViewModels
             RemoveTempoEventCommand = new RelayCommand(p => TrackEventManager.RemoveTempoEvent(p as TempoEventViewModel), p => p is TempoEventViewModel);
             AddControlChangeEventCommand = new RelayCommand(_ => TrackEventManager.AddControlChangeEvent());
             RemoveControlChangeEventCommand = new RelayCommand(p => TrackEventManager.RemoveControlChangeEvent(p as ControlChangeEventViewModel), p => p is ControlChangeEventViewModel);
+            AddProgramChangeEventCommand = new RelayCommand(_ => TrackEventManager.AddProgramChangeEvent());
+            RemoveProgramChangeEventCommand = new RelayCommand(p => TrackEventManager.RemoveProgramChangeEvent(p as ProgramChangeEventViewModel), p => p is ProgramChangeEventViewModel);
             ResetCcSearchCommand = new RelayCommand(_ => CcSearchText = string.Empty);
             ResetTempoSearchCommand = new RelayCommand(_ => TempoSearchText = string.Empty);
 

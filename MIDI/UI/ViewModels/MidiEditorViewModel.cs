@@ -7,6 +7,11 @@ using MIDI.UI.ViewModels.MidiEditor.Modals;
 using MIDI.UI.ViewModels.MidiEditor.Rendering;
 using MIDI.UI.ViewModels.MidiEditor.Services;
 using System.Windows.Controls;
+using System.IO;
+using System.Reflection;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace MIDI.UI.ViewModels
 {
@@ -87,6 +92,7 @@ namespace MIDI.UI.ViewModels
 
             RefreshPianoKeys();
             LoadSoundFonts();
+            UpdateAvailableInstruments(SelectedSoundFont);
 
             if (!string.IsNullOrEmpty(filePath) && filePath != "ファイルが選択されていません")
             {
@@ -177,6 +183,40 @@ namespace MIDI.UI.ViewModels
                 {
                     SoundFonts.Add(System.IO.Path.GetFileName(file));
                 }
+            }
+        }
+
+        public void UpdateAvailableInstruments(string soundFontName)
+        {
+            AvailableInstruments.Clear();
+            if (string.IsNullOrEmpty(soundFontName)) return;
+
+            var assemblyLocation = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            var sfDir = System.IO.Path.Combine(assemblyLocation ?? "", MidiConfiguration.Default.SoundFont.DefaultSoundFontDirectory);
+            var path = System.IO.Path.Combine(sfDir, soundFontName);
+
+            if (!System.IO.File.Exists(path))
+            {
+                var defaultPath = System.IO.Path.Combine(assemblyLocation ?? "", "GeneralUser-GS.sf2");
+                if (System.IO.File.Exists(defaultPath)) path = defaultPath;
+                else return;
+            }
+
+            try
+            {
+                var sf = new MeltySynth.SoundFont(path);
+                foreach (var preset in sf.Presets)
+                {
+                    AvailableInstruments.Add(new MidiInstrumentViewModel
+                    {
+                        Name = preset.Name,
+                        PatchNumber = preset.PatchNumber,
+                        BankNumber = preset.BankNumber
+                    });
+                }
+            }
+            catch
+            {
             }
         }
     }

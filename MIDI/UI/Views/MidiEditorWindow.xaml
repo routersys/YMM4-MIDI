@@ -146,6 +146,7 @@
                         <MenuItem Header="メトロノーム" IsCheckable="True" IsChecked="{Binding IsMetronomeVisible, Mode=TwoWay}" />
                         <MenuItem Header="テンポエディター" IsCheckable="True" IsChecked="{Binding IsTempoEditorVisible, Mode=TwoWay}" />
                         <MenuItem Header="コントロールチェンジ" IsCheckable="True" IsChecked="{Binding IsControlChangeEditorVisible, Mode=TwoWay}" />
+                        <MenuItem Header="プログラムチェンジ (音色)" IsCheckable="True" IsChecked="{Binding IsProgramChangeEditorVisible, Mode=TwoWay}" />
                         <MenuItem Header="サウンドピーク" IsCheckable="True" IsChecked="{Binding IsSoundPeakVisible, Mode=TwoWay}" />
                     </MenuItem>
                     <MenuItem Header="設定(_T)">
@@ -772,6 +773,11 @@
                                 <avalonDockLayout:LayoutAnchorablePane>
                                     <avalonDockLayout:LayoutAnchorable ContentId="controlChangeEditor" Title="コントロールチェンジ" CanClose="False">
                                         <editorPanels:ControlChangeEditorPanel />
+                                    </avalonDockLayout:LayoutAnchorable>
+                                </avalonDockLayout:LayoutAnchorablePane>
+                                <avalonDockLayout:LayoutAnchorablePane>
+                                    <avalonDockLayout:LayoutAnchorable ContentId="programChangeEditor" Title="音色 (プログラムチェンジ)" CanClose="False">
+                                        <editorPanels:ProgramChangeEditorPanel />
                                     </avalonDockLayout:LayoutAnchorable>
                                 </avalonDockLayout:LayoutAnchorablePane>
                             </avalonDockLayout:LayoutAnchorablePaneGroup>

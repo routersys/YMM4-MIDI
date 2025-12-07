@@ -52,10 +52,12 @@ namespace MIDI.UI.ViewModels
         public ObservableCollection<FlagViewModel> SelectedFlags { get; } = new ObservableCollection<FlagViewModel>();
         public ObservableCollection<TempoEventViewModel> TempoEvents { get; } = new ObservableCollection<TempoEventViewModel>();
         public ObservableCollection<ControlChangeEventViewModel> ControlChangeEvents { get; } = new ObservableCollection<ControlChangeEventViewModel>();
+        public ObservableCollection<ProgramChangeEventViewModel> ProgramChangeEvents { get; } = new ObservableCollection<ProgramChangeEventViewModel>();
         public ObservableCollection<PianoKeyViewModel> PianoKeys { get; } = new ObservableCollection<PianoKeyViewModel>();
         public Dictionary<int, PianoKeyViewModel> PianoKeysMap { get; } = new Dictionary<int, PianoKeyViewModel>();
         public ObservableCollection<TimeRulerViewModel> TimeRuler { get; } = new ObservableCollection<TimeRulerViewModel>();
         public ObservableCollection<string> SoundFonts { get; } = new ObservableCollection<string>();
+        public ObservableCollection<MidiInstrumentViewModel> AvailableInstruments { get; } = new ObservableCollection<MidiInstrumentViewModel>();
 
         private double _horizontalZoom = 100.0;
         public double HorizontalZoom
@@ -150,6 +152,9 @@ namespace MIDI.UI.ViewModels
 
         private bool _isControlChangeEditorVisible = true;
         public bool IsControlChangeEditorVisible { get => _isControlChangeEditorVisible; set => SetField(ref _isControlChangeEditorVisible, value); }
+
+        private bool _isProgramChangeEditorVisible = true;
+        public bool IsProgramChangeEditorVisible { get => _isProgramChangeEditorVisible; set => SetField(ref _isProgramChangeEditorVisible, value); }
 
         private bool _isSoundPeakVisible = true;
         public bool IsSoundPeakVisible { get => _isSoundPeakVisible; set => SetField(ref _isSoundPeakVisible, value); }
@@ -363,11 +368,13 @@ namespace MIDI.UI.ViewModels
                     MidiConfiguration.Default.Save();
                     OnPropertyChanged();
                     PlaybackService.InitializePlayback(value);
+                    UpdateAvailableInstruments(value);
                 }
             }
         }
 
         public ICollectionView FilteredTempoEvents => TrackEventManager.FilteredTempoEvents;
         public ICollectionView FilteredControlEvents => TrackEventManager.FilteredControlEvents;
+        public ICollectionView FilteredProgramChangeEvents => TrackEventManager.FilteredProgramChangeEvents;
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Data;
+using System.Linq;
+using System;
 
 namespace MIDI.UI.ViewModels.MidiEditor.Logic
 {
@@ -10,6 +12,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
 
         public ICollectionView FilteredControlEvents { get; }
         public ICollectionView FilteredTempoEvents { get; }
+        public ICollectionView FilteredProgramChangeEvents { get; }
 
         public TrackEventManager(MidiEditorViewModel vm)
         {
@@ -20,6 +23,9 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
 
             FilteredTempoEvents = CollectionViewSource.GetDefaultView(_vm.TempoEvents);
             FilteredTempoEvents.Filter = FilterTempoEvents;
+
+            FilteredProgramChangeEvents = CollectionViewSource.GetDefaultView(_vm.ProgramChangeEvents);
+            FilteredProgramChangeEvents.SortDescriptions.Add(new SortDescription(nameof(ProgramChangeEventViewModel.AbsoluteTime), ListSortDirection.Ascending));
         }
 
         private bool FilterCcEvents(object item)
@@ -121,6 +127,32 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
             SortAndRefreshCCTrack();
         }
 
+        public void AddProgramChangeEvent()
+        {
+            if (_vm.MidiFile == null) return;
+            var newPC = new NAudio.Midi.PatchChangeEvent(_vm.ViewManager.TimeToTicks(_vm.CurrentTime), 1, 0);
+            var vm = new ProgramChangeEventViewModel(newPC);
+            vm.PlaybackPropertyChanged += _vm.OnPlaybackPropertyChanged;
+            _vm.ProgramChangeEvents.Add(vm);
+
+            var track = _vm.MidiFile.Events.Tracks > 1 ? 1 : 0;
+            _vm.MidiFile.Events[track].Add(newPC);
+
+            _vm.UpdatePlaybackMidiData();
+        }
+
+        public void RemoveProgramChangeEvent(ProgramChangeEventViewModel? vm)
+        {
+            if (vm == null || _vm.MidiFile == null) return;
+            vm.PlaybackPropertyChanged -= _vm.OnPlaybackPropertyChanged;
+            _vm.ProgramChangeEvents.Remove(vm);
+            foreach (var track in _vm.MidiFile.Events)
+            {
+                track.Remove(vm.PatchChangeEvent);
+            }
+            _vm.UpdatePlaybackMidiData();
+        }
+
         private void SortAndRefreshTempoTrack()
         {
             var sorted = _vm.TempoEvents.OrderBy(e => e.AbsoluteTime).ToList();
@@ -154,6 +186,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
         {
             FilteredControlEvents.Refresh();
             FilteredTempoEvents.Refresh();
+            FilteredProgramChangeEvents.Refresh();
         }
     }
 }

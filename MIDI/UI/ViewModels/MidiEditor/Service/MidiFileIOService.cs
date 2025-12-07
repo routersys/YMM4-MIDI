@@ -68,6 +68,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                 _vm.SelectionManager.ClearSelections();
                 _vm.TempoEvents.Clear();
                 _vm.ControlChangeEvents.Clear();
+                _vm.ProgramChangeEvents.Clear();
                 _vm.Flags.Clear();
 
                 var tempoEvents = _vm.MidiFile.Events[0].OfType<NAudioMidi.TempoEvent>().Select(e => new TempoEventViewModel(e)).ToList();
@@ -285,6 +286,14 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                     }
                     catch { }
 
+                    var pcs = new List<ProgramChangeEventViewModel>();
+                    try
+                    {
+                        if (midiFile.Events != null)
+                            pcs = midiFile.Events.SelectMany(track => track).OfType<NAudioMidi.PatchChangeEvent>().Select(e => new ProgramChangeEventViewModel(e)).ToList();
+                    }
+                    catch { }
+
                     var centOffsetEvents = new Dictionary<(long, int, int), int>();
                     try
                     {
@@ -339,7 +348,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                     }
                     catch { }
 
-                    return (notes, midiFile, originalMidi, num, den, tempoValue, tempos, ccs, loadedProject, midiPathToLoad, isNewProject);
+                    return (notes, midiFile, originalMidi, num, den, tempoValue, tempos, ccs, pcs, loadedProject, midiPathToLoad, isNewProject);
                 }, token);
 
                 if (token.IsCancellationRequested) return;
@@ -383,6 +392,13 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
                 {
                     cc.PlaybackPropertyChanged += _vm.OnPlaybackPropertyChanged;
                     _vm.ControlChangeEvents.Add(cc);
+                }
+
+                _vm.ProgramChangeEvents.Clear();
+                foreach (var pc in result.pcs)
+                {
+                    pc.PlaybackPropertyChanged += _vm.OnPlaybackPropertyChanged;
+                    _vm.ProgramChangeEvents.Add(pc);
                 }
 
                 _vm.Flags.Clear();
@@ -520,6 +536,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
             _vm.Flags.Clear();
             _vm.TempoEvents.Clear();
             _vm.ControlChangeEvents.Clear();
+            _vm.ProgramChangeEvents.Clear();
             _vm.FilePath = "ファイルが選択されていません";
             _vm.ProjectPath = string.Empty;
             _vm.IsMidiFileLoaded = false;
