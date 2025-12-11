@@ -5,6 +5,7 @@ using MIDI.Core.Audio;
 using MIDI.UI.Core;
 using MIDI.UI.ViewModels.MidiEditor.Modals;
 using MIDI.UI.Views.MidiEditor.Modals;
+using MIDI.Utils;
 using NAudio.Midi;
 using System;
 using System.Collections.Generic;
@@ -621,13 +622,38 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
             if (_vm.MidiFile == null || _vm.OriginalMidiFile == null) return;
 
             string targetPath = path ?? _vm.ProjectPath;
+            string backupDir = string.Empty;
 
-            if (isBackup && string.IsNullOrEmpty(targetPath))
+            if (isBackup)
+            {
+                var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+                backupDir = Path.Combine(assemblyLocation, "backup", "editor");
+
+                try
+                {
+                    Directory.CreateDirectory(backupDir);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(LogMessages.FileAccessError, ex, "バックアップディレクトリの作成に失敗しました");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(_vm.FilePath) || _vm.FilePath == "ファイルが選択されていません")
+                {
+                    return;
+                }
+
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var baseFileName = Path.GetFileNameWithoutExtension(_vm.FilePath);
+                baseFileName = string.Join("_", baseFileName.Split(Path.GetInvalidFileNameChars()));
+                var backupFileName = $"{baseFileName}_{timestamp}.ymidi";
+                targetPath = Path.Combine(backupDir, backupFileName);
+            }
+            else if (string.IsNullOrEmpty(targetPath))
             {
                 return;
             }
-
-            if (string.IsNullOrEmpty(targetPath)) return;
 
             var validNotes = _vm.AllNotes.Where(n => n.NoteOnEvent != null && n.NoteOnEvent.OffEvent != null).ToList();
             var project = await ProjectService.CreateProjectFileAsync(_vm.FilePath, _vm.OriginalMidiFile, _vm.MidiFile, validNotes, _vm.Flags, false, _vm.IsNewFile);
@@ -635,10 +661,62 @@ namespace MIDI.UI.ViewModels.MidiEditor.Services
             GenerateTempoChanges(project);
             GenerateControlChangeOperations(project);
 
-            await ProjectService.SaveProjectAsync(project, targetPath, false);
-            if (!isBackup)
+            try
+            {
+                await ProjectService.SaveProjectAsync(project, targetPath, isBackup);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(LogMessages.FileAccessError, ex, "プロジェクトの保存に失敗しました");
+                if (!isBackup)
+                {
+                    MessageBox.Show($"プロジェクトの保存に失敗しました: {ex.Message}");
+                }
+                return;
+            }
+
+            if (isBackup)
+            {
+                CleanupOldBackups(backupDir);
+            }
+            else
             {
                 _vm.StatusText = "プロジェクトを保存しました。";
+            }
+        }
+
+        private void CleanupOldBackups(string backupDir)
+        {
+            try
+            {
+                if (!Directory.Exists(backupDir)) return;
+
+                var maxFiles = MidiEditorSettings.Default.Backup.MaxBackupFiles;
+                if (maxFiles <= 0) return;
+
+                var backupFiles = new DirectoryInfo(backupDir)
+                    .GetFiles("*.ymidi")
+                    .OrderByDescending(f => f.LastWriteTime)
+                    .ToList();
+
+                if (backupFiles.Count > maxFiles)
+                {
+                    foreach (var file in backupFiles.Skip(maxFiles))
+                    {
+                        try
+                        {
+                            File.Delete(file.FullName);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(LogMessages.FileAccessError, ex, $"古いバックアップファイルの削除に失敗しました: {file.FullName}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(LogMessages.FileAccessError, ex, "バックアップのクリーンアップ中にエラーが発生しました");
             }
         }
 
