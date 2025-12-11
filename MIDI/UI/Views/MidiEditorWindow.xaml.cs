@@ -62,9 +62,9 @@ namespace MIDI.UI.Views
         private void MidiEditorWindow_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.OriginalSource is TextBox) return;
-            if (e.Key == Key.System) return;
 
-            var key = e.Key;
+            var key = e.Key == Key.System ? e.SystemKey : e.Key;
+
             if (key == Key.LeftCtrl || key == Key.RightCtrl ||
                 key == Key.LeftAlt || key == Key.RightAlt ||
                 key == Key.LeftShift || key == Key.RightShift ||
