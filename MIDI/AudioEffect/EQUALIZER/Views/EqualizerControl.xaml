@@ -108,6 +108,44 @@
             </Setter>
         </Style>
 
+        <CubicEase x:Key="EaseOut" EasingMode="EaseOut"/>
+
+        <Storyboard x:Key="EqAnimation" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="Bar1" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="0.2" To="0.9" Duration="0:0:0.4" AutoReverse="True" EasingFunction="{StaticResource EaseOut}"/>
+            <DoubleAnimation Storyboard.TargetName="Bar2" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="0.3" To="1.0" Duration="0:0:0.5" AutoReverse="True" BeginTime="0:0:0.1" EasingFunction="{StaticResource EaseOut}"/>
+            <DoubleAnimation Storyboard.TargetName="Bar3" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="0.4" To="0.8" Duration="0:0:0.3" AutoReverse="True" BeginTime="0:0:0.2" EasingFunction="{StaticResource EaseOut}"/>
+            <DoubleAnimation Storyboard.TargetName="Bar4" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="0.2" To="0.95" Duration="0:0:0.6" AutoReverse="True" BeginTime="0:0:0.05" EasingFunction="{StaticResource EaseOut}"/>
+        </Storyboard>
+
+        <Storyboard x:Key="TitleAnimation">
+            <DoubleAnimation Storyboard.TargetName="TitleE" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.1"/>
+            <DoubleAnimation Storyboard.TargetName="TitleE" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.1" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleQ" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.15"/>
+            <DoubleAnimation Storyboard.TargetName="TitleQ" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.15" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleU" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.2"/>
+            <DoubleAnimation Storyboard.TargetName="TitleU" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.2" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleA" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.25"/>
+            <DoubleAnimation Storyboard.TargetName="TitleA" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.25" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleL" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.3"/>
+            <DoubleAnimation Storyboard.TargetName="TitleL" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.3" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleI" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.35"/>
+            <DoubleAnimation Storyboard.TargetName="TitleI" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.35" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleZ" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.4"/>
+            <DoubleAnimation Storyboard.TargetName="TitleZ" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.4" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleE2" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.45"/>
+            <DoubleAnimation Storyboard.TargetName="TitleE2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.45" EasingFunction="{StaticResource EaseOut}"/>
+
+            <DoubleAnimation Storyboard.TargetName="TitleR" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.5"/>
+            <DoubleAnimation Storyboard.TargetName="TitleR" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="-10" To="0" Duration="0:0:0.5" BeginTime="0:0:0.5" EasingFunction="{StaticResource EaseOut}"/>
+        </Storyboard>
+
     </UserControl.Resources>
 
     <Grid Margin="5">
@@ -116,9 +154,93 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Margin="0,0,0,5" Padding="5" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" CornerRadius="3">
+        <Border Grid.Row="0" BorderBrush="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" BorderThickness="0,0,0,1" Margin="0,0,0,5" Padding="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="2,0" VerticalAlignment="Center">
+                    <TextBlock Text="E" FontSize="18" FontWeight="Bold" x:Name="TitleE" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Text="Q" FontSize="18" FontWeight="Bold" x:Name="TitleQ" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Text="U" FontSize="18" FontWeight="Bold" x:Name="TitleU" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Text="A" FontSize="18" FontWeight="Bold" x:Name="TitleA" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Text="L" FontSize="18" FontWeight="Bold" x:Name="TitleL" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Text="I" FontSize="18" FontWeight="Bold" x:Name="TitleI" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Text="Z" FontSize="18" FontWeight="Bold" x:Name="TitleZ" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Text="E" FontSize="18" FontWeight="Bold" x:Name="TitleE2" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Text="R" FontSize="18" FontWeight="Bold" x:Name="TitleR" Opacity="0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="-10"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                </StackPanel>
+
+                <Grid Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Height="20">
+                        <Rectangle x:Name="Bar1" Width="4" Height="20" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Margin="1,0" RenderTransformOrigin="0.5,1">
+                            <Rectangle.RenderTransform>
+                                <ScaleTransform ScaleY="0.5"/>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Rectangle x:Name="Bar2" Width="4" Height="20" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Margin="1,0" RenderTransformOrigin="0.5,1">
+                            <Rectangle.RenderTransform>
+                                <ScaleTransform ScaleY="0.8"/>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Rectangle x:Name="Bar3" Width="4" Height="20" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Margin="1,0" RenderTransformOrigin="0.5,1">
+                            <Rectangle.RenderTransform>
+                                <ScaleTransform ScaleY="0.4"/>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Rectangle x:Name="Bar4" Width="4" Height="20" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Margin="1,0" RenderTransformOrigin="0.5,1">
+                            <Rectangle.RenderTransform>
+                                <ScaleTransform ScaleY="0.6"/>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Margin="0,0,0,5" Padding="5" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" CornerRadius="3">
             <Grid x:Name="HeaderGrid" SizeChanged="HeaderGrid_SizeChanged">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -319,7 +441,7 @@
             </Border>
         </Popup>
 
-        <Grid Grid.Row="1" Name="EditorGrid" Height="{Binding EditorHeight}" Margin="0,0,0,5">
+        <Grid Grid.Row="2" Name="EditorGrid" Height="{Binding EditorHeight}" Margin="0,0,0,5">
             <Border x:Name="CanvasBorder" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" CornerRadius="2">
                 <Canvas Name="MainCanvas" ClipToBounds="True" Background="Transparent"
                         ContextMenuOpening="MainCanvas_ContextMenuOpening"
@@ -346,7 +468,7 @@
             </Thumb>
         </Grid>
 
-        <Grid Grid.Row="2" Margin="0,0,0,10">
+        <Grid Grid.Row="3" Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -356,9 +478,15 @@
                     ValueChanged="TimeSlider_ValueChanged"/>
         </Grid>
 
-        <ScrollViewer Grid.Row="3" Height="200" VerticalScrollBarVisibility="Auto" Margin="0,5,0,0" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+        <ScrollViewer Grid.Row="4" Height="200" VerticalScrollBarVisibility="Auto" Margin="0,5,0,0" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <c:PropertiesEditor Target="{Binding SelectedBand}"
                                 BeginEdit="Band_BeginEdit" EndEdit="Band_EndEdit"/>
         </ScrollViewer>
     </Grid>
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource EqAnimation}"/>
+            <BeginStoryboard Storyboard="{StaticResource TitleAnimation}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
 </UserControl>
