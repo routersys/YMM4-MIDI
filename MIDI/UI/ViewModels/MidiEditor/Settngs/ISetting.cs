@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -7,89 +8,119 @@ using System.Windows.Media;
 
 namespace MIDI.UI.ViewModels.MidiEditor.Settings
 {
-    public interface ISetting : INotifyPropertyChanged
+    public interface ISetting
     {
         string Name { get; }
         string? Description { get; }
     }
 
-    public abstract class SettingViewModel<T> : ViewModelBase, ISetting
+    public abstract class SettingViewModelBase<T> : ViewModelBase, ISetting
     {
-        private readonly object _target;
-        private readonly PropertyInfo _propertyInfo;
+        protected readonly object _target;
+        protected readonly PropertyInfo _property;
+        protected readonly SettingAttribute _attribute;
 
-        public string Name { get; }
-        public string? Description { get; }
+        public string Name => _attribute.Name;
+        public string? Description => _attribute.Description;
 
-        public T Value
+        public virtual T Value
         {
-            get => (T)_propertyInfo.GetValue(_target)!;
+            get => (T)_property.GetValue(_target)!;
             set
             {
                 if (!EqualityComparer<T>.Default.Equals(Value, value))
                 {
-                    _propertyInfo.SetValue(_target, value);
-                    OnPropertyChanged();
+                    _property.SetValue(_target, value);
+                    OnPropertyChanged(nameof(Value));
                 }
             }
         }
 
-        protected SettingViewModel(object target, PropertyInfo propertyInfo, SettingAttribute attribute)
+        protected SettingViewModelBase(object target, PropertyInfo property, SettingAttribute attribute)
         {
             _target = target;
-            _propertyInfo = propertyInfo;
-            Name = attribute.Name;
-            Description = attribute.Description;
+            _property = property;
+            _attribute = attribute;
         }
     }
 
-    public class BoolSettingViewModel : SettingViewModel<bool>
+    public class BoolSettingViewModel : SettingViewModelBase<bool>
     {
-        public BoolSettingViewModel(object target, PropertyInfo propertyInfo, SettingAttribute attribute)
-            : base(target, propertyInfo, attribute) { }
+        public BoolSettingViewModel(object target, PropertyInfo property, SettingAttribute attribute)
+            : base(target, property, attribute) { }
     }
 
-    public class StringSettingViewModel : SettingViewModel<string>
+    public class IntSettingViewModel : SettingViewModelBase<int>
     {
-        public StringSettingViewModel(object target, PropertyInfo propertyInfo, SettingAttribute attribute)
-            : base(target, propertyInfo, attribute) { }
+        public IntSettingViewModel(object target, PropertyInfo property, SettingAttribute attribute)
+            : base(target, property, attribute) { }
     }
 
-    public class IntSettingViewModel : SettingViewModel<int>
+    public class DoubleSettingViewModel : SettingViewModelBase<double>
     {
-        public IntSettingViewModel(object target, PropertyInfo propertyInfo, SettingAttribute attribute)
-            : base(target, propertyInfo, attribute) { }
+        public DoubleSettingViewModel(object target, PropertyInfo property, SettingAttribute attribute)
+            : base(target, property, attribute) { }
     }
 
-    public class DoubleSettingViewModel : SettingViewModel<double>
+    public class StringSettingViewModel : SettingViewModelBase<string>
     {
-        public DoubleSettingViewModel(object target, PropertyInfo propertyInfo, SettingAttribute attribute)
-            : base(target, propertyInfo, attribute) { }
+        public StringSettingViewModel(object target, PropertyInfo property, SettingAttribute attribute)
+            : base(target, property, attribute) { }
     }
 
-    public class ColorSettingViewModel : SettingViewModel<Color>
+    public class ColorSettingViewModel : SettingViewModelBase<Color>
     {
-        public ColorSettingViewModel(object target, PropertyInfo propertyInfo, SettingAttribute attribute)
-            : base(target, propertyInfo, attribute) { }
+        public ColorSettingViewModel(object target, PropertyInfo property, SettingAttribute attribute)
+            : base(target, property, attribute) { }
     }
 
-    public class EnumSettingViewModel : SettingViewModel<Enum>
+    public class EnumValueViewModel
     {
-        public IEnumerable<Enum> EnumValues { get; }
+        public object Value { get; }
+        public string Description { get; }
 
-        public EnumSettingViewModel(object target, PropertyInfo propertyInfo, SettingAttribute attribute)
-            : base(target, propertyInfo, attribute)
+        public EnumValueViewModel(object value, string description)
         {
-            EnumValues = Enum.GetValues(propertyInfo.PropertyType).Cast<Enum>();
+            Value = value;
+            Description = description;
         }
     }
-    public class ComboBoxSettingViewModel : SettingViewModel<string>
+
+    public class EnumSettingViewModel : SettingViewModelBase<object>
     {
-        public List<string> Options { get; }
-        public ComboBoxSettingViewModel(object target, PropertyInfo propertyInfo, SettingAttribute attribute, List<string> options)
-            : base(target, propertyInfo, attribute)
+        public ObservableCollection<EnumValueViewModel> EnumValues { get; }
+
+        public EnumSettingViewModel(object target, PropertyInfo property, SettingAttribute attribute)
+            : base(target, property, attribute)
         {
-            Options = options;
+            EnumValues = new ObservableCollection<EnumValueViewModel>();
+            var enumType = property.PropertyType;
+
+            foreach (var value in Enum.GetValues(enumType))
+            {
+                string description = value.ToString()!;
+                var fieldInfo = enumType.GetField(value.ToString()!);
+                if (fieldInfo != null)
+                {
+                    var descAttr = fieldInfo.GetCustomAttribute<DescriptionAttribute>();
+                    if (descAttr != null)
+                    {
+                        description = descAttr.Description;
+                    }
+                }
+                EnumValues.Add(new EnumValueViewModel(value, description));
+            }
+        }
+    }
+
+    public class ComboBoxSettingViewModel : SettingViewModelBase<string>
+    {
+        public List<string> Items { get; }
+
+        public ComboBoxSettingViewModel(object target, PropertyInfo property, SettingAttribute attribute, List<string> items)
+            : base(target, property, attribute)
+        {
+            Items = items;
         }
     }
 }

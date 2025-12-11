@@ -287,4 +287,15 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
+    <SolidColorBrush x:Key="BorderBrush" Color="#FFABADB3"/>
+
+    <Style x:Key="DialogWindowStyle" TargetType="Window">
+        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        <Setter Property="ResizeMode" Value="NoResize"/>
+    </Style>
+
 </ResourceDictionary>

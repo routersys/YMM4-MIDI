@@ -1,6 +1,7 @@
 ﻿using MIDI.Configuration.Models;
 using MIDI.UI.ViewModels.MidiEditor.Modals;
 using System.Windows.Input;
+using MIDI.UI.ViewModels.MidiEditor.Enums;
 
 namespace MIDI.UI.ViewModels.MidiEditor.Logic
 {

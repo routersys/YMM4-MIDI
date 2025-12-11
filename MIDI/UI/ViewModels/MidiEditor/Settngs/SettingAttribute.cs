@@ -14,10 +14,11 @@ namespace MIDI.UI.ViewModels.MidiEditor.Settings
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
     public class SettingGroupAttribute : Attribute
     {
         public string Name { get; }
+        public string? Icon { get; set; }
 
         public SettingGroupAttribute(string name)
         {

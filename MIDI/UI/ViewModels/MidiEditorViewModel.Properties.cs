@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using MIDI.UI.ViewModels.MidiEditor.Enums;
 
 namespace MIDI.UI.ViewModels
 {

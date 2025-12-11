@@ -6,6 +6,7 @@ using NAudioMidi = NAudio.Midi;
 using System.Collections.Generic;
 using MIDI.UI.ViewModels.MidiEditor.Modals;
 using MIDI.Configuration.Models;
+using MIDI.UI.ViewModels.MidiEditor.Enums;
 
 namespace MIDI.UI.ViewModels.MidiEditor
 {

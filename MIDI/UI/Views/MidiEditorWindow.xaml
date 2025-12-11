@@ -15,6 +15,7 @@
         xmlns:midi="clr-namespace:MIDI"
         xmlns:models="clr-namespace:MIDI.Configuration.Models"
         xmlns:modals="clr-namespace:MIDI.UI.ViewModels.MidiEditor.Modals"
+        xmlns:enums="clr-namespace:MIDI.UI.ViewModels.MidiEditor.Enums"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MidiEditorViewModel}"
         Title="{Binding FileName, StringFormat='MIDIエディター - {0}'}"
@@ -158,9 +159,9 @@
                             <MenuItem Header="右" IsCheckable="True" IsChecked="{Binding ToolbarDock, ConverterParameter={x:Static Dock.Right}, Converter={StaticResource EnumToBooleanConverter}}" Command="{Binding SetToolbarDockCommand}" CommandParameter="{StaticResource DockRight}" />
                         </MenuItem>
                         <MenuItem Header="MIDI入力モード">
-                            <MenuItem Header="キーボードを鳴らす" Style="{StaticResource RadioMenuItemStyle}" IsChecked="{Binding MidiInputMode, ConverterParameter={x:Static local:MidiInputMode.Keyboard}, Converter={StaticResource EnumToBooleanConverter}, Mode=TwoWay}" />
-                            <MenuItem Header="リアルタイムレンダー" Style="{StaticResource RadioMenuItemStyle}" IsChecked="{Binding MidiInputMode, ConverterParameter={x:Static local:MidiInputMode.Realtime}, Converter={StaticResource EnumToBooleanConverter}, Mode=TwoWay}" />
-                            <MenuItem Header="PCキーボードで演奏" Style="{StaticResource RadioMenuItemStyle}" IsChecked="{Binding MidiInputMode, ConverterParameter={x:Static local:MidiInputMode.ComputerKeyboard}, Converter={StaticResource EnumToBooleanConverter}, Mode=TwoWay}" />
+                            <MenuItem Header="キーボードを鳴らす" Style="{StaticResource RadioMenuItemStyle}" IsChecked="{Binding MidiInputMode, ConverterParameter={x:Static enums:MidiInputMode.Keyboard}, Converter={StaticResource EnumToBooleanConverter}, Mode=TwoWay}" />
+                            <MenuItem Header="リアルタイムレンダー" Style="{StaticResource RadioMenuItemStyle}" IsChecked="{Binding MidiInputMode, ConverterParameter={x:Static enums:MidiInputMode.Realtime}, Converter={StaticResource EnumToBooleanConverter}, Mode=TwoWay}" />
+                            <MenuItem Header="PCキーボードで演奏" Style="{StaticResource RadioMenuItemStyle}" IsChecked="{Binding MidiInputMode, ConverterParameter={x:Static enums:MidiInputMode.ComputerKeyboard}, Converter={StaticResource EnumToBooleanConverter}, Mode=TwoWay}" />
                         </MenuItem>
                         <MenuItem Header="調律(_U)">
                             <MenuItem Header="12平均律" Command="{Binding SetTuningSystemCommand}" CommandParameter="{x:Static models:TuningSystemType.TwelveToneEqualTemperament}" IsChecked="{Binding TuningSystem, ConverterParameter={x:Static models:TuningSystemType.TwelveToneEqualTemperament}, Converter={StaticResource EnumToBooleanConverter}}" Style="{StaticResource RadioMenuItemStyle}" />

@@ -29,6 +29,7 @@ namespace MIDI.SourceGenerator
             sb.AppendLine("using System.Reflection;");
             sb.AppendLine("using MIDI.UI.ViewModels.MidiEditor.Settings;");
             sb.AppendLine("using System.Windows.Media;");
+            sb.AppendLine("using System.Linq;");
 
             sb.AppendLine("namespace MIDI.UI.ViewModels.MidiEditor.Settings");
             sb.AppendLine("{");
@@ -60,7 +61,15 @@ namespace MIDI.SourceGenerator
                         var groupAttr = groupType.GetAttributes().First(ad => ad.AttributeClass?.Name == "SettingGroupAttribute");
                         var groupName = groupAttr.ConstructorArguments[0].Value?.ToString();
 
-                        sb.AppendLine($"                var group_{groupType.Name} = new SettingGroupViewModel(\"{groupName}\");");
+                        string iconPath = "null";
+                        var iconArg = groupAttr.NamedArguments.FirstOrDefault(na => na.Key == "Icon");
+                        if (!iconArg.Equals(default(KeyValuePair<string, TypedConstant>)))
+                        {
+                            var val = iconArg.Value.Value?.ToString();
+                            if (val != null) iconPath = $"\"{val}\"";
+                        }
+
+                        sb.AppendLine($"                var group_{groupType.Name} = new SettingGroupViewModel(\"{groupName}\", {iconPath});");
 
                         sb.AppendLine($"                object target_{groupType.Name} = null!;");
 
@@ -94,7 +103,15 @@ namespace MIDI.SourceGenerator
                         var groupName = groupAttr.ConstructorArguments[0].Value?.ToString();
                         var groupType = groupProp.Type;
 
-                        sb.AppendLine($"                var group_{groupProp.Name} = new SettingGroupViewModel(\"{groupName}\");");
+                        string iconPath = "null";
+                        var iconArg = groupAttr.NamedArguments.FirstOrDefault(na => na.Key == "Icon");
+                        if (!iconArg.Equals(default(KeyValuePair<string, TypedConstant>)))
+                        {
+                            var val = iconArg.Value.Value?.ToString();
+                            if (val != null) iconPath = $"\"{val}\"";
+                        }
+
+                        sb.AppendLine($"                var group_{groupProp.Name} = new SettingGroupViewModel(\"{groupName}\", {iconPath});");
                         sb.AppendLine($"                var target_{groupProp.Name} = root_{typeSymbol.Name}.{groupProp.Name};");
                         sb.AppendLine($"                if (target_{groupProp.Name} != null)");
                         sb.AppendLine("                {");

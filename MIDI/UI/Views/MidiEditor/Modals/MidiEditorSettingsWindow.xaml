@@ -3,193 +3,211 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MIDI.UI.ViewModels.MidiEditor.Settings"
-        xmlns:conv="clr-namespace:MIDI.UI.Views.MidiEditor.Converters"
+        xmlns:settings="clr-namespace:MIDI.UI.ViewModels.MidiEditor.Settings"
         mc:Ignorable="d"
-        Title="MIDIエディター設定" Height="600" Width="800"
+        Title="エディター設定" Height="650" Width="900"
         WindowStartupLocation="CenterOwner"
-        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
-        Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
+        Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+        Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display"
+        ResizeMode="NoResize">
+
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Resources/MidiEditorResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <conv:ColorToStringConverter x:Key="ColorToStringConverter"/>
-            <conv:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
-
-            <Style TargetType="Label">
-                <Setter Property="VerticalAlignment" Value="Center"/>
-            </Style>
 
             <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
-                <Setter Property="Height" Value="32"/>
-                <Setter Property="Padding" Value="5,0"/>
+                <Setter Property="Padding" Value="4,2"/>
+                <Setter Property="Height" Value="26"/>
             </Style>
 
             <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
-                <Setter Property="Height" Value="32"/>
+                <Setter Property="Padding" Value="4,2"/>
+                <Setter Property="Height" Value="26"/>
             </Style>
 
             <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
-                <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="Margin" Value="5"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="LayoutTransform">
+                    <Setter.Value>
+                        <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
+                    </Setter.Value>
+                </Setter>
             </Style>
 
-            <DataTemplate DataType="{x:Type local:BoolSettingViewModel}">
-                <CheckBox IsChecked="{Binding Value}" Content="{Binding Name}" ToolTip="{Binding Description}"/>
+            <HierarchicalDataTemplate DataType="{x:Type settings:MajorSettingGroupViewModel}" ItemsSource="{Binding Groups}">
+                <TextBlock Text="{Binding Name}" FontWeight="Bold" Margin="0,4" FontSize="14"/>
+            </HierarchicalDataTemplate>
+
+            <DataTemplate DataType="{x:Type settings:SettingGroupViewModel}">
+                <StackPanel Orientation="Horizontal" Margin="0,4">
+                    <Viewbox Width="18" Height="18" Margin="0,0,8,0">
+                        <Path Data="{Binding Icon}" 
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Control}}" 
+                              Stretch="Uniform"/>
+                    </Viewbox>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="13"/>
+                </StackPanel>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type local:StringSettingViewModel}">
-                <Grid Margin="5">
+            <DataTemplate DataType="{x:Type settings:BoolSettingViewModel}">
+                <Grid Margin="0,8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>
+                        <ColumnDefinition Width="220"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Label Content="{Binding Name}" ToolTip="{Binding Description}" VerticalAlignment="Center"/>
-                    <TextBox Grid.Column="1" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13"/>
+                    <CheckBox Grid.Column="1" IsChecked="{Binding Value}" VerticalAlignment="Center"
+                              ToolTip="{Binding Description}" HorizontalAlignment="Left"/>
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type local:IntSettingViewModel}">
-                <Grid Margin="5">
+            <DataTemplate DataType="{x:Type settings:IntSettingViewModel}">
+                <Grid Margin="0,8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>
+                        <ColumnDefinition Width="220"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Label Content="{Binding Name}" ToolTip="{Binding Description}" VerticalAlignment="Center"/>
-                    <TextBox Grid.Column="1" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13"/>
+                    <TextBox Grid.Column="1" Text="{Binding Value}" VerticalAlignment="Center" Width="150" HorizontalAlignment="Left"
+                             ToolTip="{Binding Description}"/>
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type local:DoubleSettingViewModel}">
-                <Grid Margin="5">
+            <DataTemplate DataType="{x:Type settings:DoubleSettingViewModel}">
+                <Grid Margin="0,8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>
+                        <ColumnDefinition Width="220"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Label Content="{Binding Name}" ToolTip="{Binding Description}" VerticalAlignment="Center"/>
-                    <TextBox Grid.Column="1" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13"/>
+                    <TextBox Grid.Column="1" Text="{Binding Value}" VerticalAlignment="Center" Width="150" HorizontalAlignment="Left"
+                             ToolTip="{Binding Description}"/>
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type local:ColorSettingViewModel}">
-                <Grid Margin="5">
+            <DataTemplate DataType="{x:Type settings:StringSettingViewModel}">
+                <Grid Margin="0,8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>
+                        <ColumnDefinition Width="220"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Label Content="{Binding Name}" ToolTip="{Binding Description}" VerticalAlignment="Center"/>
-                    <TextBox Grid.Column="1" Text="{Binding Value, Converter={StaticResource ColorToStringConverter}, UpdateSourceTrigger=LostFocus}"
-                             PreviewKeyDown="ColorTextBox_PreviewKeyDown" TextChanged="ColorTextBox_TextChanged"/>
-                    <Border Grid.Column="2" Width="32" Height="32" Margin="5,0,0,0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1">
-                        <Rectangle>
-                            <Rectangle.Fill>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13"/>
+                    <TextBox Grid.Column="1" Text="{Binding Value}" VerticalAlignment="Center" HorizontalAlignment="Stretch" MaxWidth="350"
+                             ToolTip="{Binding Description}"/>
+                </Grid>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type settings:ColorSettingViewModel}">
+                <Grid Margin="0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" ToolTip="{Binding Description}">
+                        <Border Width="26" Height="26" Margin="0,0,8,0" BorderBrush="#FF888888" BorderThickness="1" CornerRadius="2">
+                            <Border.Background>
                                 <SolidColorBrush Color="{Binding Value}"/>
-                            </Rectangle.Fill>
-                        </Rectangle>
-                    </Border>
+                            </Border.Background>
+                        </Border>
+                        <TextBox Text="{Binding Value}" Width="120" VerticalAlignment="Center"
+                                 PreviewKeyDown="ColorTextBox_PreviewKeyDown"
+                                 TextChanged="ColorTextBox_TextChanged"/>
+                    </StackPanel>
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type local:EnumSettingViewModel}">
-                <Grid Margin="5">
+            <DataTemplate DataType="{x:Type settings:EnumSettingViewModel}">
+                <Grid Margin="0,8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>
+                        <ColumnDefinition Width="220"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Label Content="{Binding Name}" ToolTip="{Binding Description}" VerticalAlignment="Center"/>
-                    <ComboBox Grid.Column="1" ItemsSource="{Binding EnumValues}" SelectedItem="{Binding Value}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13"/>
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding EnumValues}" SelectedValue="{Binding Value}" SelectedValuePath="Value" DisplayMemberPath="Description"
+                              VerticalAlignment="Center" Width="200" HorizontalAlignment="Left" ToolTip="{Binding Description}"/>
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type local:ComboBoxSettingViewModel}">
-                <Grid Margin="5">
+            <DataTemplate DataType="{x:Type settings:ComboBoxSettingViewModel}">
+                <Grid Margin="0,8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>
+                        <ColumnDefinition Width="220"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Label Content="{Binding Name}" ToolTip="{Binding Description}" VerticalAlignment="Center"/>
-                    <ComboBox Grid.Column="1" ItemsSource="{Binding Options}" SelectedItem="{Binding Value}"/>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13"/>
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding Items}" SelectedItem="{Binding Value}" 
+                              VerticalAlignment="Center" Width="200" HorizontalAlignment="Left" ToolTip="{Binding Description}"/>
                 </Grid>
             </DataTemplate>
-
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Margin="15">
+
+    <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" MinWidth="150"/>
+            <ColumnDefinition Width="220"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1">
-            <TreeView ItemsSource="{Binding MajorGroups}" SelectedItemChanged="TreeView_OnSelectedItemChanged" Background="Transparent" BorderThickness="0">
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Groups}">
-                        <TextBlock Text="{Binding Name}" FontWeight="Bold" Margin="2"/>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
+        <Border Grid.Row="0" Grid.Column="0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,12,12" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+            <TreeView ItemsSource="{Binding MajorGroups}" SelectedItemChanged="TreeView_OnSelectedItemChanged" BorderThickness="0" Padding="5">
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem">
                         <Setter Property="IsExpanded" Value="True"/>
+                        <Setter Property="Padding" Value="4"/>
                     </Style>
                 </TreeView.ItemContainerStyle>
-                <TreeView.Resources>
-                    <Style TargetType="TreeViewItem">
-                        <Setter Property="HeaderTemplate">
-                            <Setter.Value>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding}" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                    <HierarchicalDataTemplate DataType="{x:Type local:MajorSettingGroupViewModel}" ItemsSource="{Binding Groups}">
-                        <TextBlock Text="{Binding Name}" FontWeight="Bold" Margin="2" />
-                    </HierarchicalDataTemplate>
-                    <DataTemplate DataType="{x:Type local:SettingGroupViewModel}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="{Binding IconPath}" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Name}" Margin="5,0,0,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </TreeView.Resources>
             </TreeView>
         </Border>
 
-        <Border Grid.Column="1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Margin="10,0,0,0">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding SelectedGroup.Settings}" Margin="10"/>
-                </ScrollViewer>
-                <Button Grid.Row="1" Content="このカテゴリの設定をリセット" Command="{Binding ResetSettingGroupCommand}" CommandParameter="{Binding SelectedGroup}"
-                        Style="{StaticResource RichButtonStyle}" HorizontalAlignment="Right" Margin="10"/>
-            </Grid>
+        <Border Grid.Row="0" Grid.Column="1" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="15" Margin="0,0,0,12" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ContentControl Content="{Binding SelectedGroup}">
+                    <ContentControl.ContentTemplate>
+                        <DataTemplate DataType="{x:Type settings:SettingGroupViewModel}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" 
+                                           Foreground="{DynamicResource {x:Static SystemColors.HotTrackBrushKey}}"/>
+                                <Separator Margin="0,0,0,15"/>
+
+                                <ItemsControl ItemsSource="{Binding Settings}"/>
+
+                                <Separator Margin="0,20,0,15"/>
+                                <Button Content="このページの設定をリセット" 
+                                        Style="{StaticResource RichButtonStyle}"
+                                        Command="{Binding DataContext.ResetSettingGroupCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                        CommandParameter="{Binding}" 
+                                        HorizontalAlignment="Right" 
+                                        Padding="15,6"
+                                        Margin="0,0,0,10"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ContentControl.ContentTemplate>
+                </ContentControl>
+            </ScrollViewer>
         </Border>
 
-        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
-            <Button Content="キャンセル" IsCancel="True" Click="CancelButton_Click" Style="{StaticResource RichButtonStyle}" Margin="0,0,5,0"/>
-            <Button Content="適用" Click="ApplyButton_Click" Style="{StaticResource RichButtonStyle}" Margin="0,0,5,0"/>
-            <Button Content="OK" IsDefault="True" Click="OkButton_Click" Style="{StaticResource RichButtonStyle}"/>
-        </StackPanel>
+        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="OK" Width="90" Height="30" Margin="5,0" Click="OkButton_Click" IsDefault="True" Style="{StaticResource RichButtonStyle}"/>
+                <Button Content="キャンセル" Width="90" Height="30" Margin="5,0" Click="CancelButton_Click" IsCancel="True" Style="{StaticResource RichButtonStyle}"/>
+                <Button Content="適用" Width="90" Height="30" Margin="5,0" Click="ApplyButton_Click" Style="{StaticResource RichButtonStyle}"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
