@@ -4,43 +4,271 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MIDI.UI.ViewModels"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:ReleaseNotesViewModel}"
-        Title="リリースノート" Height="600" Width="800"
+        Title="リリースノート &amp; 情報" Height="700" Width="1000"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
         Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
-    <Grid Margin="15">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <local:BooleanToCurrentVerStringConverter x:Key="BooleanToCurrentVerStringConverter"/>
 
-        <ListBox Grid.Column="0" ItemsSource="{Binding Releases}" SelectedItem="{Binding SelectedRelease}" Margin="0,0,15,0">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding TagName}" FontSize="14" Margin="5">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="FontWeight" Value="Normal"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsCurrentVersion}" Value="True">
-                                        <Setter Property="FontWeight" Value="Bold"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <Style x:Key="RichButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="true" CornerRadius="3">
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Focusable="False"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter TargetName="border" Property="Background" Value="#11888888"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.56"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-        <FlowDocumentScrollViewer Grid.Column="1" Name="Viewer" VerticalScrollBarVisibility="Auto">
-            <FlowDocumentScrollViewer.Resources>
-                <Style TargetType="Paragraph">
-                    <Setter Property="Margin" Value="0,0,0,10"/>
-                </Style>
-            </FlowDocumentScrollViewer.Resources>
-        </FlowDocumentScrollViewer>
+        <Style x:Key="TabButtonStyle" TargetType="RadioButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Border" Background="Transparent" Padding="15,10" BorderThickness="0,0,0,2" BorderBrush="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#11888888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="GitTreeItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Grid Background="{TemplateBinding Background}">
+                            <ContentPresenter/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#22888888"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#11888888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Storyboard x:Key="FadeInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="20" To="0" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="20,20,20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="MIDI Plugin" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                <Border Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" CornerRadius="3" Padding="8,2" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding CurrentVersion}" Foreground="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" FontWeight="Bold"/>
+                </Border>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="GitHub リポジトリ" Command="{Binding OpenGitHubCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,0,10,0"/>
+                <Button Content="サポート / ドキュメント" Command="{Binding OpenSupportCommand}" Style="{StaticResource RichButtonStyle}"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal" Margin="20,0,20,0" Grid.Row="0">
+                <RadioButton Content="リリースノート" IsChecked="{Binding IsReleaseNotesTabSelected}" GroupName="Tabs" Style="{StaticResource TabButtonStyle}"/>
+                <RadioButton Content="ライセンス情報" IsChecked="{Binding IsLicenseTabSelected}" GroupName="Tabs" Style="{StaticResource TabButtonStyle}" Margin="10,0,0,0"/>
+                <RadioButton Content="統計" IsChecked="{Binding IsStatisticsTabSelected}" GroupName="Tabs" Style="{StaticResource TabButtonStyle}" Margin="10,0,0,0"/>
+            </StackPanel>
+
+            <Border Grid.Row="1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" BorderThickness="0,1,0,0">
+                <Grid>
+                    <Grid Visibility="{Binding IsReleaseNotesTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" BorderThickness="0,0,1,0" Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}">
+                            <ListBox ItemsSource="{Binding Releases}" SelectedItem="{Binding SelectedRelease}" ItemContainerStyle="{StaticResource GitTreeItemStyle}" Padding="10" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Height="50" RenderTransformOrigin="0.5,0.5">
+                                            <Grid.RenderTransform>
+                                                <TranslateTransform X="-20"/>
+                                            </Grid.RenderTransform>
+                                            <Grid.Triggers>
+                                                <EventTrigger RoutedEvent="Loaded">
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="-20" To="0" Duration="0:0:0.3">
+                                                                <DoubleAnimation.EasingFunction>
+                                                                    <CubicEase EasingMode="EaseOut"/>
+                                                                </DoubleAnimation.EasingFunction>
+                                                            </DoubleAnimation>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </EventTrigger>
+                                            </Grid.Triggers>
+
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Grid Grid.Column="0">
+                                                <Rectangle Width="2" HorizontalAlignment="Center" Fill="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" VerticalAlignment="Stretch"/>
+                                                <Ellipse Width="10" Height="10" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Stroke="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" StrokeThickness="2" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                            </Grid>
+
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5,0,0,0">
+                                                <TextBlock Text="{Binding TagName}" FontWeight="Bold" FontSize="14"/>
+                                                <TextBlock Text="{Binding IsCurrentVersion, Converter={StaticResource BooleanToCurrentVerStringConverter}}" FontSize="10" Foreground="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+
+                        <FlowDocumentScrollViewer Grid.Column="1" Name="Viewer" VerticalScrollBarVisibility="Auto" Margin="20" RenderTransformOrigin="0.5,0.5">
+                            <FlowDocumentScrollViewer.RenderTransform>
+                                <TranslateTransform Y="0"/>
+                            </FlowDocumentScrollViewer.RenderTransform>
+                            <FlowDocumentScrollViewer.Resources>
+                                <Style TargetType="Paragraph">
+                                    <Setter Property="Margin" Value="0,0,0,10"/>
+                                </Style>
+                            </FlowDocumentScrollViewer.Resources>
+                        </FlowDocumentScrollViewer>
+                    </Grid>
+
+                    <Grid Visibility="{Binding IsLicenseTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ListBox ItemsSource="{Binding LicenseFiles}" SelectedItem="{Binding SelectedLicenseFile}" Grid.Column="0" Margin="0,0,10,0" DisplayMemberPath="FileName"/>
+                        <TextBox Grid.Column="1" Text="{Binding SelectedLicenseFile.Content}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12" Padding="10"/>
+                    </Grid>
+
+                    <Grid Visibility="{Binding IsStatisticsTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="20">
+                        <ScrollViewer>
+                            <StackPanel>
+                                <TextBlock Text="リリース統計 (行数)" FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
+                                <ItemsControl ItemsSource="{Binding Releases}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Height="300" VerticalAlignment="Bottom"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid VerticalAlignment="Bottom" Margin="5,0" ToolTip="{Binding TagName}">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Border Grid.Row="0" Width="30" Height="{Binding DescriptionLength}" Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" CornerRadius="3,3,0,0" VerticalAlignment="Bottom">
+                                                    <Border.Triggers>
+                                                        <EventTrigger RoutedEvent="Loaded">
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation Storyboard.TargetProperty="Height" From="0" To="{Binding DescriptionLength}" Duration="0:0:0.8">
+                                                                        <DoubleAnimation.EasingFunction>
+                                                                            <BounceEase EasingMode="EaseOut" Bounciness="1.5" Bounces="2"/>
+                                                                        </DoubleAnimation.EasingFunction>
+                                                                    </DoubleAnimation>
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </EventTrigger>
+                                                    </Border.Triggers>
+                                                </Border>
+                                                <TextBlock Grid.Row="1" Text="{Binding TagName}" FontSize="10" Margin="0,5,0,0" HorizontalAlignment="Center">
+                                                    <TextBlock.LayoutTransform>
+                                                        <RotateTransform Angle="-45"/>
+                                                    </TextBlock.LayoutTransform>
+                                                </TextBlock>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

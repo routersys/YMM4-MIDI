@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace MIDI.Utils
 {
@@ -15,6 +17,7 @@ namespace MIDI.Utils
             var document = new FlowDocument();
             document.SetResourceReference(FlowDocument.ForegroundProperty, SystemColors.ControlTextBrushKey);
             document.SetResourceReference(FlowDocument.BackgroundProperty, SystemColors.WindowBrushKey);
+            document.PagePadding = new Thickness(10);
 
             var lines = markdown.Replace("\r\n", "\n").Split('\n');
             var listStack = new Stack<List>();
@@ -29,7 +32,8 @@ namespace MIDI.Utils
                 if (trimmedLine.StartsWith("* ") || trimmedLine.StartsWith("- "))
                 {
                     var itemText = trimmedLine.Substring(2).Trim();
-                    var listItem = new ListItem(CreateParagraph(itemText));
+                    var listItem = new ListItem();
+                    AddContentToBlockCollection(listItem.Blocks, itemText);
 
                     while (indentStack.Any() && indentLevel < indentStack.Peek())
                     {
@@ -101,19 +105,61 @@ namespace MIDI.Utils
                     }
                     else if (line.StartsWith("###"))
                     {
-                        document.Blocks.Add(CreateParagraph(line.Substring(3).Trim(), 16, FontWeights.Bold));
+                        var p = new Paragraph();
+                        AddContentToInlineCollection(p.Inlines, line.Substring(3).Trim());
+                        p.FontSize = 16;
+                        p.FontWeight = FontWeights.Bold;
+                        document.Blocks.Add(p);
                     }
                     else if (line.StartsWith("##"))
                     {
-                        document.Blocks.Add(CreateParagraph(line.Substring(2).Trim(), 18, FontWeights.Bold));
+                        var p = new Paragraph();
+                        AddContentToInlineCollection(p.Inlines, line.Substring(2).Trim());
+                        p.FontSize = 18;
+                        p.FontWeight = FontWeights.Bold;
+                        document.Blocks.Add(p);
                     }
                     else if (line.StartsWith("#"))
                     {
-                        document.Blocks.Add(CreateParagraph(line.Substring(1).Trim(), 22, FontWeights.Bold));
+                        var p = new Paragraph();
+                        AddContentToInlineCollection(p.Inlines, line.Substring(1).Trim());
+                        p.FontSize = 22;
+                        p.FontWeight = FontWeights.Bold;
+                        document.Blocks.Add(p);
                     }
-                    else if (!string.IsNullOrWhiteSpace(line))
+                    else
                     {
-                        document.Blocks.Add(CreateParagraph(line));
+                        if (trimmedLine.StartsWith("<img") && trimmedLine.EndsWith("/>"))
+                        {
+                            var match = Regex.Match(trimmedLine, "src=\"([^\"]+)\"");
+                            if (match.Success)
+                            {
+                                var src = match.Groups[1].Value;
+                                try
+                                {
+                                    var image = new Image
+                                    {
+                                        Source = new BitmapImage(new Uri(src)),
+                                        Stretch = Stretch.Uniform,
+                                        MaxWidth = 600
+                                    };
+                                    var widthMatch = Regex.Match(trimmedLine, "width=\"([^\"]+)\"");
+                                    if (widthMatch.Success && double.TryParse(widthMatch.Groups[1].Value, out double w)) image.Width = w;
+
+                                    var heightMatch = Regex.Match(trimmedLine, "height=\"([^\"]+)\"");
+                                    if (heightMatch.Success && double.TryParse(heightMatch.Groups[1].Value, out double h)) image.Height = h;
+
+                                    document.Blocks.Add(new BlockUIContainer(image));
+                                }
+                                catch { }
+                            }
+                        }
+                        else if (!string.IsNullOrWhiteSpace(line))
+                        {
+                            var p = new Paragraph();
+                            AddContentToInlineCollection(p.Inlines, line);
+                            document.Blocks.Add(p);
+                        }
                     }
                 }
             }
@@ -121,11 +167,16 @@ namespace MIDI.Utils
             return document;
         }
 
-        private static Paragraph CreateParagraph(string text, double fontSize = 14, FontWeight? fontWeight = null)
+        private static void AddContentToBlockCollection(BlockCollection blocks, string text)
         {
-            var paragraph = new Paragraph();
+            var p = new Paragraph();
+            AddContentToInlineCollection(p.Inlines, text);
+            blocks.Add(p);
+        }
 
-            var regex = new Regex(@"(\*\*(.*?)\*\*|`(.*?)`)");
+        private static void AddContentToInlineCollection(InlineCollection inlines, string text)
+        {
+            var regex = new Regex(@"(\*\*(.*?)\*\*|`(.*?)`|\[(.*?)\]\((.*?)\)|<img[^>]*src=""([^""]*)""[^>]*/>)");
             var matches = regex.Matches(text);
             int lastIndex = 0;
 
@@ -133,12 +184,12 @@ namespace MIDI.Utils
             {
                 if (match.Index > lastIndex)
                 {
-                    paragraph.Inlines.Add(new Run(text.Substring(lastIndex, match.Index - lastIndex)));
+                    inlines.Add(new Run(text.Substring(lastIndex, match.Index - lastIndex)));
                 }
 
                 if (match.Value.StartsWith("**"))
                 {
-                    paragraph.Inlines.Add(new Run(match.Groups[2].Value) { FontWeight = FontWeights.Bold });
+                    inlines.Add(new Run(match.Groups[2].Value) { FontWeight = FontWeights.Bold });
                 }
                 else if (match.Value.StartsWith("`"))
                 {
@@ -156,26 +207,50 @@ namespace MIDI.Utils
                     };
                     border.SetResourceReference(Border.BorderBrushProperty, SystemColors.ControlDarkBrushKey);
 
-                    paragraph.Inlines.Add(new InlineUIContainer(border)
+                    inlines.Add(new InlineUIContainer(border)
                     {
                         BaselineAlignment = BaselineAlignment.TextBottom
                     });
+                }
+                else if (match.Value.StartsWith("["))
+                {
+                    var linkText = match.Groups[4].Value;
+                    var linkUrl = match.Groups[5].Value;
+                    try
+                    {
+                        var hyperlink = new Hyperlink(new Run(linkText))
+                        {
+                            NavigateUri = new Uri(linkUrl)
+                        };
+                        inlines.Add(hyperlink);
+                    }
+                    catch
+                    {
+                        inlines.Add(new Run(linkText));
+                    }
+                }
+                else if (match.Value.StartsWith("<img"))
+                {
+                    var src = match.Groups[6].Value;
+                    try
+                    {
+                        var image = new Image
+                        {
+                            Source = new BitmapImage(new Uri(src)),
+                            Stretch = Stretch.Uniform,
+                            MaxWidth = 600
+                        };
+                        inlines.Add(new InlineUIContainer(image));
+                    }
+                    catch { }
                 }
                 lastIndex = match.Index + match.Length;
             }
 
             if (lastIndex < text.Length)
             {
-                paragraph.Inlines.Add(new Run(text.Substring(lastIndex)));
+                inlines.Add(new Run(text.Substring(lastIndex)));
             }
-
-            paragraph.FontSize = fontSize;
-            if (fontWeight.HasValue)
-            {
-                paragraph.FontWeight = fontWeight.Value;
-            }
-
-            return paragraph;
         }
     }
 }
