@@ -198,6 +198,13 @@ namespace MIDI.UI.Views
             LayoutInitializer.EnsurePanelsExist(DockingManager);
 
             Dispatcher.BeginInvoke(new Action(InitializeLayoutPanes), DispatcherPriority.ContextIdle);
+
+            PianoRollScrollViewer.Focusable = true;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                this.Focus();
+                Keyboard.Focus(PianoRollScrollViewer);
+            }), DispatcherPriority.ApplicationIdle);
         }
 
         private void OnThemeChanged(object? sender, EventArgs e)
@@ -246,6 +253,11 @@ namespace MIDI.UI.Views
         private void OnNotesLoaded()
         {
             CenterViewOnNotesIfReady();
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                this.Focus();
+                Keyboard.Focus(PianoRollScrollViewer);
+            }), DispatcherPriority.ApplicationIdle);
         }
 
         private void CenterViewOnNotesIfReady()
