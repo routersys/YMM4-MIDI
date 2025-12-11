@@ -201,6 +201,7 @@ namespace MIDI.Configuration.Models
                 var defaultConfig = new MidiEditorSettings();
                 defaultConfig.SaveSynchronously();
                 CopyFrom(defaultConfig);
+                EnsureDefaultShortcuts();
             }
             else
             {
@@ -219,6 +220,10 @@ namespace MIDI.Configuration.Models
                     if (loadedConfig != null)
                     {
                         CopyFrom(loadedConfig);
+                        if (Shortcuts.Count == 0)
+                        {
+                            EnsureDefaultShortcuts();
+                        }
                     }
                     else
                     {
@@ -231,6 +236,38 @@ namespace MIDI.Configuration.Models
                     BackupAndLoadDefault();
                 }
             }
+        }
+
+        private void EnsureDefaultShortcuts()
+        {
+            if (Shortcuts.Count > 0) return;
+
+            AddDefaultShortcut("NewCommand", "Ctrl + N");
+            AddDefaultShortcut("LoadMidiCommand", "Ctrl + O");
+            AddDefaultShortcut("SaveCommand", "Ctrl + S");
+            AddDefaultShortcut("SaveAsCommand", "Ctrl + Shift + S");
+            AddDefaultShortcut("ExportAudioCommand", "Ctrl + E");
+            AddDefaultShortcut("PlayPauseCommand", "Space");
+            AddDefaultShortcut("GoToNextFlagCommand", "Alt + Right");
+            AddDefaultShortcut("GoToPreviousFlagCommand", "Alt + Left");
+            AddDefaultShortcut("UndoCommand", "Ctrl + Z");
+            AddDefaultShortcut("RedoCommand", "Ctrl + Y");
+            AddDefaultShortcut("CopyCommand", "Ctrl + C");
+            AddDefaultShortcut("PasteCommand", "Ctrl + V");
+            AddDefaultShortcut("DeleteSelectedNotesCommand", "Delete");
+            AddDefaultShortcut("SelectAllCommand", "Ctrl + A");
+            AddDefaultShortcut("OpenQuantizeSettingsCommand", "Ctrl + Q");
+
+            SaveSynchronously();
+        }
+
+        private void AddDefaultShortcut(string commandId, string key)
+        {
+            Shortcuts.Add(new KeyboardShortcut
+            {
+                CommandId = commandId,
+                Keys = new ObservableCollection<string> { key }
+            });
         }
 
         private void BackupAndLoadDefault()
@@ -251,6 +288,7 @@ namespace MIDI.Configuration.Models
 
             var defaultConfig = new MidiEditorSettings();
             CopyFrom(defaultConfig);
+            EnsureDefaultShortcuts();
             SaveSynchronously();
         }
 

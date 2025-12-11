@@ -75,7 +75,7 @@ namespace MIDI.UI.Views.MidiEditor.Modals
 
         private void ApplySettings()
         {
-            MidiConfiguration.Default.Save();
+            MidiEditorSettings.Default.Save();
         }
     }
 }

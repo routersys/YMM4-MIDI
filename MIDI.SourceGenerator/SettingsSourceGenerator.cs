@@ -83,11 +83,14 @@ namespace MIDI.SourceGenerator
                     sb.AppendLine($"                var majorGroup = new MajorSettingGroupViewModel(\"{majorGroupName}\");");
 
                     var groupProperties = typeSymbol.GetMembers().OfType<IPropertySymbol>()
-                        .Where(p => p.GetAttributes().Any(ad => ad.AttributeClass?.Name == "SettingGroupAttribute"));
+                        .Where(p => p.GetAttributes().Any(ad => ad.AttributeClass?.Name == "SettingGroupAttribute") ||
+                                    p.Type.GetAttributes().Any(ad => ad.AttributeClass?.Name == "SettingGroupAttribute"));
 
                     foreach (var groupProp in groupProperties)
                     {
-                        var groupAttr = groupProp.GetAttributes().First(ad => ad.AttributeClass?.Name == "SettingGroupAttribute");
+                        var groupAttr = groupProp.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Name == "SettingGroupAttribute")
+                                        ?? groupProp.Type.GetAttributes().First(ad => ad.AttributeClass?.Name == "SettingGroupAttribute");
+
                         var groupName = groupAttr.ConstructorArguments[0].Value?.ToString();
                         var groupType = groupProp.Type;
 
@@ -131,11 +134,14 @@ namespace MIDI.SourceGenerator
                 sb.AppendLine("            {");
 
                 var groupProperties = typeSymbol.GetMembers().OfType<IPropertySymbol>()
-                    .Where(p => p.GetAttributes().Any(ad => ad.AttributeClass?.Name == "SettingGroupAttribute"));
+                    .Where(p => p.GetAttributes().Any(ad => ad.AttributeClass?.Name == "SettingGroupAttribute") ||
+                                p.Type.GetAttributes().Any(ad => ad.AttributeClass?.Name == "SettingGroupAttribute"));
 
                 foreach (var groupProp in groupProperties)
                 {
-                    var groupAttr = groupProp.GetAttributes().First(ad => ad.AttributeClass?.Name == "SettingGroupAttribute");
+                    var groupAttr = groupProp.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Name == "SettingGroupAttribute")
+                                    ?? groupProp.Type.GetAttributes().First(ad => ad.AttributeClass?.Name == "SettingGroupAttribute");
+
                     var groupName = groupAttr.ConstructorArguments[0].Value?.ToString();
                     var groupType = groupProp.Type;
 
