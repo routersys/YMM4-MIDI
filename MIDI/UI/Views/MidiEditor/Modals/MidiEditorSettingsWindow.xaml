@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:settings="clr-namespace:MIDI.UI.ViewModels.MidiEditor.Settings"
+        xmlns:controls="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
         mc:Ignorable="d"
         Title="エディター設定" Height="650" Width="900"
         WindowStartupLocation="CenterOwner"
@@ -111,12 +112,15 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" ToolTip="{Binding Description}">
-                        <Border Width="26" Height="26" Margin="0,0,8,0" BorderBrush="#FF888888" BorderThickness="1" CornerRadius="2">
-                            <Border.Background>
-                                <SolidColorBrush Color="{Binding Value}"/>
-                            </Border.Background>
-                        </Border>
-                        <TextBox Text="{Binding Value}" Width="120" VerticalAlignment="Center"
+                        <controls:ColorPicker Value="{Binding Value, Mode=TwoWay}" Margin="0,0,8,0">
+                            <controls:ColorPicker.Style>
+                                <Style TargetType="controls:ColorPicker">
+                                    <Setter Property="Width" Value="26"/>
+                                    <Setter Property="Height" Value="26"/>
+                                </Style>
+                            </controls:ColorPicker.Style>
+                        </controls:ColorPicker>
+                        <TextBox Text="{Binding Value, Mode=TwoWay}" Width="120" VerticalAlignment="Center"
                                  PreviewKeyDown="ColorTextBox_PreviewKeyDown"
                                  TextChanged="ColorTextBox_TextChanged"/>
                     </StackPanel>

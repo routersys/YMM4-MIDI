@@ -44,7 +44,14 @@ namespace MIDI.UI.Views.MidiEditor.Modals
             {
                 var currentCaret = textBox.CaretIndex;
                 textBox.Text = "#" + textBox.Text.Replace("#", "");
-                textBox.CaretIndex = currentCaret + 1;
+                if (currentCaret > 0)
+                {
+                    textBox.CaretIndex = currentCaret + 1;
+                }
+                else
+                {
+                    textBox.CaretIndex = 1;
+                }
             }
         }
 
