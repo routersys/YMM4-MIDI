@@ -182,6 +182,7 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel Margin="10">
@@ -230,7 +231,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Tick" Binding="{Binding AbsoluteTime}" Width="*"/>
                 <DataGridTextColumn Header="Ch" Binding="{Binding Channel}" Width="50"/>
-                <DataGridComboBoxColumn Header="楽器 (Program)" SelectedValueBinding="{Binding Patch}" SelectedValuePath="PatchNumber" DisplayMemberPath="DisplayName" Width="3*">
+                <DataGridComboBoxColumn Header="楽器 (Program)" SelectedValueBinding="{Binding Patch, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="PatchNumber" DisplayMemberPath="DisplayName" Width="3*">
                     <DataGridComboBoxColumn.ElementStyle>
                         <Style TargetType="ComboBox" BasedOn="{StaticResource ThemedDataGridComboBox}">
                             <Setter Property="ItemsSource" Value="{Binding DataContext.AvailableInstruments, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
