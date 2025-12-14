@@ -1,7 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using MIDI.Configuration.Models;
 using MIDI.UI.Commands;
 
@@ -53,7 +56,8 @@ namespace MIDI.UI.ViewModels.MidiEditor
         }
 
         public double X => Time.TotalSeconds * _parentViewModel.HorizontalZoom;
-        public double Y => 0;
+
+        public double Y => _parentViewModel.VerticalScrollOffset / 2.0;
 
         public long Ticks
         {
@@ -126,9 +130,13 @@ namespace MIDI.UI.ViewModels.MidiEditor
             _name = name;
             _parentViewModel.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == nameof(MidiEditorViewModel.HorizontalZoom))
+                if (e.PropertyName == nameof(MidiEditorViewModel.HorizontalZoom) ||
+                    e.PropertyName == nameof(MidiEditorViewModel.VerticalScrollOffset) ||
+                    e.PropertyName == nameof(MidiEditorViewModel.VerticalZoom) ||
+                    e.PropertyName == nameof(MidiEditorViewModel.KeyYScale))
                 {
                     OnPropertyChanged(nameof(X));
+                    OnPropertyChanged(nameof(Y));
                 }
             };
 
