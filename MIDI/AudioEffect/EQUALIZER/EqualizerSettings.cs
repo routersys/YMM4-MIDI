@@ -1,5 +1,4 @@
-﻿
-using YukkuriMovieMaker.Plugin;
+﻿using YukkuriMovieMaker.Plugin;
 using MIDI.AudioEffect.EQUALIZER.Views;
 using MIDI.AudioEffect.EQUALIZER.Interfaces;
 using MIDI.AudioEffect.EQUALIZER.Services;
@@ -17,8 +16,8 @@ namespace MIDI.AudioEffect.EQUALIZER
         private readonly IConfigService _configService;
 
         public override string Name => "GUIイコライザー設定";
-        public override SettingsCategory Category => SettingsCategory.Voice;
-        public override bool HasSettingView => true;
+        public override SettingsCategory Category => SettingsCategory.None;
+        public override bool HasSettingView => false;
         public override object SettingView => new EqualizerSettingsWindow
         {
             DataContext = new ViewModels.EqualizerSettingsViewModel()
