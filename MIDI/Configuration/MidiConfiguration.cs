@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MIDI.UI.ViewModels.MidiEditor.Settings;
+using MIDI.Utils.Telemetry.Views;
 
 namespace MIDI
 {
@@ -47,6 +48,7 @@ namespace MIDI
         [JsonIgnore]
         private static readonly Timer _saveTimer = new Timer(_ => _ = SaveAsync());
 
+        private static bool _isTelemetryPromptShown = false;
 
         private bool _isFirstLaunch = true;
         [DisplayName("初回起動")]
@@ -109,6 +111,17 @@ namespace MIDI
             Load();
             MidiEditorSettings.Default.Initialize();
             AttachEventHandlers();
+
+            TelemetrySettings.Default.Load();
+            if (!TelemetrySettings.Default.HasAskedConsent && !_isTelemetryPromptShown)
+            {
+                _isTelemetryPromptShown = true;
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var window = new TelemetryConsentWindow();
+                    window.ShowDialog();
+                });
+            }
         }
 
 
