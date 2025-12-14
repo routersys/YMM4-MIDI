@@ -119,7 +119,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
             }
             else
             {
-                if (MidiEditorSettings.Default.Input.PianoRollMouseMode == PianoRollMouseMode.Editor && !isShiftPressed && !isCtrlPressed)
+                if (_vm.EditorSettings.Input.PianoRollMouseMode == PianoRollMouseMode.Editor && !isShiftPressed && !isCtrlPressed)
                 {
                     var newNote = _vm.NoteEditorManager.AddNoteAt(position);
                     if (newNote != null)
