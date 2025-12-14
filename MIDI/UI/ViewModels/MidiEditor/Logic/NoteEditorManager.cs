@@ -34,6 +34,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
                 ticks = _vm.ViewManager.TimeToTicks(time);
             }
 
+            if (ticks < 0) ticks = 0;
+
             var noteNumber = _vm.MaxNoteNumber - (int)Math.Floor(position.Y / _vm.NoteHeight);
             if (noteNumber < 0 || noteNumber > _vm.MaxNoteNumber) return null;
 
@@ -59,6 +61,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
             if (_vm.MidiFile == null || !_vm.IsPlaying || _recordingNotes.ContainsKey(noteNumber)) return;
 
             var startTicks = _vm.ViewManager.TimeToTicks(_vm.CurrentTime);
+            if (startTicks < 0) startTicks = 0;
+
             RemoveOverlappingNotes(startTicks, startTicks + 1, noteNumber);
 
             var tempoMap = MidiProcessor.ExtractTempoMap(_vm.MidiFile, MidiConfiguration.Default);
@@ -81,6 +85,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
             var noteViewModel = _recordingNotes[noteNumber];
             var noteOn = noteViewModel.NoteOnEvent;
             var endTicks = _vm.ViewManager.TimeToTicks(_vm.CurrentTime);
+            if (endTicks < 0) endTicks = 0;
+
             var durationTicks = endTicks - noteOn.AbsoluteTime;
 
             if (durationTicks <= 10)
@@ -123,9 +129,12 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
         {
             if (_vm.MidiFile == null) return;
             var noteOnEvent = noteViewModel.NoteOnEvent;
+            if (noteOnEvent.AbsoluteTime < 0) noteOnEvent.AbsoluteTime = 0;
+
             _vm.MidiFile.Events[0].Add(noteOnEvent);
             if (noteOnEvent.OffEvent != null)
             {
+                if (noteOnEvent.OffEvent.AbsoluteTime < 0) noteOnEvent.OffEvent.AbsoluteTime = 0;
                 _vm.MidiFile.Events[0].Add(noteOnEvent.OffEvent);
             }
             _vm.SortMidiEvents();
@@ -202,6 +211,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
             var noteToSplit = _vm.SelectedNotes.First();
             var splitTime = _vm.ViewManager.PositionToTime(clickPosition.Value.X);
             var splitTick = _vm.ViewManager.TimeToTicks(splitTime);
+            if (splitTick < 0) splitTick = 0;
 
             if (splitTick <= noteToSplit.StartTicks || splitTick >= noteToSplit.StartTicks + noteToSplit.DurationTicks)
             {
@@ -244,6 +254,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
             var lastNote = orderedNotes.Last();
 
             var newStartTick = firstNote.StartTicks;
+            if (newStartTick < 0) newStartTick = 0;
+
             var newEndTick = lastNote.StartTicks + lastNote.DurationTicks;
             var newDuration = newEndTick - newStartTick;
 
@@ -277,6 +289,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
                 double swingOffset = (beat % 2 != 0) ? quantizeTicks * swing : 0;
                 long snappedTick = beatStart + (long)swingOffset;
                 long newStartTicks = (long)(note.StartTicks + (snappedTick - note.StartTicks) * strength);
+
+                if (newStartTicks < 0) newStartTicks = 0;
 
                 commands.Add(new NoteChangeCommand(note, note.StartTicks, note.DurationTicks, note.NoteNumber, note.CentOffset, note.Channel, note.Velocity, newStartTicks, note.DurationTicks, note.NoteNumber, note.CentOffset, note.Channel, note.Velocity));
             }
@@ -335,6 +349,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
                     var timingOffset = (long)((random.NextDouble() * 2 - 1) * dialog.ViewModel.TimingAmount);
                     var velocityOffset = (int)((random.NextDouble() * 2 - 1) * dialog.ViewModel.VelocityAmount);
                     var newStart = note.StartTicks + timingOffset;
+                    if (newStart < 0) newStart = 0;
+
                     var newVelocity = Math.Clamp(note.Velocity + velocityOffset, 1, 127);
                     commands.Add(new NoteChangeCommand(note, note.StartTicks, note.DurationTicks, note.NoteNumber, note.CentOffset, note.Channel, note.Velocity, newStart, note.DurationTicks, note.NoteNumber, note.CentOffset, note.Channel, newVelocity));
                 }
@@ -346,6 +362,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
         {
             if (!clipboard.Any() || _vm.MidiFile == null) return;
             var pasteTimeTicks = _vm.ViewManager.TimeToTicks(_vm.CurrentTime);
+            if (pasteTimeTicks < 0) pasteTimeTicks = 0;
+
             var firstNoteTicks = clipboard.Min(n => n.StartTicks);
             var addedNotes = new List<NoteViewModel>();
             var tempoMap = MidiProcessor.ExtractTempoMap(_vm.MidiFile, MidiConfiguration.Default);
@@ -354,6 +372,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
             {
                 var timeOffset = originalNote.StartTicks - firstNoteTicks;
                 var newStartTicks = pasteTimeTicks + timeOffset;
+                if (newStartTicks < 0) newStartTicks = 0;
+
                 var newDurationTicks = originalNote.DurationTicks;
                 RemoveOverlappingNotes(newStartTicks, newStartTicks + newDurationTicks, originalNote.NoteNumber);
                 var noteOn = new NAudioMidi.NoteOnEvent(newStartTicks, 1, originalNote.NoteNumber, originalNote.Velocity, (int)newDurationTicks);
@@ -404,6 +424,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
                 var note = orderedNotes[i];
                 var opposite = orderedNotes[orderedNotes.Count - 1 - i];
                 var newPos = orderedNotes.First().StartTicks + (totalDuration - (opposite.StartTicks - orderedNotes.First().StartTicks));
+                if (newPos < 0) newPos = 0;
+
                 commands.Add(new NoteChangeCommand(note, note.StartTicks, note.DurationTicks, note.NoteNumber, note.CentOffset, note.Channel, note.Velocity, newPos, note.DurationTicks, note.NoteNumber, note.CentOffset, note.Channel, note.Velocity));
             }
             if (commands.Any()) _vm.ExecuteCompositeNoteChange(commands);

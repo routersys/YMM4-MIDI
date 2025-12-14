@@ -298,6 +298,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
             get => _noteOnEvent.AbsoluteTime;
             set
             {
+                if (value < 0) value = 0;
                 if (_noteOnEvent.AbsoluteTime != value)
                 {
                     long oldEndTicks = _noteOnEvent.AbsoluteTime + _noteOnEvent.NoteLength;
@@ -342,6 +343,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
         public void UpdateNote(long newStartTicks, long newDurationTicks)
         {
             _parentViewModel.RequestNoteRedraw(this);
+            if (newStartTicks < 0) newStartTicks = 0;
 
             _noteOnEvent.AbsoluteTime = newStartTicks;
             _noteOnEvent.NoteLength = (int)newDurationTicks;

@@ -149,7 +149,9 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
                     CurrentDragMode = DragMode.Scrub;
                     if (_vm.IsPlaying) _vm.PlayPauseCommand.Execute(null);
                     _vm.PlaybackService.BeginScrub();
-                    _vm.CurrentTime = _vm.ViewManager.PositionToTime(position.X);
+                    var time = _vm.ViewManager.PositionToTime(position.X);
+                    if (time < TimeSpan.Zero) time = TimeSpan.Zero;
+                    _vm.CurrentTime = time;
                 }
             }
             e.Handled = true;
@@ -177,7 +179,9 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
 
             if (CurrentDragMode == DragMode.Scrub)
             {
-                _vm.CurrentTime = _vm.ViewManager.PositionToTime(position.X);
+                var time = _vm.ViewManager.PositionToTime(position.X);
+                if (time < TimeSpan.Zero) time = TimeSpan.Zero;
+                _vm.CurrentTime = time;
                 return;
             }
 
@@ -213,6 +217,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
                                 var ticksPerGrid = _vm.ViewManager.GetTicksPerGrid();
                                 if (ticksPerGrid > 0) newStartTicks = (long)(Math.Round((double)newStartTicks / ticksPerGrid) * ticksPerGrid);
                             }
+
+                            if (newStartTicks < 0) newStartTicks = 0;
 
                             if (isAltPressed && _vm.TuningSystem == TuningSystemType.Microtonal)
                             {
@@ -254,6 +260,8 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
                                 var ticksPerGrid = _vm.ViewManager.GetTicksPerGrid();
                                 if (ticksPerGrid > 0) newStartTicks = (long)(Math.Round((double)newStartTicks / ticksPerGrid) * ticksPerGrid);
                             }
+
+                            if (newStartTicks < 0) newStartTicks = 0;
 
                             var endTicks = startTicks + durationTicks;
                             var newDurationTicks = Math.Max(1, endTicks - newStartTicks);
@@ -356,7 +364,9 @@ namespace MIDI.UI.ViewModels.MidiEditor.Logic
         {
             if (CurrentDragMode == DragMode.Scrub)
             {
-                _vm.CurrentTime = _vm.ViewManager.PositionToTime(position.X);
+                var time = _vm.ViewManager.PositionToTime(position.X);
+                if (time < TimeSpan.Zero) time = TimeSpan.Zero;
+                _vm.CurrentTime = time;
             }
         }
 
