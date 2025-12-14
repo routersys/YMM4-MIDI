@@ -174,7 +174,15 @@ namespace MIDI.UI.ViewModels
             RetrogradeCommand = new RelayCommand(_ => NoteEditorManager.Retrograde(), _ => SelectedNotes.Count > 1);
             ResetNoteColorCommand = new RelayCommand(_ => { foreach (var n in AllNotes) n.Color = EditorSettings.Note.NoteColor; PianoRollRenderer.RequestRedraw(true); });
 
-            AddFlagCommand = new RelayCommand(_ => { var t = ViewManager.PositionToTime(RightClickPosition.X); Flags.Add(new FlagViewModel(this, t < System.TimeSpan.Zero ? System.TimeSpan.Zero : t, $"Flag {Flags.Count + 1}")); });
+            AddFlagCommand = new RelayCommand(_ =>
+            {
+                var newFlag = new FlagViewModel(this, CurrentTime, "Flag");
+                Flags.Add(newFlag);
+                SelectionManager.ClearSelections(clearNotes: false, clearFlags: true);
+                newFlag.IsSelected = true;
+                SelectedFlags.Add(newFlag);
+            });
+
             CreateFlagsFromSelectionCommand = new RelayCommand(_ => { if (SelectedNotes.Count > 0) { Flags.Add(new FlagViewModel(this, ViewManager.TicksToTime(SelectedNotes[0].StartTicks), "Start")); } });
             ZoomToSelectionCommand = new RelayCommand(_ => ViewManager.ZoomToSelection(), _ => SelectedNotes.Count > 0);
             DeleteSelectedFlagsCommand = new RelayCommand(_ => { foreach (var f in new System.Collections.Generic.List<FlagViewModel>(SelectedFlags)) Flags.Remove(f); SelectedFlags.Clear(); }, _ => SelectedFlags.Count > 0);

@@ -55,6 +55,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Modals
             AddShortcutItem(editShortcuts, settings, "PasteCommand", "貼り付け", "M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z");
             AddShortcutItem(editShortcuts, settings, "DeleteSelectedNotesCommand", "削除", "M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z");
             AddShortcutItem(editShortcuts, settings, "SelectAllCommand", "すべて選択", "M3,13H7V11H3M3,17H7V15H3M3,9H7V7H3M9,13H21V11H9M9,17H21V15H9M9,9H21V7H9M3,5H21V3H3V5Z");
+            AddShortcutItem(editShortcuts, settings, "AddFlagCommand", "フラグの追加", "M14.4,6L14,4H5V21H7V14H12.6L13,16H20V6H14.4Z");
             ShortcutCategories.Add(new ShortcutCategory("編集", editShortcuts));
         }
 
@@ -93,6 +94,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Modals
             AddDefault(settings, "DeleteSelectedNotesCommand", "Delete");
             AddDefault(settings, "SelectAllCommand", "Ctrl + A");
             AddDefault(settings, "OpenQuantizeSettingsCommand", "Ctrl + Q");
+            AddDefault(settings, "AddFlagCommand", "Ctrl + F");
 
             if (force)
             {

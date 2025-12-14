@@ -53,7 +53,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
         }
 
         public double X => Time.TotalSeconds * _parentViewModel.HorizontalZoom;
-        public double Y => _parentViewModel.VerticalScrollOffset;
+        public double Y => 0;
 
         public long Ticks
         {
@@ -126,12 +126,13 @@ namespace MIDI.UI.ViewModels.MidiEditor
             _name = name;
             _parentViewModel.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == nameof(MidiEditorViewModel.HorizontalZoom) || e.PropertyName == nameof(MidiEditorViewModel.VerticalScrollOffset))
+                if (e.PropertyName == nameof(MidiEditorViewModel.HorizontalZoom))
                 {
                     OnPropertyChanged(nameof(X));
-                    OnPropertyChanged(nameof(Y));
                 }
             };
+
+            OnPropertyChanged(nameof(Y));
 
             IncrementTimeMinutesCommand = new RelayCommand(_ => UpdateTime(TimeSpan.FromMinutes(1)));
             DecrementTimeMinutesCommand = new RelayCommand(_ => UpdateTime(TimeSpan.FromMinutes(-1)));
