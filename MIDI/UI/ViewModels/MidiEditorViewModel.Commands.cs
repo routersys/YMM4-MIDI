@@ -3,6 +3,9 @@ using MIDI.UI.Commands;
 using MIDI.UI.ViewModels.MidiEditor;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System;
+using System.Linq;
+using NAudio.Midi;
 
 namespace MIDI.UI.ViewModels
 {
@@ -192,7 +195,21 @@ namespace MIDI.UI.ViewModels
             GoToNextFlagCommand = new RelayCommand(_ => { });
             GoToPreviousFlagCommand = new RelayCommand(_ => { });
             RenameFlagCommand = new RelayCommand(_ => SelectionManager.RenameFlag(), _ => SelectedFlags.Count == 1);
-            SnapFlagToNearestTempoCommand = new RelayCommand(_ => { }, _ => SelectedFlag != null);
+            SnapFlagToNearestTempoCommand = new RelayCommand(_ =>
+            {
+                if (SelectedFlag != null && MidiFile != null)
+                {
+                    var tempoEvents = MidiFile.Events.SelectMany(t => t).OfType<TempoEvent>();
+                    if (tempoEvents.Any())
+                    {
+                        var nearest = tempoEvents.OrderBy(t => Math.Abs((TicksToTime(t.AbsoluteTime) - SelectedFlag.Time).TotalMilliseconds)).FirstOrDefault();
+                        if (nearest != null)
+                        {
+                            SelectedFlag.Time = TicksToTime(nearest.AbsoluteTime);
+                        }
+                    }
+                }
+            }, _ => SelectedFlag != null);
         }
     }
 }
