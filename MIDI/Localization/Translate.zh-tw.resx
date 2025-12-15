@@ -465,4 +465,7 @@
 <data name="DistributedEncryption" xml:space="preserve"><value>加密通訊</value></data>
 <data name="DistributedKey" xml:space="preserve"><value>加密金鑰</value></data>
 <data name="DistributedWorkerList" xml:space="preserve"><value>偵測到的工作節點</value></data>
+<data name="TelemetryGroupHeader" xml:space="preserve"><value>遙測</value></data>
+<data name="EnableTelemetryCheckbox" xml:space="preserve"><value>啟用遙測</value></data>
+<data name="EnableTelemetryTooltip" xml:space="preserve"><value>傳送匿名使用資料。</value></data>
 </root>

@@ -405,3 +405,6 @@ DistributedMemLimit,メモリ制限設定,メモリ使用量制限(MB),Memory Us
 DistributedEncryption,暗号化有効化,通信を暗号化する,Encrypt Communication,加密通信,加密通訊,통신 암호화,Cifrar Comunicación,تشفير الاتصال,
 DistributedKey,暗号化キー,暗号化キー,Encryption Key,加密密钥,加密金鑰,암호화 키,Clave de Cifrado,مفتاح التشفير,
 DistributedWorkerList,ワーカーリスト,検出されたワーカー,Detected Workers,检测到的工作节点,偵測到的工作節點,감지된 워커,Trabajadores Detectados,العمال المكتشفون,
+TelemetryGroupHeader,テレメトリグループヘッダー,テレメトリ,Telemetry,遥测,遙測,텔레메트리,Telemetría,القياس عن بعد,
+EnableTelemetryCheckbox,テレメトリ有効化チェックボックス,テレメトリを有効にする,Enable Telemetry,启用遥测,啟用遙測,텔레메트리 활성화,Habilitar Telemetría,تمكين القياس عن بعد,
+EnableTelemetryTooltip,テレメトリ有効化ツールチップ,匿名の使用状況データを送信します。,Sends anonymous usage data.,发送匿名使用数据。,傳送匿名使用資料。,익명의 사용 데이터를 전송합니다.,Envía datos de uso anónimos.,يرسل بيانات استخدام مجهولة المصدر.,

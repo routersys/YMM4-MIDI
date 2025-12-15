@@ -29,6 +29,7 @@ namespace MIDI
     {
         public MidiConfiguration Settings => MidiConfiguration.Default;
         public MidiEditorSettings EditorSettings => MidiEditorSettings.Default;
+        public TelemetrySettings Telemetry => TelemetrySettings.Default;
 
         private readonly IFileService _fileService;
         private readonly IPresetService _presetService;
@@ -150,6 +151,7 @@ namespace MIDI
             {
                 Settings.Reload();
                 EditorSettings.Reload();
+                Telemetry.Load();
                 _ = RefreshAllFilesAsync();
                 OnPropertyChanged(nameof(SoundFontLayers));
             });

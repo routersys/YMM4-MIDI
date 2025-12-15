@@ -1828,21 +1828,19 @@
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
-                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.LogFilePathLabel}" ToolTip="{x:Static midi:Translate.LogFilePathTooltip}"/>
+                                            <Label Grid.Row="0" Grid.Column="0" Content="{x:Static midi:Translate.LogFilePathLabel}" 
+                                                ToolTip="{x:Static midi:Translate.LogFilePathTooltip}"/>
                                             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.Debug.LogFilePath}" Margin="10,0,0,10"
                                                 ToolTip="{x:Static midi:Translate.LogFilePathTooltip}"/>
-
                                             <Label Grid.Row="1" Grid.Column="0" Content="{x:Static midi:Translate.MaxLogSizeLabel}" ToolTip="{x:Static midi:Translate.MaxLogSizeTooltip}"/>
                                             <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Value="{Binding Settings.Debug.MaxLogSizeKB, Mode=TwoWay}" Min="10" Max="1024" 
                                                 Unit="KB" Width="200" HorizontalAlignment="Left" Margin="10,0,0,10"
                                                 ToolTip="{x:Static midi:Translate.MaxLogSizeTooltip}"/>
-
                                             <Label Grid.Row="2" 
                                                 Grid.Column="0" Content="{x:Static midi:Translate.LogLevelLabel}" ToolTip="{x:Static midi:Translate.LogLevelTooltip}"/>
                                             <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Value="{Binding Settings.Debug.LogLevel, Mode=TwoWay}" Min="1" Max="5" Unit=" " Width="200" HorizontalAlignment="Left" Margin="10,0,0,0"
                                                 ToolTip="{x:Static midi:Translate.LogLevelTooltip}"/>
                                         </Grid>
-
                                         <Grid Margin="0,15,0,0" Visibility="{Binding Settings.Debug.EnableLogging, 
                                             Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <Grid.RowDefinitions>
@@ -1862,6 +1860,19 @@
                                                 FontFamily="Consolas"
                                                 TextChanged="LogTextBox_TextChanged"/>
                                         </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{x:Static midi:Translate.TelemetryGroupHeader}" FontWeight="Bold" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Row="1">
+                                        <CheckBox IsChecked="{Binding Telemetry.IsEnabled}" Content="{x:Static midi:Translate.EnableTelemetryCheckbox}"
+                                            ToolTip="{x:Static midi:Translate.EnableTelemetryTooltip}"/>
                                     </StackPanel>
                                 </Grid>
                             </Border>

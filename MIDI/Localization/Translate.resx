@@ -465,4 +465,7 @@
 <data name="DistributedEncryption" xml:space="preserve"><value>通信を暗号化する</value></data>
 <data name="DistributedKey" xml:space="preserve"><value>暗号化キー</value></data>
 <data name="DistributedWorkerList" xml:space="preserve"><value>検出されたワーカー</value></data>
+<data name="TelemetryGroupHeader" xml:space="preserve"><value>テレメトリ</value></data>
+<data name="EnableTelemetryCheckbox" xml:space="preserve"><value>テレメトリを有効にする</value></data>
+<data name="EnableTelemetryTooltip" xml:space="preserve"><value>匿名の使用状況データを送信します。</value></data>
 </root>

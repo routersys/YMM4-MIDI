@@ -465,4 +465,7 @@
 <data name="DistributedEncryption" xml:space="preserve"><value>Cifrar Comunicación</value></data>
 <data name="DistributedKey" xml:space="preserve"><value>Clave de Cifrado</value></data>
 <data name="DistributedWorkerList" xml:space="preserve"><value>Trabajadores Detectados</value></data>
+<data name="TelemetryGroupHeader" xml:space="preserve"><value>Telemetría</value></data>
+<data name="EnableTelemetryCheckbox" xml:space="preserve"><value>Habilitar Telemetría</value></data>
+<data name="EnableTelemetryTooltip" xml:space="preserve"><value>Envía datos de uso anónimos.</value></data>
 </root>

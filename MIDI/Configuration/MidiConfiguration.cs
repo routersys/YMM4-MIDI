@@ -105,6 +105,8 @@ namespace MIDI
         [DisplayName("デバッグ設定")]
         public DebugSettings Debug { get => _debug; set => Set(ref _debug, value); }
 
+        [JsonIgnore]
+        public TelemetrySettings Telemetry => TelemetrySettings.Default;
 
         public override void Initialize()
         {
@@ -112,7 +114,7 @@ namespace MIDI
             MidiEditorSettings.Default.Initialize();
             AttachEventHandlers();
 
-            TelemetrySettings.Default.Load();
+            TelemetrySettings.Default.Initialize();
             if (!TelemetrySettings.Default.HasAskedConsent && !_isTelemetryPromptShown)
             {
                 _isTelemetryPromptShown = true;

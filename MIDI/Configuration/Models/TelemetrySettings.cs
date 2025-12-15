@@ -40,6 +40,7 @@ namespace MIDI.Configuration.Models
         public override void Initialize()
         {
             Load();
+            PropertyChanged += (s, e) => Save();
         }
 
         public void Load()

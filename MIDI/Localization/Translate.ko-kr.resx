@@ -465,4 +465,7 @@
 <data name="DistributedEncryption" xml:space="preserve"><value>통신 암호화</value></data>
 <data name="DistributedKey" xml:space="preserve"><value>암호화 키</value></data>
 <data name="DistributedWorkerList" xml:space="preserve"><value>감지된 워커</value></data>
+<data name="TelemetryGroupHeader" xml:space="preserve"><value>텔레메트리</value></data>
+<data name="EnableTelemetryCheckbox" xml:space="preserve"><value>텔레메트리 활성화</value></data>
+<data name="EnableTelemetryTooltip" xml:space="preserve"><value>익명의 사용 데이터를 전송합니다.</value></data>
 </root>
