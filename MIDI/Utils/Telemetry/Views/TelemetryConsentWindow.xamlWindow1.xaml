@@ -8,9 +8,11 @@
         Title="テレメトリ設定" 
         Height="400" Width="600"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize"
-        WindowStyle="SingleBorderWindow"
-        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+        ResizeMode="CanMinimize"
+        WindowStyle="None"
+        Topmost="True" 
+        Background="{DynamicResource 
+{x:Static SystemColors.WindowBrushKey}}"
         Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
 
     <Window.Resources>
@@ -20,33 +22,79 @@
             <Setter Property="Margin" Value="10,0,0,0"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+
             <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
+
                         <Border x:Name="border" 
                                 Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}"
+                             
+    BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#22FFFFFF"/>
+
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+
+                                <Setter TargetName="border" Property="Background" Value="#44FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter 
+ Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+
+            </Setter>
+        </Style>
+
+        <Style TargetType="Button" x:Key="TitleBarButtonStyle">
+            <Setter Property="Width" Value="45"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#22FFFFFF"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                <Setter TargetName="border" Property="Background" Value="#33000000"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#44FFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.5"/>
+                                <Setter TargetName="border" Property="Background" Value="#66000000"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <Style TargetType="Button" x:Key="CloseButtonStyle" BasedOn="{StaticResource TitleBarButtonStyle}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E81123"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#F1707A"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 
@@ -55,15 +103,18 @@
             <BeginStoryboard>
                 <Storyboard>
                     <DoubleAnimation Storyboard.TargetName="MainContentGrid" Storyboard.TargetProperty="Opacity" From="0.0" To="1.0" Duration="0:0:0.6">
+
                         <DoubleAnimation.EasingFunction>
                             <CubicEase EasingMode="EaseOut"/>
                         </DoubleAnimation.EasingFunction>
                     </DoubleAnimation>
-                    <DoubleAnimation Storyboard.TargetName="ContentTransform" Storyboard.TargetProperty="Y" From="20" To="0" Duration="0:0:0.6">
+                    <DoubleAnimation Storyboard.TargetName="ContentTransform" Storyboard.TargetProperty="Y" From="20" 
+ To="0" Duration="0:0:0.6">
                         <DoubleAnimation.EasingFunction>
                             <CubicEase EasingMode="EaseOut"/>
                         </DoubleAnimation.EasingFunction>
                     </DoubleAnimation>
+
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
@@ -71,11 +122,44 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" x:Name="MainContentGrid">
+        <Border Grid.Row="0"
+                Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
+                BorderThickness="0,0,0,1"
+                Padding="5,0,0,0"
+                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Grid Height="30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}"
+                           VerticalAlignment="Center"
+                           Margin="5,0,0,0"/>
+
+                <Button Grid.Column="1"
+                        Content="-"
+                        Style="{StaticResource TitleBarButtonStyle}"
+                        Click="MinimizeButton_Click"
+                        Padding="0,-5,0,0"/>
+
+                <Button Grid.Column="2"
+                        Content="×"
+                        Style="{StaticResource CloseButtonStyle}"
+                        Click="CloseButton_Click"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" x:Name="MainContentGrid">
+
             <Grid.RenderTransform>
                 <TranslateTransform x:Name="ContentTransform"/>
             </Grid.RenderTransform>
@@ -84,34 +168,40 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
+
             <Image Grid.Column="0" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.1">
                 <Image.Source>
                     <DrawingImage>
                         <DrawingImage.Drawing>
-                            <GeometryDrawing Brush="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Geometry="M12,3V13.55A4,4 0 0,0 10,13A4,4 0 0,0 6,17A4,4 0 0,0 10,21A4,4 0 0,0 14,17V7H18V3H12Z"/>
+                            <GeometryDrawing Brush="{DynamicResource 
+ {x:Static SystemColors.ControlTextBrushKey}}" Geometry="M12,3V13.55A4,4 0 0,0 10,13A4,4 0 0,0 6,17A4,4 0 0,0 10,21A4,4 0 0,0 14,17V7H18V3H12Z"/>
                         </DrawingImage.Drawing>
                     </DrawingImage>
                 </Image.Source>
             </Image>
-            <Border Grid.Column="0" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Opacity="0.1"/>
+            <Border Grid.Column="0" 
+ Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Opacity="0.1"/>
 
             <StackPanel Grid.Column="1" Margin="20">
                 <TextBlock Text="テレメトリ設定の構成" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
                 <TextBlock Text="プラグインの品質向上のため、匿名の使用状況データを送信することに協力してください。" TextWrapping="Wrap" Margin="0,0,0,10"/>
                 <TextBlock Text="送信される情報:" FontWeight="SemiBold" Margin="0,10,0,5"/>
                 <StackPanel Margin="10,0,0,15">
+
                     <TextBlock Text="• アプリケーションおよびOSのバージョン" Margin="0,2"/>
                     <TextBlock Text="• 基本的なハードウェア情報 (CPUコア数など)" Margin="0,2"/>
                     <TextBlock Text="• エラー発生時のログ情報" Margin="0,2"/>
                     <TextBlock Text="※ 個人を特定できる情報は一切送信されません。" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" FontSize="11" Margin="0,5,0,0"/>
+
                 </StackPanel>
                 <TextBlock Text="この設定は後から設定画面でいつでも変更できます。" TextWrapping="Wrap"/>
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="1" Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="0,1,0,0" Padding="15">
+        <Border Grid.Row="2" Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="0,1,0,0" Padding="15">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="有効にする (推奨)" Command="{Binding EnableCommand}" Style="{StaticResource InstallerButtonStyle}" FontWeight="Bold"/>
+
                 <Button Content="無効にする" Command="{Binding DisableCommand}" Style="{StaticResource InstallerButtonStyle}"/>
             </StackPanel>
         </Border>
