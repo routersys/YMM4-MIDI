@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Animation;
+using System.Windows.Input;
 using MIDI.UI.ViewModels;
 using System.ComponentModel;
 using MIDI.Configuration.Models;
@@ -44,6 +45,7 @@ namespace MIDI.UI.Views
 
         private void WizardWindow_Closing(object? sender, CancelEventArgs e)
         {
+            _viewModel.Dispose();
             if (DialogResult == null)
             {
                 var config = MidiConfiguration.Default;
@@ -59,7 +61,41 @@ namespace MIDI.UI.Views
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            _viewModel.CancelCommand.Execute(null);
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                if (_viewModel.CancelCommand.CanExecute(null))
+                {
+                    _viewModel.CancelCommand.Execute(null);
+                    e.Handled = true;
+                }
+            }
+            else if (e.Key == Key.Enter)
+            {
+                if (!(Keyboard.FocusedElement is System.Windows.Controls.Button))
+                {
+                    if (_viewModel.IsLastPage)
+                    {
+                        if (_viewModel.FinishCommand.CanExecute(null))
+                        {
+                            _viewModel.FinishCommand.Execute(null);
+                            e.Handled = true;
+                        }
+                    }
+                    else
+                    {
+                        if (_viewModel.NextCommand.CanExecute(null))
+                        {
+                            _viewModel.NextCommand.Execute(null);
+                            e.Handled = true;
+                        }
+                    }
+                }
+            }
         }
     }
 }

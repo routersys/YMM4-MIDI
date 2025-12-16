@@ -19,7 +19,7 @@ namespace MIDI.Localization {
     // または Visual Studio のようなツールを使用して自動生成されました。
     // メンバーを追加または削除するには、.ResX ファイルを編集して、/str オプションと共に
     // ResGen を実行し直すか、または VS プロジェクトをビルドし直します。
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class WizardResources {
@@ -57,6 +57,15 @@ namespace MIDI.Localization {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   拡張子の関連付け に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Category_Association {
+            get {
+                return ResourceManager.GetString("Category_Association", resourceCulture);
             }
         }
         
@@ -169,6 +178,24 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   音量変化のカーブ。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_AmplitudeEnvelope {
+            get {
+                return ResourceManager.GetString("Description_AmplitudeEnvelope", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音量を揺らすLFO。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_AmplitudeLfo {
+            get {
+                return ResourceManager.GetString("Description_AmplitudeLfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   アンチポップ適用時の最短アタック時間（秒）。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_AntiPopAttackSeconds {
@@ -187,6 +214,15 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   立ち上がり時間。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Attack {
+            get {
+                return ResourceManager.GetString("Description_Attack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   低音域の音量を調整します (倍率)。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_BassGain {
@@ -201,6 +237,15 @@ namespace MIDI.Localization {
         internal static string Description_BitCrusher {
             get {
                 return ResourceManager.GetString("Description_BitCrusher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音の解像度（ビット数）。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_BitDepth {
+            get {
+                return ResourceManager.GetString("Description_BitDepth", resourceCulture);
             }
         }
         
@@ -286,6 +331,42 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   ユーザー独自の楽器設定です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_CustomInstruments {
+            get {
+                return ResourceManager.GetString("Description_CustomInstruments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フィルターの基準周波数。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Cutoff {
+            get {
+                return ResourceManager.GetString("Description_Cutoff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   高音域の吸音具合。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Damping {
+            get {
+                return ResourceManager.GetString("Description_Damping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   減衰時間。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Decay {
+            get {
+                return ResourceManager.GetString("Description_Decay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   音が鳴り始めてから最大音量に達するまでの時間（秒）。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_DefaultAttack {
@@ -358,11 +439,47 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   揺れの深さ。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Depth {
+            get {
+                return ResourceManager.GetString("Description_Depth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   音を歪ませるエフェクトの設定。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_Distortion {
             get {
                 return ResourceManager.GetString("Description_Distortion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   歪みの強さ。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Drive {
+            get {
+                return ResourceManager.GetString("Description_Drive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   原音の音量。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_DryLevel {
+            get {
+                return ResourceManager.GetString("Description_DryLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   このエフェクトを有効にします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Enable {
+            get {
+                return ResourceManager.GetString("Description_Enable", resourceCulture);
             }
         }
         
@@ -601,11 +718,29 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   適用するMIDIプログラム番号の終了値。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_EndProgram {
+            get {
+                return ResourceManager.GetString("Description_EndProgram", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   ADSRエンベロープの時間スケール。1より大きいと長く、小さいと短くなります。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_EnvelopeScale {
             get {
                 return ResourceManager.GetString("Description_EnvelopeScale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   各帯域のゲイン設定。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_EQ {
+            get {
+                return ResourceManager.GetString("Description_EQ", resourceCulture);
             }
         }
         
@@ -642,6 +777,24 @@ namespace MIDI.Localization {
         internal static string Description_Feedback {
             get {
                 return ResourceManager.GetString("Description_Feedback", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フィルター設定。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Filter {
+            get {
+                return ResourceManager.GetString("Description_Filter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音色を揺らすLFO。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_FilterLfo {
+            get {
+                return ResourceManager.GetString("Description_FilterLfo", resourceCulture);
             }
         }
         
@@ -727,11 +880,29 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   楽器ごとのプリセット設定です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_InstrumentPresets {
+            get {
+                return ResourceManager.GetString("Description_InstrumentPresets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   重ねて使用するSoundFontファイル (上から順に優先)。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_Layers {
             get {
                 return ResourceManager.GetString("Description_Layers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   LFO（低周波発振器）設定。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Lfo {
+            get {
+                return ResourceManager.GetString("Description_Lfo", resourceCulture);
             }
         }
         
@@ -853,6 +1024,24 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   原音と歪み音のバランス。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Mix {
+            get {
+                return ResourceManager.GetString("Description_Mix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   設定の名前。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Name {
+            get {
+                return ResourceManager.GetString("Description_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   正規化後の目標音量レベル (0.0 - 1.0)。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_NormalizationLevel {
@@ -916,6 +1105,15 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   音程を揺らすLFO。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_PitchLfo {
+            get {
+                return ResourceManager.GetString("Description_PitchLfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   ルールに一致しない場合に優先的に使用するSoundFontファイル名。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_PreferredSoundFont {
@@ -952,6 +1150,15 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   MIDIプログラム番号。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Program {
+            get {
+                return ResourceManager.GetString("Description_Program", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   MIDIプログラム番号とSFZファイルの関連付け。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_ProgramMaps {
@@ -961,11 +1168,65 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   揺れの速さ。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Rate {
+            get {
+                return ResourceManager.GetString("Description_Rate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   サンプリング周波数を間引く割合。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_RateReduction {
+            get {
+                return ResourceManager.GetString("Description_RateReduction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   .mpp および .meffect ファイルをこのアプリケーションに関連付けます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_RegisterExtensions {
+            get {
+                return ResourceManager.GetString("Description_RegisterExtensions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   余韻の時間。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Release {
+            get {
+                return ResourceManager.GetString("Description_Release", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   音声レンダリング方法を選択。リアルタイムは低遅延だが品質が若干低下、GPUは対応ボードが必要。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_RenderingMode {
             get {
                 return ResourceManager.GetString("Description_RenderingMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   共鳴の強さ。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Resonance {
+            get {
+                return ResourceManager.GetString("Description_Resonance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   シミュレートする部屋の広さ。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_RoomSize {
+            get {
+                return ResourceManager.GetString("Description_RoomSize", resourceCulture);
             }
         }
         
@@ -1006,11 +1267,38 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   適用するMIDIプログラム番号の開始値。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_StartProgram {
+            get {
+                return ResourceManager.GetString("Description_StartProgram", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   持続レベル。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Sustain {
+            get {
+                return ResourceManager.GetString("Description_Sustain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   高音域の音量を調整します (倍率)。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_TrebleGain {
             get {
                 return ResourceManager.GetString("Description_TrebleGain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   歪みの種類。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Type {
+            get {
+                return ResourceManager.GetString("Description_Type", resourceCulture);
             }
         }
         
@@ -1024,11 +1312,38 @@ namespace MIDI.Localization {
         }
         
         /// <summary>
+        ///   使用するWavetableファイル。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_UserWavetableFile {
+            get {
+                return ResourceManager.GetString("Description_UserWavetableFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   より詳細なログ（例外スタックトレースなど）を出力します。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string Description_VerboseLogging {
             get {
                 return ResourceManager.GetString("Description_VerboseLogging", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音量レベル。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Volume {
+            get {
+                return ResourceManager.GetString("Description_Volume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   使用する波形。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Waveform {
+            get {
+                return ResourceManager.GetString("Description_Waveform", resourceCulture);
             }
         }
         
@@ -1047,6 +1362,1248 @@ namespace MIDI.Localization {
         internal static string Description_WetDryMix {
             get {
                 return ResourceManager.GetString("Description_WetDryMix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   エフェクト音の音量。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_WetLevel {
+            get {
+                return ResourceManager.GetString("Description_WetLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ステレオ感の広がり。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Description_Width {
+            get {
+                return ResourceManager.GetString("Description_Width", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   チューニングの基準となる「ラ」の音の周波数です。通常は440Hzですが、クラシック音楽などでは442Hzなどが使われることもあります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_A4Frequency {
+            get {
+                return ResourceManager.GetString("Help_A4Frequency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   数値計算によって空間の響きをシミュレーションするリバーブエフェクトの設定です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_AlgorithmicReverb {
+            get {
+                return ResourceManager.GetString("Help_AlgorithmicReverb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   時間の経過に伴う音量の変化を設定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_AmplitudeEnvelope {
+            get {
+                return ResourceManager.GetString("Help_AmplitudeEnvelope", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   トレモロ効果を加えるLFO設定です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_AmplitudeLfo {
+            get {
+                return ResourceManager.GetString("Help_AmplitudeLfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クリックノイズ防止用のフェードイン時間です。通常は0.005秒程度で十分です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_AntiPopAttackSeconds {
+            get {
+                return ResourceManager.GetString("Help_AntiPopAttackSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クリックノイズ防止用のフェードアウト時間です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_AntiPopReleaseSeconds {
+            get {
+                return ResourceManager.GetString("Help_AntiPopReleaseSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音が鳴り始めてから最大になるまでの時間です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Attack {
+            get {
+                return ResourceManager.GetString("Help_Attack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   低音の強さを調整します。1.0が基準で、上げると重厚感が増します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_BassGain {
+            get {
+                return ResourceManager.GetString("Help_BassGain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   解像度を下げて、レトロゲームのような荒い音質にするエフェクトです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_BitCrusher {
+            get {
+                return ResourceManager.GetString("Help_BitCrusher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   数値を小さくするほどザラザラとしたノイズの混じった音になります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_BitDepth {
+            get {
+                return ResourceManager.GetString("Help_BitDepth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音声処理のひとかたまりのサイズです。値を小さくすると遅延（レイテンシ）が減りますが、CPU負荷が高まり音が途切れる可能性があります。大きくすると安定しますが遅延が増えます。例：512, 1024。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_BufferSize {
+            get {
+                return ResourceManager.GetString("Help_BufferSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   原音に対して重ねるコピー音をどれくらい遅らせるかを設定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ChorusDelay {
+            get {
+                return ResourceManager.GetString("Help_ChorusDelay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音程の揺れ幅の大きさです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ChorusDepth {
+            get {
+                return ResourceManager.GetString("Help_ChorusDepth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音程を揺らす周期の速さです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ChorusRate {
+            get {
+                return ResourceManager.GetString("Help_ChorusRate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   エフェクト音をどれくらい強く混ぜるかを設定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ChorusStrength {
+            get {
+                return ResourceManager.GetString("Help_ChorusStrength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音が閾値を超えてから圧縮が始まるまでの反応速度です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_CompressionAttack {
+            get {
+                return ResourceManager.GetString("Help_CompressionAttack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   閾値を超えた音をどのくらい強く圧縮するかを指定します。4:1なら超えた分の音量が1/4になります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_CompressionRatio {
+            get {
+                return ResourceManager.GetString("Help_CompressionRatio", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音が閾値を下回ってから圧縮を解除するまでの時間です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_CompressionRelease {
+            get {
+                return ResourceManager.GetString("Help_CompressionRelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   圧縮を開始する音量レベルです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_CompressionThreshold {
+            get {
+                return ResourceManager.GetString("Help_CompressionThreshold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   既存の楽器定義にはない、オリジナルの音色設定を作成して管理します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_CustomInstruments {
+            get {
+                return ResourceManager.GetString("Help_CustomInstruments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フィルターをかける周波数の位置です。値を下げると音がこもります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Cutoff {
+            get {
+                return ResourceManager.GetString("Help_Cutoff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   壁やカーテンに音が吸収される具合をシミュレートします。値を上げると残響の高音が早く減衰し、柔らかい響きになります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Damping {
+            get {
+                return ResourceManager.GetString("Help_Damping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   アタック後の減衰時間です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Decay {
+            get {
+                return ResourceManager.GetString("Help_Decay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   鍵盤を押してから音が最大になるまでの時間です。打楽器は短く、バイオリンのような持続音は長く設定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_DefaultAttack {
+            get {
+                return ResourceManager.GetString("Help_DefaultAttack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   最大音量に達した後、持続音量（サステイン）に落ち着くまでの時間です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_DefaultDecay {
+            get {
+                return ResourceManager.GetString("Help_DefaultDecay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   鍵盤を離した後に余韻が残る時間です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_DefaultRelease {
+            get {
+                return ResourceManager.GetString("Help_DefaultRelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ご自身で入手したSoundFontファイルを保存しているフォルダを指定します。ここにあるファイルがリストに表示されます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_DefaultSoundFontDirectory {
+            get {
+                return ResourceManager.GetString("Help_DefaultSoundFontDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   鍵盤を押し続けている間の音量レベルです。1.0なら最大音量を維持、0.0ならディケイ後に音が消えます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_DefaultSustain {
+            get {
+                return ResourceManager.GetString("Help_DefaultSustain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   テンポ指定が含まれていないMIDIファイルを再生する際の基本テンポを設定します。通常は120BPM（500000マイクロ秒/拍）が使用されます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_DefaultTempo {
+            get {
+                return ResourceManager.GetString("Help_DefaultTempo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   特定の音色が指定されていない場合に使用される基本波形です。Sine(正弦波)、Sawtooth(ノコギリ波)、Square(矩形波)などから選択できます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_DefaultWaveform {
+            get {
+                return ResourceManager.GetString("Help_DefaultWaveform", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音が返ってくるまでの時間間隔です。テンポに合わせた時間を設定するとリズム感が良くなります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_DelayTime {
+            get {
+                return ResourceManager.GetString("Help_DelayTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   LFOの効果の強さです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Depth {
+            get {
+                return ResourceManager.GetString("Help_Depth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   エレキギターのような激しい歪みを加えるエフェクトです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Distortion {
+            get {
+                return ResourceManager.GetString("Help_Distortion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   入力信号を増幅させて歪みを強くします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Drive {
+            get {
+                return ResourceManager.GetString("Help_Drive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   エフェクトがかかっていない元の音の音量です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_DryLevel {
+            get {
+                return ResourceManager.GetString("Help_DryLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   この機能を使用するかどうかを設定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Enable {
+            get {
+                return ResourceManager.GetString("Help_Enable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   波形の途中で音が切れる際に発生するクリックノイズを防ぐため、ごく短いフェードイン・アウトを自動的に適用します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableAntiPop {
+            get {
+                return ResourceManager.GetString("Help_EnableAntiPop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   デジタル音声特有の「折り返し雑音」を除去する高品質な合成方式を使用します。高音がクリアになります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableBandlimitedSynthesis {
+            get {
+                return ResourceManager.GetString("Help_EnableBandlimitedSynthesis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   複数の楽器でユニゾンしているような、厚みのある美しい響きを加えるエフェクトです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableChorus {
+            get {
+                return ResourceManager.GetString("Help_EnableChorus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   大きな音を抑え、小さな音を持ち上げることで、全体的に迫力のある（音圧の高い）音声にします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableCompression {
+            get {
+                return ResourceManager.GetString("Help_EnableCompression", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   実際のコンサートホールなどで録音されたデータ（IR）を使って、非常にリアルな空間の響きを再現します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableConvolutionReverb {
+            get {
+                return ResourceManager.GetString("Help_EnableConvolutionReverb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   波形の中心が0からずれてしまう現象（DCオフセット）を補正します。通常はオンにしておきます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableDCOffsetRemoval {
+            get {
+                return ResourceManager.GetString("Help_EnableDCOffsetRemoval", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   リバーブやコーラスなど、全ての音響効果を一括でオン・オフします。原音を確認したい場合にオフにします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableEffects {
+            get {
+                return ResourceManager.GetString("Help_EnableEffects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   低音・中音・高音のバランスを調整し、好みの音質に補正します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableEqualizer {
+            get {
+                return ResourceManager.GetString("Help_EnableEqualizer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フェイザーに似ていますが、より金属的で強力なうねりを加えるエフェクトです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableFlanger {
+            get {
+                return ResourceManager.GetString("Help_EnableFlanger", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   楽曲の再生終了時に、音量を徐々に下げて自然に終了させる機能です。突然音が切れる不自然さを解消します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableGlobalFadeOut {
+            get {
+                return ResourceManager.GetString("Help_EnableGlobalFadeOut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   非常に計算負荷の高い「畳み込みリバーブ」処理をGPUで行います。CPUではリアルタイム処理が難しい高品質なリバーブも利用可能になります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableGpuConvolutionReverb {
+            get {
+                return ResourceManager.GetString("Help_EnableGpuConvolutionReverb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   複数のエフェクト処理を一括してGPU上で実行し、データ転送のオーバーヘッドを削減して高速化します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableGpuEffectsChain {
+            get {
+                return ResourceManager.GetString("Help_EnableGpuEffectsChain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   周波数帯域ごとの音量調整処理をGPUで行います。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableGpuEqualizer {
+            get {
+                return ResourceManager.GetString("Help_EnableGpuEqualizer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   基本的な波形生成処理をGPUで行います。多数の音を同時に鳴らす場合にCPU負荷を大幅に削減できる可能性があります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableGpuSynthesis {
+            get {
+                return ResourceManager.GetString("Help_EnableGpuSynthesis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   過大入力によるデジタルクリッピング（音割れ）を最終段階で防止する保護機能です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableLimiter {
+            get {
+                return ResourceManager.GetString("Help_EnableLimiter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   エラー調査や動作確認のために、プラグインの処理内容をテキストファイルに記録します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableLogging {
+            get {
+                return ResourceManager.GetString("Help_EnableLogging", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   MIDIファイルを読み込んだ際に、ピアノロールエディターを自動的に起動して編集可能な状態にします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableMidiEditor {
+            get {
+                return ResourceManager.GetString("Help_EnableMidiEditor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   PCに接続されたMIDIキーボードを使って、リアルタイムに音を鳴らしたり演奏したりできるようにします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableMidiInput {
+            get {
+                return ResourceManager.GetString("Help_EnableMidiInput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   他のアプリケーションからこのプラグインを制御するための通信機能を有効にします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableNamedPipeApi {
+            get {
+                return ResourceManager.GetString("Help_EnableNamedPipeApi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   再生される音声の音量が一定レベルに収まるように自動的に調整します。急激な大音量を防ぎ、聴きやすい音量バランスを保つことができます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableNormalization {
+            get {
+                return ResourceManager.GetString("Help_EnableNormalization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   同じ音程の音が連続する場合などに、前の音と次の音を滑らかにつなぎ合わせます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableNoteCrossfade {
+            get {
+                return ResourceManager.GetString("Help_EnableNoteCrossfade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   複数のCPUコアを使用して音声合成処理を並行して行います。最近のPCでは通常オンにすることでパフォーマンスが向上します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableParallelProcessing {
+            get {
+                return ResourceManager.GetString("Help_EnableParallelProcessing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ジェット機が通り過ぎるような「シュワシュワ」としたうねりを加えるエフェクトです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnablePhaser {
+            get {
+                return ResourceManager.GetString("Help_EnablePhaser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音が左、右、左…と飛び交うような反響効果を加えます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnablePingPongDelay {
+            get {
+                return ResourceManager.GetString("Help_EnablePingPongDelay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   SFZ形式の高品質なサンプラー音源を使用します。SoundFontよりも詳細な表現が可能ですが、設定が複雑になることがあります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableSfz {
+            get {
+                return ResourceManager.GetString("Help_EnableSfz", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   SoundFont形式(.sf2)の音源データを使用して演奏を行います。リアルな楽器音で再生したい場合に有効にします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnableSoundFont {
+            get {
+                return ResourceManager.GetString("Help_EnableSoundFont", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   この設定を適用する楽器の範囲（終了番号）を指定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EndProgram {
+            get {
+                return ResourceManager.GetString("Help_EndProgram", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音の立ち上がりや減衰の時間（ADSR）を一括して伸縮させます。2.0にすると全ての時間が2倍（ゆっくり）になり、0.5にすると半分（機敏）になります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EnvelopeScale {
+            get {
+                return ResourceManager.GetString("Help_EnvelopeScale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   3バンドイコライザーの詳細設定です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_EQ {
+            get {
+                return ResourceManager.GetString("Help_EQ", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   演奏しないMIDIチャンネルを指定します。例えば「10」を指定するとドラムパート（通常チャンネル10）がミュートされます。カンマ区切りで複数指定可能です。例：1,10。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ExcludedChannels {
+            get {
+                return ResourceManager.GetString("Help_ExcludedChannels", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   演奏しないトラック番号を指定します。特定のパートだけをミュートしたい場合に使用します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ExcludedTracks {
+            get {
+                return ResourceManager.GetString("Help_ExcludedTracks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   指定されたSoundFontが見つからなかったり、音色が定義されていない場合に、自動的に簡易的な波形合成音源で代用して音を出します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_FallbackToSynthesis {
+            get {
+                return ResourceManager.GetString("Help_FallbackToSynthesis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   やまびこが消えるまでの長さを調整します。値を大きくすると何度も繰り返されます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Feedback {
+            get {
+                return ResourceManager.GetString("Help_Feedback", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音の明るさを調整するフィルターの設定です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Filter {
+            get {
+                return ResourceManager.GetString("Help_Filter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ワウ効果などを加えるLFO設定です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_FilterLfo {
+            get {
+                return ResourceManager.GetString("Help_FilterLfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   原音からの遅延時間です。ごく短い時間で変化させます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_FlangerDelay {
+            get {
+                return ResourceManager.GetString("Help_FlangerDelay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   うねりの強さを設定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_FlangerDepth {
+            get {
+                return ResourceManager.GetString("Help_FlangerDepth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   遅延時間を変化させる周期の速さです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_FlangerRate {
+            get {
+                return ResourceManager.GetString("Help_FlangerRate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   変調のかかり具合の強さです。値を大きくすると金属的な音やノイズに近い音に変化します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_FmModulationIndex {
+            get {
+                return ResourceManager.GetString("Help_FmModulationIndex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   FM音源方式で音作りをする際の、音色を変化させる（変調する）波の周波数です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_FmModulatorFrequency {
+            get {
+                return ResourceManager.GetString("Help_FmModulatorFrequency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フェードアウトを開始してから完全に無音になるまでの時間を秒単位で指定します。例：2.0（2秒かけてフェードアウト）。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_GlobalFadeOutSeconds {
+            get {
+                return ResourceManager.GetString("Help_GlobalFadeOutSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   空間の響きを記録したWAVファイルを指定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ImpulseResponseFilePath {
+            get {
+                return ResourceManager.GetString("Help_ImpulseResponseFilePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   アプリケーション起動時にあらかじめGPUの計算リソースを確保します。これにより、最初の再生開始時の待ち時間を短縮できますが、起動直後のメモリ使用量が増加します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_InitializeGpuOnStartup {
+            get {
+                return ResourceManager.GetString("Help_InitializeGpuOnStartup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   再生開始前にメモリに読み込んでおくデータの長さです。値を大きくすると再生開始まで時間がかかりますが、再生中のディスク読み込み負荷が減り、音飛びを防げます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_InitialSyncDurationSeconds {
+            get {
+                return ResourceManager.GetString("Help_InitialSyncDurationSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ピアノやギターなど、楽器の種類ごとに使用するSoundFontやエンベロープ設定などを保存したプリセットを管理します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_InstrumentPresets {
+            get {
+                return ResourceManager.GetString("Help_InstrumentPresets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   複数のSoundFontを重ねて使用する場合の設定です。リストの上にあるSoundFontが優先して使用され、そこに音色がない場合に下のSoundFontが参照されます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Layers {
+            get {
+                return ResourceManager.GetString("Help_Layers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音を周期的に揺らすLFOの設定です。ビブラートなどに使います。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Lfo {
+            get {
+                return ResourceManager.GetString("Help_Lfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   これ以上音量を上げないとする上限ラインを設定します。通常は1.0（最大）または少し下げた0.95などにします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_LimiterThreshold {
+            get {
+                return ResourceManager.GetString("Help_LimiterThreshold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ログファイルを保存する場所を指定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_LogFilePath {
+            get {
+                return ResourceManager.GetString("Help_LogFilePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   記録する情報の重要度を指定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_LogLevel {
+            get {
+                return ResourceManager.GetString("Help_LogLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   出力される音声の最終的な音量を調整します。0.0で無音、1.0で最大音量となります。他のアプリケーションとのバランスを考慮して設定してください。例：0.8。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_MasterVolume {
+            get {
+                return ResourceManager.GetString("Help_MasterVolume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   再生する音の高音の限界を設定します。サンプルレートの半分（ナイキスト周波数）以下である必要があります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_MaxFrequency {
+            get {
+                return ResourceManager.GetString("Help_MaxFrequency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   読み込むIRデータの長さを制限します。長すぎると処理負荷が高くなるため、適切な長さにカットします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_MaxImpulseResponseDurationSeconds {
+            get {
+                return ResourceManager.GetString("Help_MaxImpulseResponseDurationSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ログファイルが肥大化しすぎないように制限を設けます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_MaxLogSizeKB {
+            get {
+                return ResourceManager.GetString("Help_MaxLogSizeKB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   同時に鳴らすことができる音の最大数です。ピアノのダンパーペダルを多用する曲などでは、この値を大きくしないと音が途中で消えてしまうことがあります。例：256, 512。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_MaxPolyphony {
+            get {
+                return ResourceManager.GetString("Help_MaxPolyphony", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音声合成に使用するCPUスレッドの上限を指定します。0または-1を指定すると、システムの論理プロセッサ数に合わせて自動設定されます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_MaxThreads {
+            get {
+                return ResourceManager.GetString("Help_MaxThreads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   中音の強さを調整します。ボーカルやメロディの聴こえやすさに影響します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_MidGain {
+            get {
+                return ResourceManager.GetString("Help_MidGain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   接続されているMIDIデバイスの中から、入力に使用するものを選択します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_MidiInputDevice {
+            get {
+                return ResourceManager.GetString("Help_MidiInputDevice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   再生する音の低音の限界を設定します。人間の可聴域の下限（約20Hz）以下に設定しても通常は聞こえませんが、無駄な処理を省くために制限をかけることができます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_MinFrequency {
+            get {
+                return ResourceManager.GetString("Help_MinFrequency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   発音する最小の強さ（ベロシティ）を設定します。これより弱い音は演奏されません。ノイズのような極小の音をカットする場合に使用します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_MinVelocity {
+            get {
+                return ResourceManager.GetString("Help_MinVelocity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   歪ませた音をどれくらい混ぜるかを設定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Mix {
+            get {
+                return ResourceManager.GetString("Help_Mix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   識別しやすくするための任意の名前を入力します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Name {
+            get {
+                return ResourceManager.GetString("Help_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   正規化された音声の目標とする最大音量を指定します。通常は1.0に近い値を設定しますが、少し余裕を持たせるために0.95などを設定することもあります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_NormalizationLevel {
+            get {
+                return ResourceManager.GetString("Help_NormalizationLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   正規化処理を開始する音量レベルを指定します。この値を超えた音声に対して音量の圧縮が行われます。値が低いほど、小さい音量から効果がかかります。例：0.5。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_NormalizationThreshold {
+            get {
+                return ResourceManager.GetString("Help_NormalizationThreshold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音のつなぎ目のクロスフェードにかける時間です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_NoteCrossfadeDuration {
+            get {
+                return ResourceManager.GetString("Help_NoteCrossfadeDuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   処理された音を入力に戻すことで、エフェクトのクセを強めます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_PhaserFeedback {
+            get {
+                return ResourceManager.GetString("Help_PhaserFeedback", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   うねりの周期の速さです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_PhaserRate {
+            get {
+                return ResourceManager.GetString("Help_PhaserRate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   位相をずらす回路の数です。数が多いほど深くて複雑なうねりになります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_PhaserStages {
+            get {
+                return ResourceManager.GetString("Help_PhaserStages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ピッチベンドホイールを最大まで動かした際の音程変化量を半音単位で指定します。一般的には2（全音）または12（1オクターブ）が設定されます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_PitchBendRange {
+            get {
+                return ResourceManager.GetString("Help_PitchBendRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ビブラート効果を加えるLFO設定です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_PitchLfo {
+            get {
+                return ResourceManager.GetString("Help_PitchLfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   特定の音源指定がない場合に使用される、基本となるSoundFontファイル名を指定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_PreferredSoundFont {
+            get {
+                return ResourceManager.GetString("Help_PreferredSoundFont", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   MIDIファイルに含まれる音量や定位（パン）などの制御信号を反映するかどうかを設定します。オフにすると、それらの変化が無視され一定になります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ProcessControlChanges {
+            get {
+                return ResourceManager.GetString("Help_ProcessControlChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音程を滑らかに変化させるピッチベンド情報を反映するかどうかを設定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ProcessPitchBend {
+            get {
+                return ResourceManager.GetString("Help_ProcessPitchBend", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   楽器の音色を変更する命令を反映するかどうかを設定します。オフにすると、最初または手動で設定した音色が維持されます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ProcessProgramChanges {
+            get {
+                return ResourceManager.GetString("Help_ProcessProgramChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   MIDI規格上の音色番号です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Program {
+            get {
+                return ResourceManager.GetString("Help_Program", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   MIDIの音色番号（プログラムナンバー）ごとに、どのSFZファイルを使用するかを定義します。例：Program 0 (Piano) -&gt; grand_piano.sfz。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ProgramMaps {
+            get {
+                return ResourceManager.GetString("Help_ProgramMaps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   LFOの周期の速さです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Rate {
+            get {
+                return ResourceManager.GetString("Help_Rate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   値を大きくするほど高音が失われ、こもったような劣化した音になります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_RateReduction {
+            get {
+                return ResourceManager.GetString("Help_RateReduction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   アプリケーションに関連付けるファイル拡張子を設定します。これにより、ファイルをダブルクリックして直接開くことができるようになります。例：オンにすると、エクスプローラーで.mppファイルをダブルクリックした際にこのアプリケーションが起動します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_RegisterExtensions {
+            get {
+                return ResourceManager.GetString("Help_RegisterExtensions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   キーを離した後の余韻の時間です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Release {
+            get {
+                return ResourceManager.GetString("Help_Release", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音声合成の処理方式を選択します。「CPU」は互換性が高く、「GPU」は高速ですが対応したグラフィックボードが必要です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_RenderingMode {
+            get {
+                return ResourceManager.GetString("Help_RenderingMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   カットオフ周波数付近を強調してクセのある音にします。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Resonance {
+            get {
+                return ResourceManager.GetString("Help_Resonance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   残響の長さや質を決定する「部屋の大きさ」を設定します。値が大きいほど大ホールのような長い残響になります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_RoomSize {
+            get {
+                return ResourceManager.GetString("Help_RoomSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   「トラック名に&quot;Piano&quot;が含まれていたらこのSoundFontを使う」といった条件を設定し、楽器ごとに適切な音源を自動選択させることができます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Rules {
+            get {
+                return ResourceManager.GetString("Help_Rules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   1秒間あたりの音声データのサンプル数です。値が大きいほど高音質になりますが、処理負荷も増加します。一般的な用途では44100Hz (CD音質) または 48000Hz (DVD音質) が推奨されます。例：44100, 48000, 96000。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_SampleRate {
+            get {
+                return ResourceManager.GetString("Help_SampleRate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   SFZファイルやそのサンプルデータ（WAVなど）が保存されている親フォルダを指定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_SfzSearchPath {
+            get {
+                return ResourceManager.GetString("Help_SfzSearchPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   MIDIファイルを読み込んだ際に、トラック構成などの詳細情報を確認できるウィンドウを自動的に開きます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_ShowMidiInfoWindowOnLoad {
+            get {
+                return ResourceManager.GetString("Help_ShowMidiInfoWindowOnLoad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   この設定を適用する楽器の範囲（開始番号）を指定します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_StartProgram {
+            get {
+                return ResourceManager.GetString("Help_StartProgram", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   キーを押している間の音量レベルです。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Sustain {
+            get {
+                return ResourceManager.GetString("Help_Sustain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   高音の強さを調整します。上げるときらびやかになりますが、上げすぎると耳障りになることがあります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_TrebleGain {
+            get {
+                return ResourceManager.GetString("Help_TrebleGain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   歪み方の特性（ソフト、ハードなど）を選択します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Type {
+            get {
+                return ResourceManager.GetString("Help_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   これといったSoundFontを持っていない場合、このオプションを有効にすると標準的な音源が自動的に使用されます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_UseDefaultSoundFont {
+            get {
+                return ResourceManager.GetString("Help_UseDefaultSoundFont", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   波形として使用するカスタムWAVファイルを選択します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_UserWavetableFile {
+            get {
+                return ResourceManager.GetString("Help_UserWavetableFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   開発者向けの詳細なデバッグ情報を記録します。ログファイルのサイズが大きくなるため、トラブルシューティング時以外はオフ推奨です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_VerboseLogging {
+            get {
+                return ResourceManager.GetString("Help_VerboseLogging", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   この楽器の音量を調整します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Volume {
+            get {
+                return ResourceManager.GetString("Help_Volume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   音の基本となる波形を選択します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Waveform {
+            get {
+                return ResourceManager.GetString("Help_Waveform", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   波形合成に使用する短いWAVファイル（ウェーブテーブル）を保存するフォルダです。ここにファイルを追加すると、カスタム波形として選択できるようになります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_WavetableDirectory {
+            get {
+                return ResourceManager.GetString("Help_WavetableDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   エフェクトの効果音をどれくらいの割合で混ぜるかを設定します。0なら原音のみ、1ならエフェクト音のみになります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_WetDryMix {
+            get {
+                return ResourceManager.GetString("Help_WetDryMix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   リバーブ成分（残響音）の音量です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_WetLevel {
+            get {
+                return ResourceManager.GetString("Help_WetLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   残響音の左右への広がり具合を調整します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help_Width {
+            get {
+                return ResourceManager.GetString("Help_Width", resourceCulture);
             }
         }
         
@@ -2073,6 +3630,15 @@ namespace MIDI.Localization {
         internal static string Setting_RateReduction {
             get {
                 return ResourceManager.GetString("Setting_RateReduction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   拡張子の関連付け に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Setting_RegisterExtensions {
+            get {
+                return ResourceManager.GetString("Setting_RegisterExtensions", resourceCulture);
             }
         }
         

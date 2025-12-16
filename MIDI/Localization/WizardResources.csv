@@ -1,0 +1,420 @@
+﻿Key,Value
+Category_Association,拡張子の関連付け
+Category_Audio,音声
+Category_Performance,パフォーマンス
+Category_MIDI,MIDI
+Category_SoundFont,SoundFont
+Category_SFZ,SFZ
+Category_Synthesis,シンセシス
+Category_Effects,エフェクト
+Category_InstrumentPresets,楽器プリセット
+Category_CustomInstruments,カスタム楽器
+Category_Debug,デバッグ
+Setting_RegisterExtensions,拡張子の関連付け
+Description_RegisterExtensions,.mpp および .meffect ファイルをこのアプリケーションに関連付けます。
+Help_RegisterExtensions,アプリケーションに関連付けるファイル拡張子を設定します。これにより、ファイルをダブルクリックして直接開くことができるようになります。例：オンにすると、エクスプローラーで.mppファイルをダブルクリックした際にこのアプリケーションが起動します。
+Setting_SampleRate,サンプルレート (Hz)
+Description_SampleRate,1秒間に音声をサンプリングする回数。高いほど高音質ですがCPU負荷が増加します。(CD音質: 44100)
+Help_SampleRate,1秒間あたりの音声データのサンプル数です。値が大きいほど高音質になりますが、処理負荷も増加します。一般的な用途では44100Hz (CD音質) または 48000Hz (DVD音質) が推奨されます。例：44100, 48000, 96000。
+Setting_MasterVolume,マスターボリューム
+Description_MasterVolume,全体の音量を調整します。(0.0 - 1.0)
+Help_MasterVolume,出力される音声の最終的な音量を調整します。0.0で無音、1.0で最大音量となります。他のアプリケーションとのバランスを考慮して設定してください。例：0.8。
+Setting_EnableNormalization,正規化を有効にする
+Description_EnableNormalization,音量を自動調整し、音割れを防ぎ均一化します。
+Help_EnableNormalization,再生される音声の音量が一定レベルに収まるように自動的に調整します。急激な大音量を防ぎ、聴きやすい音量バランスを保つことができます。
+Setting_NormalizationThreshold,正規化 閾値
+Description_NormalizationThreshold,正規化が作動する音量のしきい値 (0.0 - 1.0)。
+Help_NormalizationThreshold,正規化処理を開始する音量レベルを指定します。この値を超えた音声に対して音量の圧縮が行われます。値が低いほど、小さい音量から効果がかかります。例：0.5。
+Setting_NormalizationLevel,正規化 レベル
+Description_NormalizationLevel,正規化後の目標音量レベル (0.0 - 1.0)。
+Help_NormalizationLevel,正規化された音声の目標とする最大音量を指定します。通常は1.0に近い値を設定しますが、少し余裕を持たせるために0.95などを設定することもあります。
+Setting_EnableGlobalFadeOut,グローバルフェードアウトを有効にする
+Description_EnableGlobalFadeOut,再生終了時に音を滑らかに消し、突然の音切れを防ぎます。
+Help_EnableGlobalFadeOut,楽曲の再生終了時に、音量を徐々に下げて自然に終了させる機能です。突然音が切れる不自然さを解消します。
+Setting_GlobalFadeOutSeconds,フェードアウト時間 (秒)
+Description_GlobalFadeOutSeconds,フェードアウトにかける時間（秒）。
+Help_GlobalFadeOutSeconds,フェードアウトを開始してから完全に無音になるまでの時間を秒単位で指定します。例：2.0（2秒かけてフェードアウト）。
+Setting_InitializeGpuOnStartup,起動時にGPUを初期化
+Description_InitializeGpuOnStartup,YMM4起動時にGPUデバイスを初期化します。無効の場合、初回MIDI読み込み時に時間がかかることがあります。
+Help_InitializeGpuOnStartup,アプリケーション起動時にあらかじめGPUの計算リソースを確保します。これにより、最初の再生開始時の待ち時間を短縮できますが、起動直後のメモリ使用量が増加します。
+Setting_BufferSize,バッファサイズ
+Description_BufferSize,一度に処理するサンプル数。小さいほど低遅延ですがCPU負荷が高く音飛びしやすくなります。
+Help_BufferSize,音声処理のひとかたまりのサイズです。値を小さくすると遅延（レイテンシ）が減りますが、CPU負荷が高まり音が途切れる可能性があります。大きくすると安定しますが遅延が増えます。例：512, 1024。
+Setting_EnableParallelProcessing,並列処理を有効にする (CPU)
+Description_EnableParallelProcessing,マルチコアCPUを活用してレンダリングを高速化します。
+Help_EnableParallelProcessing,複数のCPUコアを使用して音声合成処理を並行して行います。最近のPCでは通常オンにすることでパフォーマンスが向上します。
+Setting_MaxThreads,最大スレッド数
+Description_MaxThreads,並列処理に使用する最大スレッド数。通常はCPUコア数に合わせます。
+Help_MaxThreads,音声合成に使用するCPUスレッドの上限を指定します。0または-1を指定すると、システムの論理プロセッサ数に合わせて自動設定されます。
+Setting_MaxPolyphony,最大同時発音数
+Description_MaxPolyphony,同時に再生できる最大ノート数。超えると古い音が消えることがあります。
+Help_MaxPolyphony,同時に鳴らすことができる音の最大数です。ピアノのダンパーペダルを多用する曲などでは、この値を大きくしないと音が途中で消えてしまうことがあります。例：256, 512。
+Setting_InitialSyncDurationSeconds,初期読み込み時間 (秒)
+Description_InitialSyncDurationSeconds,ファイル読み込み時に最初に読み込む時間(秒)。長いほど開始は遅いが再生中の負荷が減ります。
+Help_InitialSyncDurationSeconds,再生開始前にメモリに読み込んでおくデータの長さです。値を大きくすると再生開始まで時間がかかりますが、再生中のディスク読み込み負荷が減り、音飛びを防げます。
+Setting_RenderingMode,レンダリングモード
+Description_RenderingMode,音声レンダリング方法を選択。リアルタイムは低遅延だが品質が若干低下、GPUは対応ボードが必要。
+Help_RenderingMode,音声合成の処理方式を選択します。「CPU」は互換性が高く、「GPU」は高速ですが対応したグラフィックボードが必要です。
+Setting_EnableGpuSynthesis,シンセシス
+Description_EnableGpuSynthesis,GPUを使用して波形合成処理を行います。
+Help_EnableGpuSynthesis,基本的な波形生成処理をGPUで行います。多数の音を同時に鳴らす場合にCPU負荷を大幅に削減できる可能性があります。
+Setting_EnableGpuEqualizer,イコライザー
+Description_EnableGpuEqualizer,GPUを使用してイコライザー処理を行います。
+Help_EnableGpuEqualizer,周波数帯域ごとの音量調整処理をGPUで行います。
+Setting_EnableGpuEffectsChain,エフェクトチェーン
+Description_EnableGpuEffectsChain,GPUを使用して複数のエフェクト（リバーブ、コンプなど）をまとめて処理します。
+Help_EnableGpuEffectsChain,複数のエフェクト処理を一括してGPU上で実行し、データ転送のオーバーヘッドを削減して高速化します。
+Setting_EnableGpuConvolutionReverb,畳み込みリバーブ
+Description_EnableGpuConvolutionReverb,GPUを使用して高品質な畳み込みリバーブを処理します。
+Help_EnableGpuConvolutionReverb,非常に計算負荷の高い「畳み込みリバーブ」処理をGPUで行います。CPUではリアルタイム処理が難しい高品質なリバーブも利用可能になります。
+Setting_DefaultTempo,デフォルトテンポ (μs/拍)
+Description_DefaultTempo,MIDIファイルにテンポ情報がない場合のテンポ (120BPM = 500000)。
+Help_DefaultTempo,テンポ指定が含まれていないMIDIファイルを再生する際の基本テンポを設定します。通常は120BPM（500000マイクロ秒/拍）が使用されます。
+Setting_PitchBendRange,ピッチベンド範囲 (半音)
+Description_PitchBendRange,ピッチベンドの変化範囲 (半音単位)。
+Help_PitchBendRange,ピッチベンドホイールを最大まで動かした際の音程変化量を半音単位で指定します。一般的には2（全音）または12（1オクターブ）が設定されます。
+Setting_MinVelocity,最小ベロシティ
+Description_MinVelocity,これより小さいベロシティのノートは無視されます。
+Help_MinVelocity,発音する最小の強さ（ベロシティ）を設定します。これより弱い音は演奏されません。ノイズのような極小の音をカットする場合に使用します。
+Setting_ProcessControlChanges,コントロールチェンジを処理
+Description_ProcessControlChanges,ボリュームやパンなどのコントロールチェンジを処理します。
+Help_ProcessControlChanges,MIDIファイルに含まれる音量や定位（パン）などの制御信号を反映するかどうかを設定します。オフにすると、それらの変化が無視され一定になります。
+Setting_ProcessPitchBend,ピッチベンドを処理
+Description_ProcessPitchBend,ピッチベンドメッセージを処理します。
+Help_ProcessPitchBend,音程を滑らかに変化させるピッチベンド情報を反映するかどうかを設定します。
+Setting_ProcessProgramChanges,プログラムチェンジを処理
+Description_ProcessProgramChanges,音色切り替えメッセージを処理します。
+Help_ProcessProgramChanges,楽器の音色を変更する命令を反映するかどうかを設定します。オフにすると、最初または手動で設定した音色が維持されます。
+Setting_ExcludedChannels,除外チャンネル
+Description_ExcludedChannels,再生時に無視するMIDIチャンネル (カンマ区切り)。
+Help_ExcludedChannels,演奏しないMIDIチャンネルを指定します。例えば「10」を指定するとドラムパート（通常チャンネル10）がミュートされます。カンマ区切りで複数指定可能です。例：1,10。
+Setting_ExcludedTracks,除外トラック
+Description_ExcludedTracks,再生時に無視するトラック番号 (カンマ区切り)。
+Help_ExcludedTracks,演奏しないトラック番号を指定します。特定のパートだけをミュートしたい場合に使用します。
+Setting_EnableSoundFont,SoundFontを有効にする
+Description_EnableSoundFont,SoundFont (.sf2) ファイルを使用して再生します。
+Help_EnableSoundFont,SoundFont形式(.sf2)の音源データを使用して演奏を行います。リアルな楽器音で再生したい場合に有効にします。
+Setting_UseDefaultSoundFont,デフォルトSoundFontを使用
+Description_UseDefaultSoundFont,プラグイン同梱のデフォルトSoundFont (GeneralUser-GS.sf2) を使用します。
+Help_UseDefaultSoundFont,これといったSoundFontを持っていない場合、このオプションを有効にすると標準的な音源が自動的に使用されます。
+Setting_DefaultSoundFontDirectory,SoundFontディレクトリ
+Description_DefaultSoundFontDirectory,ユーザーが追加したSoundFontファイルを格納するディレクトリ。
+Help_DefaultSoundFontDirectory,ご自身で入手したSoundFontファイルを保存しているフォルダを指定します。ここにあるファイルがリストに表示されます。
+Setting_PreferredSoundFont,優先SoundFontファイル名
+Description_PreferredSoundFont,ルールに一致しない場合に優先的に使用するSoundFontファイル名。
+Help_PreferredSoundFont,特定の音源指定がない場合に使用される、基本となるSoundFontファイル名を指定します。
+Setting_FallbackToSynthesis,シンセシスへフォールバック
+Description_FallbackToSynthesis,適切なSoundFontが見つからない場合、内蔵シンセサイザーで再生します。
+Help_FallbackToSynthesis,指定されたSoundFontが見つからなかったり、音色が定義されていない場合に、自動的に簡易的な波形合成音源で代用して音を出します。
+Setting_Layers,SoundFontレイヤー
+Description_Layers,重ねて使用するSoundFontファイル (上から順に優先)。
+Help_Layers,複数のSoundFontを重ねて使用する場合の設定です。リストの上にあるSoundFontが優先して使用され、そこに音色がない場合に下のSoundFontが参照されます。
+Setting_Rules,SoundFontルール
+Description_Rules,MIDIファイルの特性に応じて使用するSoundFontを決定するルール。
+Help_Rules,「トラック名に"Piano"が含まれていたらこのSoundFontを使う」といった条件を設定し、楽器ごとに適切な音源を自動選択させることができます。
+Setting_EnableSfz,SFZを有効にする (SoundFontより優先)
+Description_EnableSfz,SFZ形式のサンプラー音源を使用して再生します (有効な場合SoundFontより優先)。
+Help_EnableSfz,SFZ形式の高品質なサンプラー音源を使用します。SoundFontよりも詳細な表現が可能ですが、設定が複雑になることがあります。
+Setting_SfzSearchPath,SFZ 検索フォルダ
+Description_SfzSearchPath,SFZファイルを検索するフォルダのパス。
+Help_SfzSearchPath,SFZファイルやそのサンプルデータ（WAVなど）が保存されている親フォルダを指定します。
+Setting_ProgramMaps,SFZ プログラムマップ
+Description_ProgramMaps,MIDIプログラム番号とSFZファイルの関連付け。
+Help_ProgramMaps,MIDIの音色番号（プログラムナンバー）ごとに、どのSFZファイルを使用するかを定義します。例：Program 0 (Piano) -> grand_piano.sfz。
+Setting_DefaultWaveform,デフォルト波形
+Description_DefaultWaveform,音色の基本となる波形の種類。
+Help_DefaultWaveform,特定の音色が指定されていない場合に使用される基本波形です。Sine(正弦波)、Sawtooth(ノコギリ波)、Square(矩形波)などから選択できます。
+Setting_WavetableDirectory,Wavetableフォルダ
+Description_WavetableDirectory,ユーザー定義のWAVファイルを配置するフォルダ。
+Help_WavetableDirectory,波形合成に使用する短いWAVファイル（ウェーブテーブル）を保存するフォルダです。ここにファイルを追加すると、カスタム波形として選択できるようになります。
+Setting_A4Frequency,A4周波数 (Hz)
+Description_A4Frequency,基準音A4（ラ）の周波数 (現代標準: 440Hz)。
+Help_A4Frequency,チューニングの基準となる「ラ」の音の周波数です。通常は440Hzですが、クラシック音楽などでは442Hzなどが使われることもあります。
+Setting_MinFrequency,最小周波数 (Hz)
+Description_MinFrequency,生成する音声の周波数の下限。これより低い周波数はクリップされます。
+Help_MinFrequency,再生する音の低音の限界を設定します。人間の可聴域の下限（約20Hz）以下に設定しても通常は聞こえませんが、無駄な処理を省くために制限をかけることができます。
+Setting_MaxFrequency,最大周波数 (Hz)
+Description_MaxFrequency,生成する音声の周波数の上限。これより高い周波数はクリップされます。
+Help_MaxFrequency,再生する音の高音の限界を設定します。サンプルレートの半分（ナイキスト周波数）以下である必要があります。
+Setting_EnvelopeScale,エンベロープスケール
+Description_EnvelopeScale,ADSRエンベロープの時間スケール。1より大きいと長く、小さいと短くなります。
+Help_EnvelopeScale,音の立ち上がりや減衰の時間（ADSR）を一括して伸縮させます。2.0にすると全ての時間が2倍（ゆっくり）になり、0.5にすると半分（機敏）になります。
+Setting_DefaultAttack,デフォルト アタック (s)
+Description_DefaultAttack,音が鳴り始めてから最大音量に達するまでの時間（秒）。
+Help_DefaultAttack,鍵盤を押してから音が最大になるまでの時間です。打楽器は短く、バイオリンのような持続音は長く設定します。
+Setting_DefaultDecay,デフォルト ディケイ (s)
+Description_DefaultDecay,最大音量からサステインレベルまで減衰する時間（秒）。
+Help_DefaultDecay,最大音量に達した後、持続音量（サステイン）に落ち着くまでの時間です。
+Setting_DefaultSustain,デフォルト サステイン
+Description_DefaultSustain,ノートが押されている間の音量レベル (0-1)。
+Help_DefaultSustain,鍵盤を押し続けている間の音量レベルです。1.0なら最大音量を維持、0.0ならディケイ後に音が消えます。
+Setting_DefaultRelease,デフォルト リリース (s)
+Description_DefaultRelease,ノートが離されてから音が消えるまでの時間（秒）。
+Help_DefaultRelease,鍵盤を離した後に余韻が残る時間です。
+Setting_FmModulatorFrequency,FM 変調周波数 (Hz)
+Description_FmModulatorFrequency,FM合成における変調波の周波数。
+Help_FmModulatorFrequency,FM音源方式で音作りをする際の、音色を変化させる（変調する）波の周波数です。
+Setting_FmModulationIndex,FM 変調指数
+Description_FmModulationIndex,FM合成における変調の深さ。大きいほど複雑な音色になります。
+Help_FmModulationIndex,変調のかかり具合の強さです。値を大きくすると金属的な音やノイズに近い音に変化します。
+Setting_EnableAntiPop,アンチポップを有効にする
+Description_EnableAntiPop,ノート開始/終了時に短いフェードを適用し、「プツッ」というノイズを低減します。
+Help_EnableAntiPop,波形の途中で音が切れる際に発生するクリックノイズを防ぐため、ごく短いフェードイン・アウトを自動的に適用します。
+Setting_AntiPopAttackSeconds,アンチポップ アタック (s)
+Description_AntiPopAttackSeconds,アンチポップ適用時の最短アタック時間（秒）。
+Help_AntiPopAttackSeconds,クリックノイズ防止用のフェードイン時間です。通常は0.005秒程度で十分です。
+Setting_AntiPopReleaseSeconds,アンチポップ リリース (s)
+Description_AntiPopReleaseSeconds,アンチポップ適用時の最短リリース時間（秒）。
+Help_AntiPopReleaseSeconds,クリックノイズ防止用のフェードアウト時間です。
+Setting_EnableNoteCrossfade,ノートクロスフェードを有効にする
+Description_EnableNoteCrossfade,ノートの切り替わりをスムーズにし、ノイズを低減します。
+Help_EnableNoteCrossfade,同じ音程の音が連続する場合などに、前の音と次の音を滑らかにつなぎ合わせます。
+Setting_NoteCrossfadeDuration,クロスフェード時間 (s)
+Description_NoteCrossfadeDuration,ノートクロスフェードの時間（秒）。
+Help_NoteCrossfadeDuration,音のつなぎ目のクロスフェードにかける時間です。
+Setting_EnableBandlimitedSynthesis,バンドリミテッド合成を有効にする
+Description_EnableBandlimitedSynthesis,エイリアシング（折り返しノイズ）を低減します。音質が向上しますがCPU負荷がわずかに増加します。
+Help_EnableBandlimitedSynthesis,デジタル音声特有の「折り返し雑音」を除去する高品質な合成方式を使用します。高音がクリアになります。
+Setting_EnableEffects,エフェクトを有効にする
+Description_EnableEffects,すべてのオーディオエフェクトの有効/無効を切り替えます。
+Help_EnableEffects,リバーブやコーラスなど、全ての音響効果を一括でオン・オフします。原音を確認したい場合にオフにします。
+Setting_EnableCompression,コンプレッサーを有効にする
+Description_EnableCompression,音量のばらつきを抑え、音圧を上げるエフェクトです。
+Help_EnableCompression,大きな音を抑え、小さな音を持ち上げることで、全体的に迫力のある（音圧の高い）音声にします。
+Setting_CompressionThreshold,コンプ 閾値
+Description_CompressionThreshold,コンプレッサーが作動を開始する音量のしきい値 (0-1)。
+Help_CompressionThreshold,圧縮を開始する音量レベルです。
+Setting_CompressionRatio,コンプ レシオ
+Description_CompressionRatio,しきい値を超えた音を圧縮する比率 (例: 4)。
+Help_CompressionRatio,閾値を超えた音をどのくらい強く圧縮するかを指定します。4:1なら超えた分の音量が1/4になります。
+Setting_CompressionAttack,コンプ アタック (s)
+Description_CompressionAttack,コンプレッサーが作動し始めるまでの時間（秒）。
+Help_CompressionAttack,音が閾値を超えてから圧縮が始まるまでの反応速度です。
+Setting_CompressionRelease,コンプ リリース (s)
+Description_CompressionRelease,コンプレッサーが解除されるまでの時間（秒）。
+Help_CompressionRelease,音が閾値を下回ってから圧縮を解除するまでの時間です。
+Setting_AlgorithmicReverb,アルゴリズミックリバーブ
+Description_AlgorithmicReverb,計算によって残響を生成するリバーブの設定。
+Help_AlgorithmicReverb,数値計算によって空間の響きをシミュレーションするリバーブエフェクトの設定です。
+Setting_Enable,有効にする
+Description_Enable,このエフェクトを有効にします。
+Help_Enable,この機能を使用するかどうかを設定します。
+Setting_RoomSize,部屋の広さ
+Description_RoomSize,シミュレートする部屋の広さ。
+Help_RoomSize,残響の長さや質を決定する「部屋の大きさ」を設定します。値が大きいほど大ホールのような長い残響になります。
+Setting_Damping,減衰
+Description_Damping,高音域の吸音具合。
+Help_Damping,壁やカーテンに音が吸収される具合をシミュレートします。値を上げると残響の高音が早く減衰し、柔らかい響きになります。
+Setting_WetLevel,ウェットレベル
+Description_WetLevel,エフェクト音の音量。
+Help_WetLevel,リバーブ成分（残響音）の音量です。
+Setting_DryLevel,ドライレベル
+Description_DryLevel,原音の音量。
+Help_DryLevel,エフェクトがかかっていない元の音の音量です。
+Setting_Width,広がり
+Description_Width,ステレオ感の広がり。
+Help_Width,残響音の左右への広がり具合を調整します。
+Setting_EnableChorus,コーラスを有効にする
+Description_EnableChorus,音をわずかに揺らして重ね、厚みと広がりを与えます。
+Help_EnableChorus,複数の楽器でユニゾンしているような、厚みのある美しい響きを加えるエフェクトです。
+Setting_ChorusDelay,コーラス ディレイ (s)
+Description_ChorusDelay,原音と重ねる音の遅延時間（秒）。
+Help_ChorusDelay,原音に対して重ねるコピー音をどれくらい遅らせるかを設定します。
+Setting_ChorusDepth,コーラス 深さ
+Description_ChorusDepth,音の揺れの深さ。
+Help_ChorusDepth,音程の揺れ幅の大きさです。
+Setting_ChorusRate,コーラス レート (Hz)
+Description_ChorusRate,音を揺らす速さ（Hz）。
+Help_ChorusRate,音程を揺らす周期の速さです。
+Setting_ChorusStrength,コーラス 強度
+Description_ChorusStrength,原音に対するコーラス音の強さ (0-1)。
+Help_ChorusStrength,エフェクト音をどれくらい強く混ぜるかを設定します。
+Setting_EnableEqualizer,イコライザーを有効にする
+Description_EnableEqualizer,特定の周波数帯域を調整して音質を変えます。
+Help_EnableEqualizer,低音・中音・高音のバランスを調整し、好みの音質に補正します。
+Setting_EQ,イコライザー設定
+Description_EQ,各帯域のゲイン設定。
+Help_EQ,3バンドイコライザーの詳細設定です。
+Setting_BassGain,低音ゲイン
+Description_BassGain,低音域の音量を調整します (倍率)。
+Help_BassGain,低音の強さを調整します。1.0が基準で、上げると重厚感が増します。
+Setting_MidGain,中音ゲイン
+Description_MidGain,中音域の音量を調整します (倍率)。
+Help_MidGain,中音の強さを調整します。ボーカルやメロディの聴こえやすさに影響します。
+Setting_TrebleGain,高音ゲイン
+Description_TrebleGain,高音域の音量を調整します (倍率)。
+Help_TrebleGain,高音の強さを調整します。上げるときらびやかになりますが、上げすぎると耳障りになることがあります。
+Setting_EnableConvolutionReverb,畳み込みリバーブを有効にする
+Description_EnableConvolutionReverb,インパルス応答(IR)ファイルを使用し、リアルな残響を再現します。
+Help_EnableConvolutionReverb,実際のコンサートホールなどで録音されたデータ（IR）を使って、非常にリアルな空間の響きを再現します。
+Setting_ImpulseResponseFilePath,IRファイルパス
+Description_ImpulseResponseFilePath,使用するインパルス応答ファイル (.wav) のパス。
+Help_ImpulseResponseFilePath,空間の響きを記録したWAVファイルを指定します。
+Setting_MaxImpulseResponseDurationSeconds,IR最大読み込み時間 (s)
+Description_MaxImpulseResponseDurationSeconds,インパルス応答ファイルの最大読み込み時間（秒）。長いファイルはこの時間に切り詰められます。
+Help_MaxImpulseResponseDurationSeconds,読み込むIRデータの長さを制限します。長すぎると処理負荷が高くなるため、適切な長さにカットします。
+Setting_EnablePhaser,フェイザーを有効にする
+Description_EnablePhaser,音の位相をずらして独特のうねりを生み出します。
+Help_EnablePhaser,ジェット機が通り過ぎるような「シュワシュワ」としたうねりを加えるエフェクトです。
+Setting_PhaserRate,フェイザー レート (Hz)
+Description_PhaserRate,位相を変化させる速さ（Hz）。
+Help_PhaserRate,うねりの周期の速さです。
+Setting_PhaserStages,フェイザー ステージ数
+Description_PhaserStages,フェイザーのフィルター段数。多いほど複雑な効果になります。
+Help_PhaserStages,位相をずらす回路の数です。数が多いほど深くて複雑なうねりになります。
+Setting_PhaserFeedback,フェイザー フィードバック
+Description_PhaserFeedback,エフェクト音を再度入力に戻す量 (0-1)。効果を強調します。
+Help_PhaserFeedback,処理された音を入力に戻すことで、エフェクトのクセを強めます。
+Setting_EnableFlanger,フランジャーを有効にする
+Description_EnableFlanger,短く周期的な遅延を用いて金属的なうねりを生み出します。
+Help_EnableFlanger,フェイザーに似ていますが、より金属的で強力なうねりを加えるエフェクトです。
+Setting_FlangerDelay,フランジャー ディレイ (s)
+Description_FlangerDelay,遅延時間（秒）。
+Help_FlangerDelay,原音からの遅延時間です。ごく短い時間で変化させます。
+Setting_FlangerRate,フランジャー レート (Hz)
+Description_FlangerRate,うねりの速さ（Hz）。
+Help_FlangerRate,遅延時間を変化させる周期の速さです。
+Setting_FlangerDepth,フランジャー 深さ
+Description_FlangerDepth,うねりの深さ (0-1)。
+Help_FlangerDepth,うねりの強さを設定します。
+Setting_EnableLimiter,リミッターを有効にする
+Description_EnableLimiter,音量が一定値を超えないように制限し、音割れを防ぎます。
+Help_EnableLimiter,過大入力によるデジタルクリッピング（音割れ）を最終段階で防止する保護機能です。
+Setting_LimiterThreshold,リミッター 閾値
+Description_LimiterThreshold,音量を制限する上限値 (0-1)。
+Help_LimiterThreshold,これ以上音量を上げないとする上限ラインを設定します。通常は1.0（最大）または少し下げた0.95などにします。
+Setting_EnableDCOffsetRemoval,DCオフセット除去を有効にする
+Description_EnableDCOffsetRemoval,音声信号の直流成分を除去し、ノイズや歪みを防ぎます。
+Help_EnableDCOffsetRemoval,波形の中心が0からずれてしまう現象（DCオフセット）を補正します。通常はオンにしておきます。
+Setting_EnablePingPongDelay,ピンポンディレイを有効にする
+Description_EnablePingPongDelay,左右チャンネルで交互にやまびこ効果を生み出します。
+Help_EnablePingPongDelay,音が左、右、左…と飛び交うような反響効果を加えます。
+Setting_DelayTime,ディレイタイム (s)
+Description_DelayTime,やまびこの間隔（秒）。
+Help_DelayTime,音が返ってくるまでの時間間隔です。テンポに合わせた時間を設定するとリズム感が良くなります。
+Setting_Feedback,フィードバック
+Description_Feedback,やまびこが繰り返される強さ (0-1)。
+Help_Feedback,やまびこが消えるまでの長さを調整します。値を大きくすると何度も繰り返されます。
+Setting_WetDryMix,Mix
+Description_WetDryMix,原音(Dry)とエフェクト音(Wet)のバランス (0-1)。
+Help_WetDryMix,エフェクトの効果音をどれくらいの割合で混ぜるかを設定します。0なら原音のみ、1ならエフェクト音のみになります。
+Setting_Distortion,ディストーション設定
+Description_Distortion,音を歪ませるエフェクトの設定。
+Help_Distortion,エレキギターのような激しい歪みを加えるエフェクトです。
+Setting_Type,種類
+Description_Type,歪みの種類。
+Help_Type,歪み方の特性（ソフト、ハードなど）を選択します。
+Setting_Drive,ドライブ
+Description_Drive,歪みの強さ。
+Help_Drive,入力信号を増幅させて歪みを強くします。
+Setting_Mix,ミックス
+Description_Mix,原音と歪み音のバランス。
+Help_Mix,歪ませた音をどれくらい混ぜるかを設定します。
+Setting_BitCrusher,ビットクラッシャー設定
+Description_BitCrusher,音質を意図的に劣化させるエフェクトの設定。
+Help_BitCrusher,解像度を下げて、レトロゲームのような荒い音質にするエフェクトです。
+Setting_BitDepth,ビット深度
+Description_BitDepth,音の解像度（ビット数）。
+Help_BitDepth,数値を小さくするほどザラザラとしたノイズの混じった音になります。
+Setting_RateReduction,レート削減
+Description_RateReduction,サンプリング周波数を間引く割合。
+Help_RateReduction,値を大きくするほど高音が失われ、こもったような劣化した音になります。
+Setting_ShowMidiInfoWindowOnLoad,MIDI情報ウィンドウを表示
+Description_ShowMidiInfoWindowOnLoad,MIDIファイル追加時に内部情報ウィンドウを自動表示します。
+Help_ShowMidiInfoWindowOnLoad,MIDIファイルを読み込んだ際に、トラック構成などの詳細情報を確認できるウィンドウを自動的に開きます。
+Setting_EnableMidiEditor,MIDIエディターを開く
+Description_EnableMidiEditor,MIDIファイル追加時にMIDIエディターを自動で開きます。
+Help_EnableMidiEditor,MIDIファイルを読み込んだ際に、ピアノロールエディターを自動的に起動して編集可能な状態にします。
+Setting_EnableMidiInput,MIDI入力を有効にする
+Description_EnableMidiInput,MIDIキーボードからの入力を有効にします。
+Help_EnableMidiInput,PCに接続されたMIDIキーボードを使って、リアルタイムに音を鳴らしたり演奏したりできるようにします。
+Setting_MidiInputDevice,MIDI入力デバイス
+Description_MidiInputDevice,使用するMIDI入力デバイス名。
+Help_MidiInputDevice,接続されているMIDIデバイスの中から、入力に使用するものを選択します。
+Setting_EnableLogging,ログを有効にする
+Description_EnableLogging,プラグインの動作ログをファイルに出力します。
+Help_EnableLogging,エラー調査や動作確認のために、プラグインの処理内容をテキストファイルに記録します。
+Setting_VerboseLogging,詳細ログを有効にする
+Description_VerboseLogging,より詳細なログ（例外スタックトレースなど）を出力します。
+Help_VerboseLogging,開発者向けの詳細なデバッグ情報を記録します。ログファイルのサイズが大きくなるため、トラブルシューティング時以外はオフ推奨です。
+Setting_LogFilePath,ログファイルパス
+Description_LogFilePath,ログファイルの出力先パス。
+Help_LogFilePath,ログファイルを保存する場所を指定します。
+Setting_MaxLogSizeKB,最大ログサイズ (KB)
+Description_MaxLogSizeKB,ログファイルの最大サイズ(KB)。超えると古いログから削除されます。
+Help_MaxLogSizeKB,ログファイルが肥大化しすぎないように制限を設けます。
+Setting_EnableNamedPipeApi,名前付きパイプAPIを有効にする
+Description_EnableNamedPipeApi,外部連携用APIを有効にします。変更後はYMM4の再起動が必要です。
+Help_EnableNamedPipeApi,他のアプリケーションからこのプラグインを制御するための通信機能を有効にします。
+Setting_LogLevel,ログレベル
+Description_LogLevel,出力するログの詳細度 (1:エラーのみ - 5:全て)。
+Help_LogLevel,記録する情報の重要度を指定します。
+Setting_InstrumentPresets,楽器プリセット
+Description_InstrumentPresets,楽器ごとのプリセット設定です。
+Help_InstrumentPresets,ピアノやギターなど、楽器の種類ごとに使用するSoundFontやエンベロープ設定などを保存したプリセットを管理します。
+Setting_CustomInstruments,カスタム楽器
+Description_CustomInstruments,ユーザー独自の楽器設定です。
+Help_CustomInstruments,既存の楽器定義にはない、オリジナルの音色設定を作成して管理します。
+Setting_Name,名前
+Description_Name,設定の名前。
+Help_Name,識別しやすくするための任意の名前を入力します。
+Setting_StartProgram,開始プログラム
+Description_StartProgram,適用するMIDIプログラム番号の開始値。
+Help_StartProgram,この設定を適用する楽器の範囲（開始番号）を指定します。
+Setting_EndProgram,終了プログラム
+Description_EndProgram,適用するMIDIプログラム番号の終了値。
+Help_EndProgram,この設定を適用する楽器の範囲（終了番号）を指定します。
+Setting_Waveform,波形
+Description_Waveform,使用する波形。
+Help_Waveform,音の基本となる波形を選択します。
+Setting_Attack,アタック (s)
+Description_Attack,立ち上がり時間。
+Help_Attack,音が鳴り始めてから最大になるまでの時間です。
+Setting_Decay,ディケイ (s)
+Description_Decay,減衰時間。
+Help_Decay,アタック後の減衰時間です。
+Setting_Sustain,サステイン
+Description_Sustain,持続レベル。
+Help_Sustain,キーを押している間の音量レベルです。
+Setting_Release,リリース (s)
+Description_Release,余韻の時間。
+Help_Release,キーを離した後の余韻の時間です。
+Setting_Volume,音量
+Description_Volume,音量レベル。
+Help_Volume,この楽器の音量を調整します。
+Setting_Filter,フィルター
+Description_Filter,フィルター設定。
+Help_Filter,音の明るさを調整するフィルターの設定です。
+Setting_Cutoff,カットオフ (Hz)
+Description_Cutoff,フィルターの基準周波数。
+Help_Cutoff,フィルターをかける周波数の位置です。値を下げると音がこもります。
+Setting_Resonance,レゾナンス
+Description_Resonance,共鳴の強さ。
+Help_Resonance,カットオフ周波数付近を強調してクセのある音にします。
+Setting_Lfo,LFO
+Description_Lfo,LFO（低周波発振器）設定。
+Help_Lfo,音を周期的に揺らすLFOの設定です。ビブラートなどに使います。
+Setting_Rate,レート (Hz)
+Description_Rate,揺れの速さ。
+Help_Rate,LFOの周期の速さです。
+Setting_Depth,深さ
+Description_Depth,揺れの深さ。
+Help_Depth,LFOの効果の強さです。
+Setting_Program,プログラム番号
+Description_Program,MIDIプログラム番号。
+Help_Program,MIDI規格上の音色番号です。
+Setting_UserWavetableFile,Wavetableファイル
+Description_UserWavetableFile,使用するWavetableファイル。
+Help_UserWavetableFile,波形として使用するカスタムWAVファイルを選択します。
+Setting_AmplitudeEnvelope,振幅エンベロープ
+Description_AmplitudeEnvelope,音量変化のカーブ。
+Help_AmplitudeEnvelope,時間の経過に伴う音量の変化を設定します。
+Setting_PitchLfo,ピッチLFO
+Description_PitchLfo,音程を揺らすLFO。
+Help_PitchLfo,ビブラート効果を加えるLFO設定です。
+Setting_AmplitudeLfo,振幅LFO
+Description_AmplitudeLfo,音量を揺らすLFO。
+Help_AmplitudeLfo,トレモロ効果を加えるLFO設定です。
+Setting_FilterLfo,フィルターLFO
+Description_FilterLfo,音色を揺らすLFO。
+Help_FilterLfo,ワウ効果などを加えるLFO設定です。

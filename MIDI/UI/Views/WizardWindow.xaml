@@ -16,7 +16,8 @@
         Topmost="True"
         ResizeMode="NoResize"
         Background="{x:Null}"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -29,6 +30,13 @@
             <conv:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
             <conv:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
             <conv:NullToVisibilityConverterInverted x:Key="NullToVisibilityConverterInverted" />
+
+            <ControlTemplate x:Key="ValidationErrorTemplate">
+                <StackPanel>
+                    <AdornedElementPlaceholder x:Name="placeholder"/>
+                    <TextBlock Text="{Binding [0].ErrorContent}" Foreground="Red" FontSize="11" Margin="0,2,0,0"/>
+                </StackPanel>
+            </ControlTemplate>
 
             <Storyboard x:Key="LoadingAnimation" RepeatBehavior="Forever">
                 <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Note1" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" SpeedRatio="2">
@@ -76,6 +84,7 @@
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Margin" Value="0,0,10,0"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
             </Style>
 
             <Style TargetType="TextBlock" x:Key="SettingDescriptionStyle">
@@ -91,6 +100,7 @@
                 <Setter Property="Height" Value="28"/>
                 <Setter Property="Padding" Value="5,0"/>
                 <Setter Property="Margin" Value="0,0,0,5"/>
+                <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ValidationErrorTemplate}"/>
             </Style>
 
             <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
@@ -106,32 +116,28 @@
 
             <DataTemplate x:Key="BooleanTemplate">
                 <StackPanel Margin="0,5,0,5">
-                    <CheckBox IsChecked="{Binding Value}" Content="{Binding Name}" Style="{StaticResource {x:Type CheckBox}}" ToolTip="{Binding Description}"/>
-                    <TextBlock Text="{Binding Description}" Style="{StaticResource SettingDescriptionStyle}"/>
+                    <CheckBox IsChecked="{Binding Value, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Content="{Binding Name}" Style="{StaticResource {x:Type CheckBox}}" ToolTip="{Binding Description}"/>
                 </StackPanel>
             </DataTemplate>
 
             <DataTemplate x:Key="StringTemplate">
                 <StackPanel Margin="0,5,0,5">
                     <TextBlock Text="{Binding Name}" Style="{StaticResource SettingNameStyle}"/>
-                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource {x:Type TextBox}}"/>
-                    <TextBlock Text="{Binding Description}" Style="{StaticResource SettingDescriptionStyle}"/>
+                    <TextBox Text="{Binding Value, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource {x:Type TextBox}}"/>
                 </StackPanel>
             </DataTemplate>
 
             <DataTemplate x:Key="IntTemplate">
                 <StackPanel Margin="0,5,0,5">
                     <TextBlock Text="{Binding Name}" Style="{StaticResource SettingNameStyle}"/>
-                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource {x:Type TextBox}}"/>
-                    <TextBlock Text="{Binding Description}" Style="{StaticResource SettingDescriptionStyle}"/>
+                    <TextBox Text="{Binding Value, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource {x:Type TextBox}}"/>
                 </StackPanel>
             </DataTemplate>
 
             <DataTemplate x:Key="DoubleTemplate">
                 <StackPanel Margin="0,5,0,5">
                     <TextBlock Text="{Binding Name}" Style="{StaticResource SettingNameStyle}"/>
-                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource {x:Type TextBox}}"/>
-                    <TextBlock Text="{Binding Description}" Style="{StaticResource SettingDescriptionStyle}"/>
+                    <TextBox Text="{Binding Value, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource {x:Type TextBox}}"/>
                 </StackPanel>
             </DataTemplate>
 
@@ -143,7 +149,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Text="{Binding Value, Converter={StaticResource ColorToStringConverter}, UpdateSourceTrigger=LostFocus}" Style="{StaticResource {x:Type TextBox}}"/>
+                        <TextBox Grid.Column="0" Text="{Binding Value, Converter={StaticResource ColorToStringConverter}, ValidatesOnDataErrors=True, UpdateSourceTrigger=LostFocus}" Style="{StaticResource {x:Type TextBox}}"/>
                         <Border Grid.Column="1" Width="28" Height="28" Margin="5,0,0,0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1">
                             <Rectangle>
                                 <Rectangle.Fill>
@@ -152,21 +158,19 @@
                             </Rectangle>
                         </Border>
                     </Grid>
-                    <TextBlock Text="{Binding Description}" Style="{StaticResource SettingDescriptionStyle}"/>
                 </StackPanel>
             </DataTemplate>
 
             <DataTemplate x:Key="EnumTemplate">
                 <StackPanel Margin="0,5,0,5">
                     <TextBlock Text="{Binding Name}" Style="{StaticResource SettingNameStyle}"/>
-                    <ComboBox ItemsSource="{Binding EnumValues}" SelectedItem="{Binding Value}" Style="{StaticResource {x:Type ComboBox}}">
+                    <ComboBox ItemsSource="{Binding EnumValues}" SelectedItem="{Binding Value, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource {x:Type ComboBox}}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <TextBlock Text="{Binding Description}" Style="{StaticResource SettingDescriptionStyle}"/>
                 </StackPanel>
             </DataTemplate>
 
@@ -181,7 +185,7 @@
             <DataTemplate DataType="{x:Type vm:WizardSelectionPageViewModel}">
                 <Grid>
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="セットアップモードの選択" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center"/>
+                        <TextBlock Text="セットアップモードの選択" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
                         <TextBlock Text="MIDIプラグインの設定を行います。ご希望のモードを選択してください。" FontSize="16" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" Margin="0,0,0,40" HorizontalAlignment="Center"/>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -194,11 +198,9 @@
                                             </Border.Effect>
                                             <StackPanel VerticalAlignment="Center" Margin="20">
                                                 <Viewbox Width="80" Height="80" Margin="0,0,0,20" HorizontalAlignment="Center">
-                                                    <Path Data="M12,3V13.55A4,4 0 0,0 10,13A4,4 0 0,0 6,17A4,4 0 0,0 10,21A4,4 0 0,0 14,17V7H18V3H12Z" 
-                                                          Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" 
-                                                          Stretch="Uniform"/>
+                                                    <Path Data="{Binding Source={x:Static vm:Icons.Home}}" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Stretch="Uniform"/>
                                                 </Viewbox>
-                                                <TextBlock Text="かんたん設定" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                                <TextBlock Text="かんたん設定" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
                                                 <TextBlock Text="基本的な設定のみを行います。&#x0a;すぐに使い始めたい方におすすめです。" 
                                                            TextAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" FontSize="14" LineHeight="20"/>
                                             </StackPanel>
@@ -228,11 +230,9 @@
                                             </Border.Effect>
                                             <StackPanel VerticalAlignment="Center" Margin="20">
                                                 <Viewbox Width="80" Height="80" Margin="0,0,0,20" HorizontalAlignment="Center">
-                                                    <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.35 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.35 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,13L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.04 4.95,18.95L7.44,17.95C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.95L19.05,18.95C19.27,19.04 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" 
-                                                          Fill="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" 
-                                                          Stretch="Uniform"/>
+                                                    <Path Data="{Binding Source={x:Static vm:Icons.Default}}" Fill="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" Stretch="Uniform"/>
                                                 </Viewbox>
-                                                <TextBlock Text="詳細設定" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                                <TextBlock Text="詳細設定" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
                                                 <TextBlock Text="すべての項目を詳細に設定します。&#x0a;こだわりたい方におすすめです。" 
                                                            TextAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" FontSize="14" LineHeight="20"/>
                                             </StackPanel>
@@ -258,12 +258,62 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type vm:WizardSettingsPageViewModel}">
-                <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="25">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding Settings}"
-                                      ItemTemplateSelector="{StaticResource WizardTemplateSelector}"/>
-                    </ScrollViewer>
-                </Border>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="1.2*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="25" Margin="0,0,10,0" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ListBox ItemsSource="{Binding Settings}"
+                                     SelectedItem="{Binding SelectedSetting, Mode=TwoWay}"
+                                     ItemTemplateSelector="{StaticResource WizardTemplateSelector}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     HorizontalContentAlignment="Stretch"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     KeyboardNavigation.TabNavigation="Cycle"
+                                     Focusable="True"/>
+                        </ScrollViewer>
+                    </Border>
+
+                    <Border Grid.Column="1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="20" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+                        <StackPanel>
+                            <TextBlock Text="ヘルプ" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                            <ContentControl Content="{Binding SelectedSetting}">
+                                <ContentControl.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,10" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                            <TextBlock Text="{Binding DetailedHelp}" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" LineHeight="20"/>
+                                            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" Margin="0,10,0,0" FontWeight="Bold" TextWrapping="Wrap" Visibility="{Binding HasErrors, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ContentControl.ContentTemplate>
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedSetting}" Value="{x:Null}">
+                                                <Setter Property="ContentTemplate">
+                                                    <Setter.Value>
+                                                        <DataTemplate>
+                                                            <StackPanel>
+                                                                <TextBlock Text="設定項目の選択" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,10" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                                                <TextBlock Text="左側のリストから設定項目を選択すると、ここに詳細な説明が表示されます。" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                                                <TextBlock Text="&#x0a;※ 設定を変更するとリアルタイムにプレビューに反映されます。" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </DataTemplate>
 
             <Style TargetType="ListBoxItem">
@@ -344,7 +394,7 @@
     </Window.Resources>
 
     <Grid Background="#B3000000">
-        <Border Margin="80"
+        <Border Margin="60"
                 Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" 
                 CornerRadius="0"
                 HorizontalAlignment="Stretch"
@@ -356,19 +406,19 @@
             <Grid>
                 <Grid x:Name="LoadingGrid" Background="Transparent">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="MIDIプラグイン 設定ウィザード" FontSize="24" FontWeight="Bold" Margin="0,0,0,30" HorizontalAlignment="Center"/>
+                        <TextBlock Text="MIDIプラグイン 設定ウィザード" FontSize="24" FontWeight="Bold" Margin="0,0,0,30" HorizontalAlignment="Center" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Path x:Name="Note1" Data="M12,3V13.55A4,4 0 0,0 10,13A4,4 0 0,0 6,17A4,4 0 0,0 10,21A4,4 0 0,0 14,17V7H18V3H12Z" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Width="40" Height="40" Margin="8">
+                            <Path x:Name="Note1" Data="{Binding Source={x:Static vm:Icons.MIDI}}" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Width="40" Height="40" Margin="8" Stretch="Uniform">
                                 <Path.RenderTransform>
                                     <TranslateTransform Y="0"/>
                                 </Path.RenderTransform>
                             </Path>
-                            <Path x:Name="Note2" Data="M12,3V13.55A4,4 0 0,0 10,13A4,4 0 0,0 6,17A4,4 0 0,0 10,21A4,4 0 0,0 14,17V7H18V3H12Z" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Width="40" Height="40" Margin="8">
+                            <Path x:Name="Note2" Data="{Binding Source={x:Static vm:Icons.MIDI}}" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Width="40" Height="40" Margin="8" Stretch="Uniform">
                                 <Path.RenderTransform>
                                     <TranslateTransform Y="0"/>
                                 </Path.RenderTransform>
                             </Path>
-                            <Path x:Name="Note3" Data="M12,3V13.55A4,4 0 0,0 10,13A4,4 0 0,0 6,17A4,4 0 0,0 10,21A4,4 0 0,0 14,17V7H18V3H12Z" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Width="40" Height="40" Margin="8">
+                            <Path x:Name="Note3" Data="{Binding Source={x:Static vm:Icons.MIDI}}" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Width="40" Height="40" Margin="8" Stretch="Uniform">
                                 <Path.RenderTransform>
                                     <TranslateTransform Y="0"/>
                                 </Path.RenderTransform>
@@ -380,7 +430,7 @@
 
                 <Grid x:Name="MainGrid" Margin="20" Visibility="Collapsed" Opacity="0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="260"/>
+                        <ColumnDefinition Width="220"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
@@ -390,25 +440,61 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="1" 
-                               Text="{Binding CurrentPageIndexDisplay, StringFormat='ステップ {0}'}" 
-                               FontSize="14" FontWeight="SemiBold" 
-                               Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" 
-                               HorizontalAlignment="Right" Margin="0,10,60,10"
-                               Visibility="{Binding SelectedPage.ShowSidebar, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <ItemsControl Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Pages}" Margin="0,10,0,20" 
+                                  Visibility="{Binding SelectedPage.ShowSidebar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="5,0">
+                                    <Grid Width="24" Height="24">
+                                        <Ellipse x:Name="CompletedEllipse" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Visibility="Collapsed"/>
+                                        <Ellipse x:Name="CurrentEllipse" Stroke="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" StrokeThickness="2" Visibility="Collapsed"/>
+                                        <Ellipse x:Name="PendingEllipse" Stroke="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" StrokeThickness="2" Visibility="Collapsed"/>
+                                        <Path x:Name="CompletedCheck" Data="M4,10L9,15L20,4" Stroke="White" StrokeThickness="2" Stretch="Uniform" Margin="5" Visibility="Collapsed"/>
+                                    </Grid>
+                                    <TextBlock x:Name="CategoryText" Text="{Binding CategoryName}" VerticalAlignment="Center" Margin="5,0,0,0" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                    <Rectangle Width="20" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Status}" Value="Completed">
+                                        <Setter TargetName="CompletedEllipse" Property="Visibility" Value="Visible"/>
+                                        <Setter TargetName="CompletedCheck" Property="Visibility" Value="Visible"/>
+                                        <Setter TargetName="CategoryText" Property="Opacity" Value="0.6"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Status}" Value="Current">
+                                        <Setter TargetName="CurrentEllipse" Property="Visibility" Value="Visible"/>
+                                        <Setter TargetName="CategoryText" Property="FontWeight" Value="Bold"/>
+                                        <Setter TargetName="CategoryText" Property="Opacity" Value="1.0"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                        <Setter TargetName="PendingEllipse" Property="Visibility" Value="Visible"/>
+                                        <Setter TargetName="CategoryText" Property="Opacity" Value="0.4"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
                     <Border Grid.Row="1" Grid.Column="0" 
                             BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" 
-                            BorderThickness="1,1,0,1" 
-                            Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                            BorderThickness="0,0,1,0" 
+                            Margin="0,0,20,0"
                             Visibility="{Binding SelectedPage.ShowSidebar, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ListBox ItemsSource="{Binding Pages}"
                                  SelectedItem="{Binding SelectedPage, Mode=TwoWay}"
                                  BorderThickness="0"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 Background="Transparent">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding CategoryName}" FontWeight="SemiBold" FontSize="14"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="{Binding IconGeometry}" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0" Opacity="0.7"/>
+                                        <TextBlock Text="{Binding CategoryName}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                    </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -432,6 +518,37 @@
                     <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0,20,0,0">
                         <Button Content="キャンセル" Command="{Binding CancelCommand}" Style="{StaticResource RichButtonStyle}" HorizontalAlignment="Left" Padding="20,10"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+
+                            <Button Margin="0,0,20,0" Width="40" Height="40"
+                                    Command="{Binding TogglePlayCommand}"
+                                    Visibility="{Binding IsSettingsPage, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="プレビュー再生">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Grid>
+                                            <Ellipse Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}">
+                                                <Ellipse.Effect>
+                                                    <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.4"/>
+                                                </Ellipse.Effect>
+                                            </Ellipse>
+                                            <Path Data="M8,5.14V19.14L19,12.14L8,5.14Z" Fill="White" Stretch="Uniform" Margin="12" 
+                                                  Visibility="{Binding DataContext.IsPlaying, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanConverter}}"/>
+                                            <Path Data="M18,18H6V6H18V18Z" Fill="White" Stretch="Uniform" Margin="11" 
+                                                  Visibility="{Binding DataContext.IsPlaying, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="RenderTransform">
+                                                    <Setter.Value>
+                                                        <ScaleTransform ScaleX="0.95" ScaleY="0.95" CenterX="20" CenterY="20"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+
                             <Button Content="戻る" Command="{Binding PreviousCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,0,10,0" IsEnabled="{Binding CanGoPrevious}" Padding="20,10"/>
                             <Button Content="次へ" Command="{Binding NextCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,0,10,0" 
                                     Visibility="{Binding IsSettingsPage, Converter={StaticResource BooleanToVisibilityConverter}}" 

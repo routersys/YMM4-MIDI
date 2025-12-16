@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
+using MIDI.Localization;
 using MIDI.UI.ViewModels.MidiEditor;
 
 namespace MIDI.UI.ViewModels
@@ -22,7 +23,7 @@ namespace MIDI.UI.ViewModels
         Enum,
     }
 
-    public class WizardSettingItem : ViewModelBase
+    public class WizardSettingItem : ViewModelBase, INotifyDataErrorInfo
     {
         private readonly object _target;
         private readonly PropertyInfo _propertyInfo;
@@ -30,9 +31,30 @@ namespace MIDI.UI.ViewModels
 
         public string Name { get; }
         public string? Description { get; }
+        public string DetailedHelp { get; }
         public SettingType Type { get; }
         public IEnumerable? EnumValues { get; }
         public Type? EnumType { get; }
+
+        private bool _hasErrors;
+        private string? _errorMessage;
+
+        public bool HasErrors => _hasErrors;
+        public string? ErrorMessage
+        {
+            get => _errorMessage;
+            private set
+            {
+                if (SetField(ref _errorMessage, value))
+                {
+                    _hasErrors = !string.IsNullOrEmpty(value);
+                    OnPropertyChanged(nameof(HasErrors));
+                    ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(nameof(Value)));
+                }
+            }
+        }
+
+        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
         public object Value
         {
@@ -41,6 +63,9 @@ namespace MIDI.UI.ViewModels
             {
                 try
                 {
+                    Validate(value);
+                    if (HasErrors) return;
+
                     var convertedValue = ConvertValue(value, _propertyInfo.PropertyType);
 
                     if (convertedValue != null && !EqualityComparer<object>.Default.Equals(Value, convertedValue))
@@ -57,6 +82,7 @@ namespace MIDI.UI.ViewModels
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error setting value for {Name}: {ex.Message}");
+                    ErrorMessage = "無効な値です。";
                 }
             }
         }
@@ -69,6 +95,18 @@ namespace MIDI.UI.ViewModels
 
             Name = name;
             Description = description;
+
+            var helpKey = "Help_" + propertyInfo.Name;
+            var helpText = WizardStringResources.GetString(helpKey);
+
+            if (!string.IsNullOrEmpty(helpText))
+            {
+                DetailedHelp = helpText;
+            }
+            else
+            {
+                DetailedHelp = description ?? "";
+            }
 
             var propertyType = propertyInfo.PropertyType;
 
@@ -89,23 +127,76 @@ namespace MIDI.UI.ViewModels
         public void ResetValue()
         {
             Value = _originalValue;
+            ErrorMessage = null;
+        }
+
+        public IEnumerable GetErrors(string? propertyName)
+        {
+            if (propertyName == nameof(Value) && HasErrors)
+            {
+                yield return ErrorMessage;
+            }
+        }
+
+        private void Validate(object? value)
+        {
+            if (value == null) return;
+
+            string strVal = value.ToString() ?? "";
+
+            if (Type == SettingType.Int || Type == SettingType.Double)
+            {
+                double numVal = 0;
+                bool isNum = double.TryParse(strVal, NumberStyles.Any, CultureInfo.InvariantCulture, out numVal);
+
+                if (!isNum && value is IConvertible conv)
+                {
+                    try { numVal = conv.ToDouble(CultureInfo.InvariantCulture); isNum = true; } catch { }
+                }
+
+                if (isNum)
+                {
+                    if (Name.Contains("Latency") || Name.Contains("Buffer") || Name.Contains("Size") || Name.Contains("Count") || Name.Contains("Rate"))
+                    {
+                        if (numVal < 0)
+                        {
+                            ErrorMessage = "0以上の値を入力してください。";
+                            return;
+                        }
+                    }
+                    if (Name.Contains("Volume") || Name.Contains("Mix"))
+                    {
+                        if (numVal < 0)
+                        {
+                            ErrorMessage = "負の値は指定できません。";
+                            return;
+                        }
+                    }
+                }
+                else if (Type != SettingType.String)
+                {
+                    if (string.IsNullOrWhiteSpace(strVal))
+                    {
+                        ErrorMessage = "値を入力してください。";
+                        return;
+                    }
+                }
+            }
+
+            ErrorMessage = null;
         }
 
         private object? ConvertValue(object? value, Type targetType)
         {
             if (value == null)
             {
-
                 return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
             }
 
-
             if (targetType == value.GetType()) return value;
-
 
             if (targetType == typeof(float) && value is double d_float) return (float)d_float;
             if (targetType == typeof(double) && value is float f_double) return (double)f_double;
-
 
             if (value is string s)
             {
@@ -122,7 +213,6 @@ namespace MIDI.UI.ViewModels
                 }
             }
 
-
             if (targetType.IsEnum && value != null && targetType.IsInstanceOfType(value))
             {
                 return value;
@@ -134,7 +224,6 @@ namespace MIDI.UI.ViewModels
             }
             catch
             {
-
                 if (targetType == typeof(string)) return value?.ToString() ?? "";
                 if (targetType == typeof(int)) return 0;
                 if (targetType == typeof(double)) return 0.0;
