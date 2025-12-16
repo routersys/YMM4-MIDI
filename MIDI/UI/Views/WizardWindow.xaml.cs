@@ -56,5 +56,10 @@ namespace MIDI.UI.Views
             }
             Closing -= WizardWindow_Closing;
         }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }
