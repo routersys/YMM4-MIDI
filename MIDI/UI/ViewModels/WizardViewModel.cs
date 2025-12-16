@@ -120,6 +120,7 @@ namespace MIDI.UI.ViewModels
         private DateTime _lastAudioChangeTime;
         private bool _isPreviewScheduled;
         private bool _isPlaying;
+        private readonly Random _random = new Random();
 
         public bool IsPlaying
         {
@@ -223,7 +224,12 @@ namespace MIDI.UI.ViewModels
                         string samplesDir = Path.Combine(pluginDir, "Samples");
                         if (Directory.Exists(samplesDir))
                         {
-                            _previewMidiPath = Directory.GetFiles(samplesDir, "*.mid").FirstOrDefault();
+                            string[] midiFiles = Directory.GetFiles(samplesDir, "*.mid");
+                            if (midiFiles.Any())
+                            {
+                                int randomIndex = _random.Next(midiFiles.Length);
+                                _previewMidiPath = midiFiles[randomIndex];
+                            }
                         }
                     }
                 }
@@ -381,6 +387,7 @@ namespace MIDI.UI.ViewModels
                 if (mode == SetupMode.Easy)
                 {
                     if (prop.Name != nameof(MidiConfiguration.Audio) &&
+                        prop.Name != nameof(MidiConfiguration.Performance) &&
                         prop.Name != nameof(MidiConfiguration.MIDI) &&
                         prop.Name != nameof(MidiConfiguration.InstrumentPresets))
                     {
