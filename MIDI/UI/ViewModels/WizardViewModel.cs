@@ -18,28 +18,59 @@ using System.IO;
 
 namespace MIDI.UI.ViewModels
 {
-    public class WizardPageViewModel : ViewModelBase
+    public abstract class WizardPageViewModel : ViewModelBase
+    {
+        public string CategoryName { get; protected set; }
+        public bool ShowSidebar { get; protected set; }
+
+        protected WizardPageViewModel(string categoryName, bool showSidebar)
+        {
+            CategoryName = categoryName;
+            ShowSidebar = showSidebar;
+        }
+    }
+
+    public class WizardSelectionPageViewModel : WizardPageViewModel
+    {
+        public ICommand SelectEasyCommand { get; }
+        public ICommand SelectFullCommand { get; }
+
+        public WizardSelectionPageViewModel(ICommand easyCommand, ICommand fullCommand)
+            : base("はじめに", false)
+        {
+            SelectEasyCommand = easyCommand;
+            SelectFullCommand = fullCommand;
+        }
+    }
+
+    public class WizardSettingsPageViewModel : WizardPageViewModel
     {
         public string CategoryKey { get; }
-        public string CategoryName { get; }
         public ObservableCollection<WizardSettingItem> Settings { get; }
 
-        public WizardPageViewModel(string categoryKey, string categoryName)
+        public WizardSettingsPageViewModel(string categoryKey, string categoryName)
+            : base(categoryName, true)
         {
             CategoryKey = categoryKey;
-            CategoryName = categoryName;
             Settings = new ObservableCollection<WizardSettingItem>();
         }
+    }
+
+    public enum SetupMode
+    {
+        None,
+        Easy,
+        Full
     }
 
     public class WizardViewModel : ViewModelBase
     {
         private readonly MidiConfiguration _configuration;
-        private readonly List<WizardPageViewModel> _pages = new List<WizardPageViewModel>();
+        private readonly ObservableCollection<WizardPageViewModel> _pages = new ObservableCollection<WizardPageViewModel>();
         private int _currentPageIndex;
         private ResourceManager _resourceManager = WizardResources.ResourceManager;
 
-        public ObservableCollection<WizardPageViewModel> Pages => new ObservableCollection<WizardPageViewModel>(_pages);
+        public ObservableCollection<WizardPageViewModel> Pages => _pages;
 
         private WizardPageViewModel? _selectedPage;
         public WizardPageViewModel? SelectedPage
@@ -52,17 +83,26 @@ namespace MIDI.UI.ViewModels
                     _currentPageIndex = _pages.IndexOf(value);
                     UpdateCommandStates();
                     OnPropertyChanged(nameof(CurrentPageIndexDisplay));
+                    OnPropertyChanged(nameof(IsSettingsPage));
                 }
             }
         }
 
-        public string CurrentPageIndexDisplay => $"{_currentPageIndex + 1} / {_pages.Count}";
-        public int TotalPages => _pages.Count;
+        public string CurrentPageIndexDisplay
+        {
+            get
+            {
+                if (_currentPageIndex == 0) return "";
+                return $"{_currentPageIndex} / {_pages.Count - 1}";
+            }
+        }
 
+        public int TotalPages => _pages.Count;
 
         public bool CanGoPrevious => _currentPageIndex > 0;
         public bool CanGoNext => _currentPageIndex < _pages.Count - 1;
-        public bool IsLastPage => _currentPageIndex == _pages.Count - 1;
+        public bool IsLastPage => _currentPageIndex == _pages.Count - 1 && _currentPageIndex > 0;
+        public bool IsSettingsPage => _selectedPage is WizardSettingsPageViewModel;
 
         public ICommand NextCommand { get; }
         public ICommand PreviousCommand { get; }
@@ -76,7 +116,11 @@ namespace MIDI.UI.ViewModels
         public WizardViewModel(MidiConfiguration configuration)
         {
             _configuration = configuration;
-            LoadSettings();
+
+            _pages.Add(new WizardSelectionPageViewModel(
+                new RelayCommand(_ => SelectMode(SetupMode.Easy)),
+                new RelayCommand(_ => SelectMode(SetupMode.Full))
+            ));
 
             NextCommand = new RelayCommand(_ => GoNext(), _ => CanGoNext);
             PreviousCommand = new RelayCommand(_ => GoPrevious(), _ => CanGoPrevious);
@@ -86,6 +130,12 @@ namespace MIDI.UI.ViewModels
             _currentPageIndex = 0;
             SelectedPage = _pages.FirstOrDefault();
             UpdateCommandStates();
+        }
+
+        private void SelectMode(SetupMode mode)
+        {
+            GenerateSettingsPages(mode);
+            GoNext();
         }
 
         private string GetResourceString(string key, string defaultValue)
@@ -100,10 +150,14 @@ namespace MIDI.UI.ViewModels
             }
         }
 
-
-        private void LoadSettings()
+        private void GenerateSettingsPages(SetupMode mode)
         {
-            var associationPage = new WizardPageViewModel("Association", GetResourceString("Category_Association", "拡張子の関連付け"));
+            while (_pages.Count > 1)
+            {
+                _pages.RemoveAt(_pages.Count - 1);
+            }
+
+            var associationPage = new WizardSettingsPageViewModel("Association", GetResourceString("Category_Association", "拡張子の関連付け"));
             var propInfo = GetType().GetProperty(nameof(RegisterExtensions))!;
             associationPage.Settings.Add(new WizardSettingItem(
                 this,
@@ -119,14 +173,27 @@ namespace MIDI.UI.ViewModels
                                       .Where(p => p.Name != nameof(MidiConfiguration.IsFirstLaunch) &&
                                                   p.Name != nameof(MidiConfiguration.SoundFont) &&
                                                   p.Name != nameof(MidiConfiguration.SFZ) &&
+                                                  p.Name != "DistributedProcessing" &&
                                                   p.CanRead && p.CanWrite &&
                                                   p.GetCustomAttribute<System.Text.Json.Serialization.JsonIgnoreAttribute>() == null);
 
+            var generatedPages = new List<WizardSettingsPageViewModel>();
+
             foreach (var prop in properties)
             {
+                if (mode == SetupMode.Easy)
+                {
+                    if (prop.Name != nameof(MidiConfiguration.Audio) &&
+                        prop.Name != nameof(MidiConfiguration.MIDI) &&
+                        prop.Name != nameof(MidiConfiguration.InstrumentPresets))
+                    {
+                        continue;
+                    }
+                }
+
                 var categoryKey = prop.Name;
                 var categoryName = GetResourceString($"Category_{categoryKey}", categoryKey);
-                var page = new WizardPageViewModel(categoryKey, categoryName);
+                var page = new WizardSettingsPageViewModel(categoryKey, categoryName);
                 var categoryObject = prop.GetValue(_configuration);
 
                 if (categoryObject == null) continue;
@@ -147,8 +214,6 @@ namespace MIDI.UI.ViewModels
                     var settingKey = settingProp.Name;
                     var settingName = GetResourceString($"Setting_{settingKey}", settingKey);
                     var settingDescription = GetResourceString($"Description_{settingKey}", "");
-
-
 
                     if (typeof(INotifyPropertyChanged).IsAssignableFrom(settingProp.PropertyType) &&
                         !settingProp.PropertyType.IsEnum &&
@@ -180,11 +245,15 @@ namespace MIDI.UI.ViewModels
 
                 if (page.Settings.Any())
                 {
-                    _pages.Add(page);
+                    generatedPages.Add(page);
                 }
             }
 
-            _pages.Sort((p1, p2) => GetCategoryOrder(p1.CategoryKey).CompareTo(GetCategoryOrder(p2.CategoryKey)));
+            generatedPages.Sort((p1, p2) => GetCategoryOrder(p1.CategoryKey).CompareTo(GetCategoryOrder(p2.CategoryKey)));
+            foreach (var page in generatedPages)
+            {
+                _pages.Add(page);
+            }
         }
 
         private int GetCategoryOrder(string categoryKey)
@@ -224,7 +293,6 @@ namespace MIDI.UI.ViewModels
             {
                 _currentPageIndex--;
                 SelectedPage = _pages[_currentPageIndex];
-
             }
         }
 
@@ -258,12 +326,14 @@ namespace MIDI.UI.ViewModels
 
         private void Cancel()
         {
-
             foreach (var page in _pages)
             {
-                foreach (var setting in page.Settings)
+                if (page is WizardSettingsPageViewModel settingsPage)
                 {
-                    setting.ResetValue();
+                    foreach (var setting in settingsPage.Settings)
+                    {
+                        setting.ResetValue();
+                    }
                 }
             }
             _configuration.IsFirstLaunch = false;

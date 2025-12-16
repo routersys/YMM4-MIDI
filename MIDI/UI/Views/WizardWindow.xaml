@@ -178,6 +178,94 @@
                 ColorTemplate="{StaticResource ColorTemplate}"
                 EnumTemplate="{StaticResource EnumTemplate}"/>
 
+            <DataTemplate DataType="{x:Type vm:WizardSelectionPageViewModel}">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="セットアップモードの選択" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center"/>
+                        <TextBlock Text="MIDIプラグインの設定を行います。ご希望のモードを選択してください。" FontSize="16" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" Margin="0,0,0,40" HorizontalAlignment="Center"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Command="{Binding SelectEasyCommand}" Margin="20" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bd" Width="260" Height="300" CornerRadius="8" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" SnapsToDevicePixels="True">
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="15" ShadowDepth="3" Opacity="0.1"/>
+                                            </Border.Effect>
+                                            <StackPanel VerticalAlignment="Center" Margin="20">
+                                                <Viewbox Width="80" Height="80" Margin="0,0,0,20" HorizontalAlignment="Center">
+                                                    <Path Data="M12,3V13.55A4,4 0 0,0 10,13A4,4 0 0,0 6,17A4,4 0 0,0 10,21A4,4 0 0,0 14,17V7H18V3H12Z" 
+                                                          Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" 
+                                                          Stretch="Uniform"/>
+                                                </Viewbox>
+                                                <TextBlock Text="かんたん設定" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                                <TextBlock Text="基本的な設定のみを行います。&#x0a;すぐに使い始めたい方におすすめです。" 
+                                                           TextAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" FontSize="14" LineHeight="20"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"/>
+                                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                                <Setter TargetName="Bd" Property="BorderThickness" Value="2"/>
+                                                <Setter TargetName="Bd" Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.2"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+
+                            <Button Command="{Binding SelectFullCommand}" Margin="20" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bd" Width="260" Height="300" CornerRadius="8" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" SnapsToDevicePixels="True">
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="15" ShadowDepth="3" Opacity="0.1"/>
+                                            </Border.Effect>
+                                            <StackPanel VerticalAlignment="Center" Margin="20">
+                                                <Viewbox Width="80" Height="80" Margin="0,0,0,20" HorizontalAlignment="Center">
+                                                    <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.35 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.35 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,13L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.04 4.95,18.95L7.44,17.95C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.95L19.05,18.95C19.27,19.04 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" 
+                                                          Fill="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" 
+                                                          Stretch="Uniform"/>
+                                                </Viewbox>
+                                                <TextBlock Text="詳細設定" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                                <TextBlock Text="すべての項目を詳細に設定します。&#x0a;こだわりたい方におすすめです。" 
+                                                           TextAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" FontSize="14" LineHeight="20"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"/>
+                                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                                <Setter TargetName="Bd" Property="BorderThickness" Value="2"/>
+                                                <Setter TargetName="Bd" Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.2"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type vm:WizardSettingsPageViewModel}">
+                <Border BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="25">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Settings}"
+                                      ItemTemplateSelector="{StaticResource WizardTemplateSelector}"/>
+                    </ScrollViewer>
+                </Border>
+            </DataTemplate>
+
             <Style TargetType="ListBoxItem">
                 <Setter Property="Padding" Value="15,12"/>
                 <Setter Property="Margin" Value="0,2"/>
@@ -302,9 +390,18 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentPageIndexDisplay, StringFormat='ステップ {0}'}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" HorizontalAlignment="Right" Margin="0,10,60,10"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                               Text="{Binding CurrentPageIndexDisplay, StringFormat='ステップ {0}'}" 
+                               FontSize="14" FontWeight="SemiBold" 
+                               Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" 
+                               HorizontalAlignment="Right" Margin="0,10,60,10"
+                               Visibility="{Binding SelectedPage.ShowSidebar, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-                    <Border Grid.Row="1" Grid.Column="0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1,1,0,1" Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}">
+                    <Border Grid.Row="1" Grid.Column="0" 
+                            BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" 
+                            BorderThickness="1,1,0,1" 
+                            Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                            Visibility="{Binding SelectedPage.ShowSidebar, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ListBox ItemsSource="{Binding Pages}"
                                  SelectedItem="{Binding SelectedPage, Mode=TwoWay}"
                                  BorderThickness="0"
@@ -317,18 +414,28 @@
                         </ListBox>
                     </Border>
 
-                    <Border Grid.Row="1" Grid.Column="1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Padding="25">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding SelectedPage.Settings}"
-                                          ItemTemplateSelector="{StaticResource WizardTemplateSelector}"/>
-                        </ScrollViewer>
-                    </Border>
+                    <ContentControl Grid.Row="1" Content="{Binding SelectedPage}">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Grid.Column" Value="1"/>
+                                <Setter Property="Grid.ColumnSpan" Value="1"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedPage.ShowSidebar}" Value="False">
+                                        <Setter Property="Grid.Column" Value="0"/>
+                                        <Setter Property="Grid.ColumnSpan" Value="2"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
 
                     <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0,20,0,0">
                         <Button Content="キャンセル" Command="{Binding CancelCommand}" Style="{StaticResource RichButtonStyle}" HorizontalAlignment="Left" Padding="20,10"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="戻る" Command="{Binding PreviousCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,0,10,0" IsEnabled="{Binding CanGoPrevious}" Padding="20,10"/>
-                            <Button Content="次へ" Command="{Binding NextCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,0,10,0" Visibility="{Binding IsLastPage, Converter={StaticResource InverseBooleanConverter}}" Padding="20,10"/>
+                            <Button Content="次へ" Command="{Binding NextCommand}" Style="{StaticResource RichButtonStyle}" Margin="0,0,10,0" 
+                                    Visibility="{Binding IsSettingsPage, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                    IsEnabled="{Binding CanGoNext}" Padding="20,10"/>
                             <Button Content="完了" Command="{Binding FinishCommand}" IsDefault="True" Style="{StaticResource RichButtonStyle}" Visibility="{Binding IsLastPage, Converter={StaticResource BooleanToVisibilityConverter}}" Padding="20,10"/>
                         </StackPanel>
                     </Grid>
