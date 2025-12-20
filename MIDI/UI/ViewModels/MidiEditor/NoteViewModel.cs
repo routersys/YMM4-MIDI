@@ -125,7 +125,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
             _ticksPerQuarterNote = ticksPerQuarterNote;
             _tempoMap = tempoMap;
             _parentViewModel = parentViewModel;
-            _color = MidiEditorSettings.Default.Note.NoteColor;
+            _color = _parentViewModel.GetColorForChannel(_noteOnEvent.Channel);
 
             IncrementStartTimeMinutesCommand = new RelayCommand(_ => UpdateStartTime(TimeSpan.FromMinutes(1)));
             DecrementStartTimeMinutesCommand = new RelayCommand(_ => UpdateStartTime(TimeSpan.FromMinutes(-1)));
@@ -265,14 +265,7 @@ namespace MIDI.UI.ViewModels.MidiEditor
                         _noteOnEvent.OffEvent.Channel = value;
                     }
 
-                    if (_parentViewModel.IsColorizedByChannel)
-                    {
-                        Color = _parentViewModel.GetColorForChannel(value);
-                    }
-                    else
-                    {
-                        Color = MidiEditorSettings.Default.Note.NoteColor;
-                    }
+                    Color = _parentViewModel.GetColorForChannel(value);
 
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(FillBrush));

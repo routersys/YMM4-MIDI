@@ -336,7 +336,7 @@ namespace MIDI.UI.ViewModels.MidiEditor.Rendering
             {
                 if (note.IsEditing) continue;
 
-                Color fillColor = note.IsSelected ? selectedColor : note.Color;
+                Color fillColor = note.IsSelected ? selectedColor : _vm.GetColorForChannel(note.Channel);
                 byte r = fillColor.R, g = fillColor.G, b = fillColor.B, a = fillColor.A;
 
                 Rect noteRectWPF = GetNoteRectWPF(note);
