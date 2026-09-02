@@ -1,8 +1,12 @@
 # 統合 MIDI読み込みプラグイン for YMM4
 
+> [!WARNING]
+> このプラグインはサポートを終了しました。
+>
+> 今後の更新と不具合の修正は行わず、動作に関する問い合わせにも対応いたしません。配布していたリリースは削除したため、`.ymme` ファイルのダウンロードはできません。ソースコードと各バージョンのタグは、記録としてそのまま残しています。
+
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-9.0-purple.svg)](#)
-[![Release](https://img.shields.io/github/v/release/routersys/YMM4-MIDI.svg)](https://github.com/routersys/YMM4-MIDI/releases)
 
 YMM4（YukkuriMovieMaker v4）で、MIDIファイル（`.mid`, `.midi`）を音声アイテムとして読み込めるようにするファイルソースプラグインです。
 
@@ -69,6 +73,9 @@ YMM4（YukkuriMovieMaker v4）で、MIDIファイル（`.mid`, `.midi`）を音�
 1. **[リリースページ](https://github.com/routersys/YMM4-MIDI/releases)** から最新版の `.ymme` ファイルをダウンロードします。
 2. ダウンロードしたファイルを実行（ダブルクリック）してインストールを開始します。
 3. YMM4にプラグインが登録され、インストール完了です。
+
+> [!NOTE]
+> リリースを削除したため、`.ymme` ファイルの配布は終了しています。上記の手順は利用できません。
 
 ### 使い方
 1. タイムラインに音声ファイルとして`.mid`または`.midi`ファイルをドラッグ＆ドロップします。
